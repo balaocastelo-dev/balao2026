@@ -1,277 +1,252 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "perifericos-para-gta-6",
-  titulo: "Periféricos para GTA 6: mouse, teclado e headset",
-  resumo: "Mouse, teclado e headset não fazem o jogo rodar. Veja o que melhora a sessão de hoje e por que nenhuma marca é obrigatória.",
-  categoria: "hardware",
-  etiquetas: [
+  "slug": "perifericos-para-gta-6",
+  "titulo": "Periféricos para GTA 6: o que muda na mão e no ouvido",
+  "resumo": "Periféricos para GTA 6: controle no console, mouse e teclado no PC, fone que separa o motor do tiro. A ordem certa, sem gastar no acessório errado.",
+  "categoria": "hardware",
+  "etiquetas": [
     "GTA 6",
     "Periféricos",
-    "Mouse",
+    "Controle",
+    "Headset"
   ],
-  capa: {
-    src: "/blog/capas/perifericos-para-gta-6.webp",
-    alt: "Teclado mecânico e mouse sobre um mousepad.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/perifericos-para-gta-6.webp",
+    "alt": "Teclado mecânico e mouse num mousepad, periféricos para jogar no PC de olho em GTA 6.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-12T12:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-12T12:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Periféricos para GTA 6: mouse, teclado, headset",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Periféricos para GTA 6: mouse, teclado e controle",
+    "descricao": "Periféricos para GTA 6: controle no console, mouse e teclado no PC, fone que separa o motor do tiro. A ordem certa, sem gastar no acessório errado.",
+    "palavrasChave": [
       "periféricos para gta 6",
-      "mouse para jogar",
-      "teclado para jogo",
-      "headset para jogo",
-    ],
+      "controle ou teclado gta 6",
+      "mouse para gta",
+      "fone para gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Periférico para GTA 6 no PC esbarra no mesmo muro das outras peças: até 19 de novembro de 2026 não havia versão de computador anunciada. Mouse, teclado e headset não derrubam esse muro. Eles não instalam o jogo, não desenham o quadro e não criam um requisito. Servem para outra coisa, menor e mais honesta: a sessão que você já tem deixar de incomodar.",
+      "tipo": "paragrafo",
+      "texto": "Periféricos para GTA 6 dependem de onde você vai jogar. Na estreia, o caminho anunciado é o controle, no PlayStation 5 ou no Xbox Series X|S. No computador, quando a versão existir, GTA V já mostrou que mouse, teclado e controle convivem: o newswire de 2015 citava os dois jeitos de mirar. Enquanto o PC do GTA 6 não tem página, dá para acertar a mesa para os jogos que você já abre."
     },
     {
-      tipo: "paragrafo",
-      texto: "A peça certa é a que resolve um incômodo observável. Mouse com sensor decente, teclado que você aguenta por horas, headset se a sala é barulhenta. Nenhuma marca é obrigatória. Quem vende um modelo como “o de GTA 6” está emprestando um nome de jogo a um conforto que você pode testar na mão, sem ficha oficial. A [página da Rockstar](https://www.rockstargames.com/VI) não lista periférico de PC.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "No console, o controle oficial resolve. Gatilho gasto e analógico torto atrapalham mais do que qualquer skin.",
+        "No PC, mouse com sensor decente e teclado em que você não erra o WASD mudam a direção mais do que um LED a mais.",
+        "Fone fechado ajuda a ouvir motor e passo. Microfone de live é outro produto, tratado na matéria própria."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**Periférico não faz o jogo rodar.** Placa, processador, memória e disco é que sustentam a sessão.",
-        "**Mouse pede sensor estável.** O formato tem de caber na sua mão, não numa lista de marca.",
-        "**Teclado pede horas.** Mecânico ou membrana é conforto, não requisito de jogo.",
-        "**Headset pede sala.** Se o ambiente é quieto, o fone é opção. Se não é, ele vira ferramenta.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Periféricos para GTA 6 no console e no PC"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Periférico não liga o jogo",
+      "tipo": "paragrafo",
+      "texto": "Quem vai jogar em 19 de novembro está no sofá ou na cadeira com um DualSense ou com o controle do Xbox. Antes da estreia, vale testar drift: deixe o analógico em paz e veja se a câmera anda sozinha. Analógico cansado estraga corrida e mira, e a troca do controle custa menos do que insistir. A assistência de games da loja vê controle que não responde antes de você culpar o jogo novo."
     },
     {
-      tipo: "paragrafo",
-      texto: "Um mouse novo não compensa placa sem folga, nem teclado novo abre um jogo que está num HD lotado. A ordem de gasto, quando o orçamento é um só, começa pela máquina que roda os jogos de hoje. O guia de [PC sem requisito](/blog/pc-para-gta-6-sem-requisito-oficial) fica antes desta página de propósito. Periférico entra depois, no ponto em que a sessão já roda e ainda incomoda.",
+      "tipo": "paragrafo",
+      "texto": "No PC, a escolha clássica de GTA é mouse para mirar e teclado para andar, com o controle guardado para voar e dirigir se você preferir o analógico no veículo. Não há jeito oficial do GTA 6 nessa disputa, porque não há versão de PC. O que funciona nos jogos atuais é ter os dois conectados. Muita placa-mãe já aceita o controle de Xbox por cabo ou receptor, e o DualSense funciona por cabo em vários jogos, com recursos extras só em alguns títulos. Teste no jogo que você já tem antes de comprar um adaptador caro."
     },
     {
-      tipo: "paragrafo",
-      texto: "Isso também corta o atalho do controle. No console, GTA 6 será jogado com o controle da plataforma. Nada disso foi publicado como esquema de PC, porque o PC não foi anunciado. Comprar controle “oficial de PC para GTA 6” repete o chute das outras peças. A [checagem do Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html), em 15 de novembro de 2026, não achou essa versão.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/perifericos-para-gta-6-pecas.webp",
-        alt: "Headset branco, mouse e teclado numa mesa de jogo.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/perifericos-para-gta-6-pecas.webp",
+        "alt": "Headset, mouse e teclado numa mesa, conjunto de periféricos para GTA 6 no computador.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Headset branco, mouse e teclado numa mesa de jogo. Foto de Matheus Bertelli (Pexels).",
+      "legenda": "Fone, mouse e teclado fecham a mesa de quem joga no PC. No console, o controle continua sendo o principal."
     },
     {
-      tipo: "paragrafo",
-      texto: "Dá para jogar mundo aberto com mouse e teclado ou com controle no computador, nos jogos que já existem. A escolha é sua mão, não uma norma. Se você passa horas num controle e odeia teclado, o controle genérico que você já usa nos outros jogos continua válido. Ele não precisa de um selo com o nome de um jogo sem versão de PC.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Mouse: sensor decente e a sua mão",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Sensor decente é o que acompanha o movimento sem acelerar sozinho e sem travar no meio do pano. Aceleração escondida, aquela que muda a distância conforme a velocidade da mão, atrapalha a mira nos jogos em que a mira importa. Para mundo aberto, o mesmo sensor evita o cursor que foge no mapa. Não há um DPI obrigatório. Há um sensor que não mente e uma mão que não cansa.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Peso, formato e o lado dos botões são prova de mão, não de tabela. Mouse leve demais para quem segura firme, ou largo demais para quem tem a mão pequena, vira incômodo na segunda hora. Por isso a escolha acontece com a mão em cima, não pelo ranking de um jogo que ainda não tem PC. A categoria de [PC gamer](/categoria/computadores-pc-pc-gamer) é a máquina; o mouse só aponta dentro dela.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Tecla macia ou mecânica é conforto",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Teclado mecânico faz barulho e tem curso que muita gente prefere em sessão longa. Membrana é mais quieta e, para outras pessoas, menos cansativa. Nenhum dos dois faz o jogo rodar melhor. Se você escreve e joga na mesma mesa, o ruído da tecla também é decisão de casa, não de GTA 6. Aguentar horas é o critério. A marca na caixa não é.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Marca não é requisito",
-      texto: "Não existe mouse, teclado ou headset oficial de GTA 6 no PC. Até 19 de novembro de 2026 a versão de computador não foi anunciada. O que existe é a peça que a sua sessão de hoje aguenta.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Teclado para horas, não para a caixa",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Tecla baixa de notebook e tecla de desktop não cansam do mesmo jeito, e o pulso acusa antes do jogo. Um teclado com luz e sem conforto perde de um teclado sem luz que você esquece que está usando. A matéria de [monitor](/blog/monitor-para-gta-6) trata a distância da tela, que é a outra metade da postura.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "O que observar e o que ignorar",
-      colunas: [
-        "Peça",
-        "Vale observar",
-        "Dá para ignorar",
+      "tipo": "tabela",
+      "titulo": "O que comprar primeiro",
+      "colunas": [
+        "Se o que você tem hoje",
+        "Troque primeiro",
+        "Pode esperar"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Mouse",
-          "Sensor estável e formato na mão",
-          "Marca dita como obrigatória",
+          "Controle com analógico torto",
+          "O controle",
+          "Skin, carregador extra, controle de elite"
         ],
         [
-          "Teclado",
-          "Conforto por várias horas",
-          "Tecla “de GTA” ou luz extra",
+          "Mouse genérico de escritório",
+          "Um mouse com sensor decente e mousepad",
+          "Teclado cheio de macro"
         ],
         [
-          "Headset",
-          "Isolar sala barulhenta",
-          "Achar que o fone faz o jogo rodar",
+          "Som pela caixinha do monitor",
+          "Um fone fechado",
+          "Placa de som dedicada"
         ],
         [
-          "Controle",
-          "O que você já usa nos outros jogos",
-          "Selo oficial de um PC não anunciado",
-        ],
+          "Tudo novo, mesa apertada",
+          "Mousepad grande e espaço para o cotovelo",
+          "LED, suporte de cabo, enfeite"
+        ]
       ],
-      colunaDestaque: 1,
-      fonte: ROCKSTARVI,
-      nota: "A página do jogo, em 19 de novembro de 2026, não lista periférico de PC.",
+      "nota": "Ordem prática para a mesa de hoje. Não é lista oficial de acessórios de Grand Theft Auto VI."
     },
     {
-      tipo: "paragrafo",
-      texto: "Layout com teclado numérico ajuda quem usa o computador para além do jogo. Layout compacto libera pano para o mouse. As duas escolhas são de mesa. Nenhuma está numa ficha de GTA 6, e não estará enquanto a Rockstar não publicar versão de PC. Até lá, o teclado que você já aguenta horas não precisa ser trocado por causa de um nome.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Mouse, teclado e o fone da partida"
     },
     {
-      tipo: "chamada",
-      tema: "notebooks",
+      "tipo": "paragrafo",
+      "texto": "Mouse leve, com sensor que não treme na velocidade que você usa, resolve mira. DPI altíssimo no anúncio não é qualidade. Ajuste até o giro de 180 graus caber no mousepad sem você levantar o pulso duas vezes. Teclado mecânico é conforto e duração, não um aumento de quadro. O que importa no GTA, quando você joga no teclado, é não errar a tecla de correr e a de entrar no carro. Um membrana decente, com tecla que não gruda, já serve."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Headset se a sala não deixa ouvir",
+      "tipo": "paragrafo",
+      "texto": "Fone fechado isola o ventilador do PC e o barulho da casa, e deixa o motor do carro e o passo na calçada no lugar certo do estéreo. Fone aberto é ótimo para música e ruim para não vazar som no microfone da live. Se a ideia é transmitir, o fone da partida e o microfone da voz são compras separadas. O microfone está em [microfone para live](/blog/microfone-para-live-de-jogo). Caixinha Bluetooth em jogo competitivo acrescenta atraso. Para campanha, muita gente aceita. Para dirigir colado, cabo ou receptor de baixa latência é mais honesto."
     },
     {
-      tipo: "paragrafo",
-      texto: "Headset fechado isola a sala. Headset aberto deixa você ouvir a casa. Se o ambiente é quieto, a caixa de som pode bastar. Se há gente, televisão ou rua, o fone deixa de ser enfeite e passa a ser a condição para ouvir o jogo. É condição da sala, não requisito do título.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/perifericos-para-gta-6-ordem.webp",
-        alt: "Fone sobre um teclado iluminado, com mouse ao lado.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/perifericos-para-gta-6-ordem.webp",
+        "alt": "Fone sobre teclado iluminado com mouse ao lado, periféricos para GTA 6 numa mesa de PC.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Fone sobre um teclado iluminado, com mouse ao lado. Foto de Simone Cisale (Pexels).",
+      "legenda": "O fone em cima do teclado é o teste rápido: se a concha tapa o ouvido inteiro, o motor do carro não briga com a sala."
     },
     {
-      tipo: "paragrafo",
-      texto: "Microfone entra na mesma peça quando você fala com outras pessoas enquanto joga. Um microfone que só capta o ventilador da máquina atrapalha mais do que a falta de luz no teclado. Dá para perceber isso numa chamada de um minuto. Não dá para perceber numa caixa que promete “som de GTA 6”, porque esse som de PC não foi especificado.",
+      "tipo": "pros-contras",
+      "titulo": "Vale o dinheiro",
+      "pros": [
+        "Controle novo quando o atual tem drift ou gatilho morto.",
+        "Mouse e mousepad se você ainda usa o kit que veio com o computador do escritório.",
+        "Fone com fio se o sem fio corta no meio da perseguição."
+      ],
+      "contras": [
+        "Controle profissional pelo triplo do preço só por causa da estreia.",
+        "Teclado de pulso iluminado que não cabe na mesa e empurra o mouse para fora.",
+        "Comprar acessório de PC achando que isso adianta uma versão de GTA 6 que não foi anunciada."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "No notebook a peça já vem grudada",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Uma mesa que não briga com você"
     },
     {
-      tipo: "paragrafo",
-      texto: "No notebook, o teclado, o trackpad e os alto-falantes já vieram. Se o trackpad perde o cursor e o teclado cansa na primeira hora, mouse e teclado externos mudam a sessão sem trocar a máquina. A tela, porém, continua sendo a do notebook, e é ela que limita a placa. A página de [notebooks](/notebooks) serve para ver o conjunto. O periférico não transforma vídeo integrado em placa dedicada.",
+      "tipo": "lista",
+      "itens": [
+        "Mousepad largo o bastante para a câmera girar sem bater no teclado.",
+        "Cabo de controle com folga, ou pilha carregada antes da sessão, não no meio dela.",
+        "Fone com a concha em volta do ouvido, não em cima, se a ideia é isolamento.",
+        "Nada de LED que refleta na tela. A matéria do [monitor](/blog/monitor-para-gta-6) explica por que a tela vem primeiro."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "Alto-falante pequeno em quarto barulhento é o caso clássico do headset, no notebook e no desktop. A [manutenção](/manutencao) entra só quando a tecla falha ou o conector do fone não responde: aí é defeito, não upgrade. Defeito não se resolve com uma marca “de GTA 6”. Resolve com o conserto da peça que quebrou. O jogo, sem versão de PC, continua fora dessa ordem de serviço.",
+      "tipo": "paragrafo",
+      "texto": "Quem monta a máquina em volta dessa mesa olha o [PC de entrada](/blog/pc-gamer-entrada-para-gta-6) ou o [intermediário](/blog/pc-gamer-intermediario-para-gta-6), conforme a resolução. No sofá, o caminho da estreia está em [plataformas](/blog/gta-6-plataformas-ps5-xbox-e-pc)."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/perifericos-para-gta-6-fecho.webp",
-        alt: "Teclado, mouse e headset claros, numa mesa de feira.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/perifericos-para-gta-6-fecho.webp",
+        "alt": "Teclado, mouse e headset numa mesa, periféricos para GTA 6 à prova antes da compra.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Teclado, mouse e headset claros, numa mesa de feira. Foto de Matheus Bertelli (Pexels).",
+      "legenda": "Teclado, mouse e headset claros, do tipo que a loja deixa provar na mão."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "O gasto fica na peça que hoje incomoda, não num kit com nome de jogo",
-        "Sensor, conforto e sala são critérios que você confere na hora",
-        "Nenhuma marca entra como obrigatória",
-      ],
-      contras: [
-        "Periférico não faz um jogo sem versão de PC rodar",
-        "Controle de console não vira esquema oficial de computador",
-        "Notebook com vídeo integrado não muda porque o mouse é novo",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O controle no PC, sem adaptador misterioso"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Antes de completar a mesa",
+      "tipo": "paragrafo",
+      "texto": "No computador, o controle de Xbox costuma aparecer no jogo assim que o cabo ou o receptor está ligado. O DualSense, do PS5, funciona por cabo em muitos jogos e perde alguns recursos de gatilho que são do ecossistema da PlayStation. Para dirigir no GTA V, vale testar os dois por dez minutos: tem gente que mira no mouse e vira o carro no analógico. Não há jeito oficial do GTA 6 nessa escolha. O teste no GTA V já mostra o seu hábito, e o hábito é o que a mesa tem de atender."
     },
     {
-      tipo: "paragrafo",
-      texto: "Mouse, teclado e headset você experimenta na mão. A Balão da Informática Anchieta recebe na Av. Anchieta, 789, no Cambuí, em Campinas, e responde no WhatsApp (19) 98751-0267. Leve o que você usa hoje, se a dúvida for troca, e diga o que cansou: mira, tecla ou barulho.",
+      "tipo": "paragrafo",
+      "texto": "Pilhas acabam na perseguição. Um cabo reservado na gaveta, ou o controle carregado antes da sessão, evita a pausa. Drift, aquele analógico que anda sozinho no menu, não se resolve com software na maior parte das vezes. Controle com drift vai para a assistência ou para a troca. Insistir estraga a corrida e a live, porque a câmera passeia sem você pedir."
     },
     {
-      tipo: "paragrafo",
-      texto: "Se a máquina ainda não roda os jogos que você já tem, o periférico espera. A decisão é acertar o computador primeiro e completar a mesa só no ponto que hoje atrapalha a sessão, sem marca obrigatória e sem chamar a peça de equipamento de GTA 6.",
+      "tipo": "lista",
+      "itens": [
+        "Teste mouse e controle no mesmo jogo, por alguns minutos.",
+        "Deixe um cabo ou a carga pronta antes da sessão.",
+        "Analógico que anda sozinho é defeito, não “configuração”."
+      ]
     },
     {
-      tipo: "chamada",
-      titulo: "O que incomoda: mira, tecla ou barulho?",
-      texto: "Diga qual dos três cansa na sessão atual. A peça indicada resolve esse ponto, e não um jogo que ainda não tem versão de PC.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "chamada",
+      "tema": "games",
+      "titulo": "Controle falhando ou mesa de PC pela metade?",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas avalia controle de PlayStation e Xbox e separa mouse, teclado e fone no Cambuí. Av. Anchieta, 789. WhatsApp (19) 98751-0267.",
+      "rotulo": "Falar com a loja",
+      "href": "/assistenciagames",
+      "mensagem": "Olá! Li a matéria de periféricos para GTA 6 e quero ver controle, mouse ou fone."
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Periféricos para GTA 6 segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Qual mouse é obrigatório para GTA 6?",
-      resposta: "Nenhum. Até 19 de novembro de 2026 não havia versão de PC nem lista de periférico. O que importa num mouse, para os jogos de hoje, é sensor estável e formato que a sua mão aguenta. Marca obrigatória não existe.",
+      "pergunta": "GTA 6 é melhor no controle ou no teclado?",
+      "resposta": "Na estreia, o jogo anunciado é de console, então o controle é o caminho. No PC, GTA V aceita os dois. O GTA 6 ainda não tem versão de computador para comparar."
     },
     {
-      pergunta: "Teclado mecânico é necessário?",
-      resposta: "Não. Mecânico e membrana cansam pessoas diferentes, e o critério é aguentar horas. O teclado não faz o jogo rodar. Se você já passa a sessão sem notar a tecla, trocar por causa de GTA 6 não melhora nada.",
+      "pergunta": "Preciso de controle novo para o PS5?",
+      "resposta": "Só se o atual tem analógico torto, gatilho morto ou drift. Um controle saudável joga a campanha inteira. Skin e controle de elite são gosto, não requisito."
     },
     {
-      pergunta: "Headset faz o jogo ficar melhor?",
-      resposta: "Faz a sala ficar de fora, quando a sala compete com o som. Em ambiente quieto, a caixa pode bastar. O fone não instala o jogo e não substitui placa, memória ou SSD. Também não há headset oficial de GTA 6 para PC.",
+      "pergunta": "Qual mouse serve para GTA no PC?",
+      "resposta": "Um mouse com sensor estável e um mousepad em que a câmera gira sem você levantar o braço. DPI alto no anúncio não substitui esse ajuste."
     },
     {
-      pergunta: "No notebook, o que trocar primeiro?",
-      resposta: "Se o trackpad e o teclado cansam, mouse e teclado externos mudam a sessão. A tela e a placa do notebook continuam as mesmas. Periférico não converte vídeo integrado em placa dedicada, nem cria uma versão de PC de GTA 6.",
+      "pergunta": "Fone Bluetooth serve?",
+      "resposta": "Para campanha, muita gente acha aceitável. Para dirigir e mirar com precisão, cabo ou receptor de jogo evita o atraso do Bluetooth comum."
     },
+    {
+      "pergunta": "O fone da partida serve para live?",
+      "resposta": "Ouve bem. O microfone embutido costuma pegar o teclado e o ventilador. Para transmitir, o microfone é outra compra."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    YAHOOPC,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — “Grand Theft Auto V Is Now Available for PC”",
+      "url": "https://www.rockstargames.com/newswire/article/25o2411812a31k/grand-theft-auto-v-is-now-available-for-pc",
+      "data": "14 de abril de 2015"
+    },
+    {
+      "nome": "PlayStation — página de Grand Theft Auto VI",
+      "url": "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

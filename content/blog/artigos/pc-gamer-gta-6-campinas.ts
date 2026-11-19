@@ -1,289 +1,247 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
-
-const PLAYSTATION: Fonte = {
-  nome: "PlayStation — página de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const VERGETAMANHO: Fonte = {
-  nome: "The Verge — “GTA VI’s download will need up to 212GB of hard drive space”",
-  url: "https://www.theverge.com/games/1025271/gta-vi-storage-space-rockstar-games",
-  data: "novembro de 2026",
-};
-
-const ROCKSTARDATA: Fonte = {
-  nome: "Rockstar Games — “Grand Theft Auto VI is Now Set to Launch November 19, 2026”",
-  url: "https://www.rockstargames.com/newswire/article/ak3ak31a49a221/grand-theft-auto-vi-is-now-set-to-launch-november-19-2026",
-  data: "6 de novembro de 2025",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "pc-gamer-gta-6-campinas",
-  titulo: "PC gamer para GTA 6 em Campinas: o que a loja faz",
-  resumo: "Em Campinas, o PC que dá para montar agora é o dos jogos que você já roda. GTA 6 não tem versão de computador nem requisito para prometer.",
-  categoria: "guias",
-  etiquetas: [
+  "slug": "pc-gamer-gta-6-campinas",
+  "titulo": "PC gamer para GTA 6 em Campinas: o que a loja monta",
+  "resumo": "PC gamer para GTA 6 em Campinas se monta na Balão da Informática Anchieta, no Cambuí. Você vê a máquina ligada e leva orçamento pelo WhatsApp ou no balcão.",
+  "categoria": "guias",
+  "etiquetas": [
     "GTA 6",
     "Campinas",
     "PC gamer",
-    "Cambuí",
+    "Cambuí"
   ],
-  capa: {
-    src: "/blog/capas/pc-gamer-gta-6-campinas.webp",
-    alt: "Fachada vermelha da Balão da Informática Anchieta, com o letreiro preto e o logotipo do balão.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/pc-gamer-gta-6-campinas.webp",
+    "alt": "Fachada da Balão da Informática Anchieta, na Av. Anchieta, loja de PC gamer para GTA 6 em Campinas.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-18T18:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-18T18:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "PC gamer para GTA 6 em Campinas",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "PC gamer para GTA 6 em Campinas",
+    "descricao": "PC gamer para GTA 6 em Campinas se monta na Balão da Informática Anchieta, no Cambuí. Você vê a máquina ligada e leva orçamento pelo WhatsApp ou no balcão.",
+    "palavrasChave": [
+      "pc gamer para gta 6 em campinas",
       "pc gamer campinas",
-      "pc gamer gta 6 campinas",
-      "computador gamer campinas",
-      "pc gamer cambuí",
-    ],
+      "computador gamer cambuí",
+      "montar pc campinas"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "PC gamer para GTA 6 em Campinas junta duas perguntas que não cabem na mesma resposta. A primeira é local: onde montar e ver a máquina. A segunda é do jogo: qual peça o GTA 6 pede no computador. A segunda não tem resposta publicada. Até 19 de novembro de 2026 não havia versão de PC nem requisito. A cidade não preenche esse vazio.",
+      "tipo": "paragrafo",
+      "texto": "PC gamer para GTA 6 em Campinas se resolve numa loja, não num fórum. A Balão da Informática Anchieta fica na Av. Anchieta, 789, Cambuí, e monta o computador em cima da sua tela e dos jogos que você já abre. A versão de PC do GTA 6 não foi anunciada pela Rockstar. A máquina que sai daqui é para o que você joga agora, com peça que dá para ver ligada antes de pagar."
     },
     {
-      tipo: "paragrafo",
-      texto: "O que dá para fazer aqui, enquanto isso, é montar para os jogos que você já roda, na tela que você já tem. O dia 19 de novembro de 2026, no comunicado da Rockstar, é de PlayStation 5 e Xbox Series. Um computador comprado em Campinas nessa semana não vem com a promessa de rodar GTA 6. Essa frase é o centro deste texto.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "A loja é no Cambuí: Av. Anchieta, 789. Telefone (19) 3255-1661. WhatsApp (19) 98751-0267.",
+        "Horário de balcão: segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h.",
+        "Você diz a resolução do monitor e dois ou três jogos. A equipe fecha a configuração e mostra a máquina funcionando."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**Campinas não tem uma ficha local de GTA 6.** O requisito de PC não foi publicado em lugar nenhum.",
-        "**O dia 19 é de console.** A página oficial não lista computador.",
-        "**Dá para montar para o uso de hoje.** Tela, jogos e captura fecham a conversa.",
-        "**Ninguém deve sair com a promessa de que o PC roda o jogo.** Essa promessa não tem fonte.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "PC gamer para GTA 6 em Campinas, na prática"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a busca em Campinas está misturando",
+      "tipo": "paragrafo",
+      "texto": "Quem chega por causa do GTA 6 costuma ter uma de três histórias. A primeira quer jogar no computador os mundos abertos que já ama, GTA V incluído, e aproveita a estreia nos consoles como empurrão para arrumar o PC. A segunda transmite e precisa de folga. A terceira está com uma torre de 2019 que abre o jogo e pede paciência. As três saem com máquinas diferentes. Nenhuma sai com um adesivo de “pronto para o GTA 6”, porque essa ficha não existe."
     },
     {
-      tipo: "paragrafo",
-      texto: "A busca trata “PC gamer em Campinas” e “GTA 6” como se o segundo escolhesse o primeiro. Não escolhe. A [página do jogo](https://www.rockstargames.com/VI) lista console. A [reportagem do Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html), de 15 de novembro de 2026, não achou pré-venda de PC nem lista de hardware. Quem mora em Campinas e quem mora em outra cidade lê a mesma ausência.",
+      "tipo": "paragrafo",
+      "texto": "O caminho das faixas está escrito: [entrada em Full HD](/blog/pc-gamer-entrada-para-gta-6), [intermediário em Quad HD](/blog/pc-gamer-intermediario-para-gta-6) e [alto desempenho](/blog/pc-gamer-alto-desempenho-gta-6). Se a torre atual só precisa de uma peça, o [upgrade](/blog/upgrade-do-pc-antes-do-gta-6) evita trocar o que ainda serve. Quem mora em outra cidade e quer só o texto geral começa por [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial)."
     },
     {
-      tipo: "paragrafo",
-      texto: "Morar em Campinas não muda a página da Rockstar. O guia de [PC sem requisito](/blog/pc-para-gta-6-sem-requisito-oficial) vale aqui do mesmo jeito que vale em qualquer outra cidade. A série está em [GTA 6](/blog/gta-6). O lugar onde você conversa não publica requisito, não antecipa data de PC e não transforma o dia 19 numa estreia de computador.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Quais jogos e qual tela fecham a escolha",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Leve três dados, esteja você em Campinas ou não: quais jogos abre toda semana, se o monitor é Full HD ou Quad HD, e se grava. Full HD com placa dedicada recente, 16 GB de RAM e SSD descreve a entrada. Quad HD com folga de VRAM descreve a intermediária. Placa forte, 32 GB, SSD rápido e folga para capturar descrevem a alta.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "O que já dá para decidir e o que a página não traz",
-      colunas: [
-        "Pergunta",
-        "Resposta de hoje",
-        "O que não entra",
-      ],
-      linhas: [
-        [
-          "Qual máquina",
-          "Pelos jogos e pela tela atuais",
-          "Ficha de GTA 6",
-        ],
-        [
-          "Dia 19 de novembro",
-          "Lançamento de console",
-          "Estreia de PC",
-        ],
-        [
-          "212 GB",
-          "Espaço de console",
-          "Cota do SSD de computador",
-        ],
-        [
-          "Roda o jogo?",
-          "Não há como prometer",
-          "Requisito, que não existe",
-        ],
-      ],
-      nota: "O dia 19 e a ausência de PC estão na página da Rockstar. 212 GB é tamanho de console, na PlayStation e na The Verge.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-gamer-gta-6-campinas-cidade.webp",
-        alt: "Fundo do corredor, com a parede vermelha e a escada da loja.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-gamer-gta-6-campinas-cidade.webp",
+        "alt": "Corredor da Balão da Informática Anchieta no Cambuí, loja de PC gamer para GTA 6 em Campinas.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Fundo do corredor, com a parede vermelha e a escada da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
+      "legenda": "No fim do corredor, a parede vermelha e a escada. É loja de balcão, não galpão em que a máquina sai sem você ver."
     },
     {
-      tipo: "paragrafo",
-      texto: "Nenhuma dessas faixas ganha um sobrenome de GTA 6 por ser montada em Campinas. Elas organizam o uso de hoje. Se a sua tela é Full HD e você não grava, a faixa alta não fica mais correta porque o jogo futuro é famoso. O [guia intermediário](/blog/pc-gamer-intermediario-para-gta-6) e o de [alto desempenho](/blog/pc-gamer-alto-desempenho-gta-6) detalham os dois degraus sem transformar nenhum em requisito.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que levar e o que falar no balcão"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Por que o dia 19 não entrega requisito de PC",
+      "tipo": "lista",
+      "itens": [
+        "Resolução e tamanho do monitor. Se não souber, uma foto da etiqueta atrás da tela resolve.",
+        "Os jogos que você abre toda semana, não o jogo da moda que você viu num vídeo.",
+        "Se vai transmitir, gravar aula ou só jogar.",
+        "Uma foto da fonte, se a ideia é upgrade. Potência e conector mudam a placa que cabe."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "19 de novembro de 2026 é quinta-feira de console. A Rockstar fixou essa data para PlayStation 5 e Xbox Series. Não houve, até essa data, uma coluna de Windows ao lado. Procurar em Campinas uma “configuração de lançamento” para PC é procurar um documento de outro produto. O produto com data é o de console.",
+      "tipo": "paragrafo",
+      "texto": "Com isso o orçamento fica curto e concreto. Sem isso, qualquer configuração “gamer” serve para uma pessoa genérica, não para a sua mesa. O atendimento também começa pelo WhatsApp, se você quiser adiantar a lista antes de atravessar a Anchieta. A mensagem cai com a equipe da loja, no número (19) 98751-0267."
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Tamanho de console não vira cota local",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O espaço publicado também é de console. A PlayStation fala em pelo menos 212 GB. A The Verge fala em até 212 GB, conforme o aparelho. Morar em Campinas não converte esse número em tamanho de instalação de PC. O SSD da sua máquina se mede pelos jogos que você já guarda, com folga. O resto espera página oficial.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-gamer-gta-6-campinas-espera.webp",
-        alt: "Totem de autoatendimento e estante branca, ao lado da vitrine de entrada.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
-      },
-      legenda: "Totem de autoatendimento e estante branca, ao lado da vitrine de entrada. Foto da loja, na Av. Anchieta, 789, Cambuí.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Sem a frase “este PC roda GTA 6”",
-      texto: "Dá para falar dos jogos que você já tem. Não dá para carimbar GTA 6 na máquina. O carimbo seria uma promessa sem requisito.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que um anúncio de PC mudaria depois",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Se a Rockstar publicar versão e números, a conversa muda de base: mínimo, recomendado e espaço em disco passam a existir. Aí sim dá para comparar a máquina que você tem com uma ficha. Antes disso, comparar é chute. Campinas não recebe essa ficha mais cedo que o resto do país. Recebe no mesmo dia, quando o texto existir.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Até lá, a [montagem em Campinas](/blog/montagem-pc-gamer-campinas) segue o monitor e os jogos atuais. A página de [PCs gamer](/pcgamer) mostra o tipo de máquina, não uma lista secreta do jogo. Se você já tem computador e a dúvida é troca de peça, o caminho é o [upgrade](/blog/upgrade-do-pc-antes-do-gta-6), com HD, memória e placa nessa ordem, e não uma peça comprada pelo nome do jogo.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Folga de memória e de disco sem copiar o console",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "16 GB de RAM e SSD são o piso da faixa de entrada para o uso de agora. Quad HD pede folga de VRAM, assunto da [pesquisa da Steam](/blog/steam-setembro-2026-vram-16gb) e da comparação de [8 GB e 16 GB](/blog/rtx-5060-ti-8gb-ou-16gb). Esses textos descrevem parque e família de placa. Não descrevem um recomendado de GTA 6, e não mudam porque a compra é em Campinas.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Disco com folga evita instalar o próximo jogo em cima do limite. Essa folga é sua, contada em cima da biblioteca atual. Não é os 212 GB do console reaproveitados como meta. Quando, e se, o PC tiver tamanho oficial, você soma. Não antecipa.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-gamer-gta-6-campinas-fecho.webp",
-        alt: "Balcão curvo vermelho e branco, com um iMac e caixas de computador.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
-      },
-      legenda: "Balcão curvo vermelho e branco, com um iMac e caixas de computador. Foto da loja, na Av. Anchieta, 789, Cambuí.",
-    },
-    {
-      tipo: "pros-contras",
-      pros: [
-        "A busca local se separa da ficha do jogo, então Campinas deixa de parecer um requisito paralelo",
-        "Tela, jogos e captura fecham uma máquina que você consegue explicar sem citar GTA 6",
-        "O dia 19 permanece como data de console, visível para quem quer jogar na estreia",
+      "tipo": "tabela",
+      "titulo": "Como ser atendido",
+      "colunas": [
+        "Canal",
+        "Para que serve",
+        "O que já ajuda"
       ],
-      contras: [
-        "Ninguém em Campinas consegue prometer que o PC rode GTA 6 com o que foi publicado",
-        "Um anúncio futuro de PC pode pedir mais ou menos do que a máquina montada agora",
-        "212 GB continuam sendo número de console, inúteis como cota do SSD de computador",
+      "linhas": [
+        [
+          "WhatsApp (19) 98751-0267",
+          "Adiantar a configuração e tirar dúvida de peça",
+          "Foto do monitor, dos jogos e da fonte"
+        ],
+        [
+          "Telefone (19) 3255-1661",
+          "Horário, peça e se a máquina está pronta",
+          "Seu nome e o que ficou combinado"
+        ],
+        [
+          "Balcão, Av. Anchieta, 789",
+          "Ver a máquina ligada e fechar",
+          "Tempo para sentar e olhar a tela"
+        ]
       ],
+      "nota": "Atendimento da Balão da Informática Anchieta, no Cambuí. Preço de peça não fica fixo no site: muda, e o orçamento é do dia."
     },
     {
-      tipo: "chamada",
-      tema: "pc-gamer",
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-gamer-gta-6-campinas-espera.webp",
+        "alt": "Totem e vitrine na entrada da loja, primeiro contato de quem busca PC gamer para GTA 6 em Campinas.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "Totem e vitrine na entrada. Dá para olhar a máquina exposta antes mesmo de sentar no balcão."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a loja faz na Anchieta",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que acontece depois do orçamento"
     },
     {
-      tipo: "paragrafo",
-      texto: "A Balão da Informática Anchieta fica na Av. Anchieta, 789, no Cambuí, em Campinas. A loja monta o computador para os jogos que você já roda e mostra a máquina ligada antes de você pagar. A assistência técnica é no mesmo endereço. Nada disso é uma promessa de que o PC roda GTA 6. Essa promessa não será feita, porque o requisito não existe.",
+      "tipo": "paragrafo",
+      "texto": "A montagem é feita na própria loja. Você não leva uma caixa de peças para descobrir em casa que a tampa não fecha. O passo a passo da bancada está na matéria de [montagem de PC gamer em Campinas](/blog/montagem-pc-gamer-campinas). Se preferir um computador que já está na categoria, olhe os [PCs gamer](/categoria/computadores-pc-pc-gamer) e venha ver o que está exposto. Seminovo testado também existe, para quem quer entrar no Full HD gastando menos, na página de [seminovos](/seminovos)."
     },
     {
-      tipo: "paragrafo",
-      texto: "O WhatsApp é (19) 98751-0267. Diga o bairro, o monitor e os jogos da semana. O orçamento é o do dia, porque o preço muda. Se a resposta honesta for que o seu caso é console no dia 19, é essa resposta que você deve ouvir. A máquina, se sair, sai para o uso de hoje.",
+      "tipo": "paragrafo",
+      "texto": "Assistência fica no mesmo endereço. Quando a máquina que saiu daqui, ou a que você já tinha, esquenta ou desliga, a bancada de [manutenção](/manutencao) é no Cambuí, não um código de postagem para outro estado. Isso pesa mais do que qualquer adesivo na hora de escolher onde montar."
     },
     {
-      tipo: "chamada",
-      titulo: "Quer um PC em Campinas sem promessa de GTA 6?",
-      texto: "Diga os jogos de hoje e o monitor. Você vê a máquina ligada. Ela não vem com a promessa de rodar um jogo sem versão de PC.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-gamer-gta-6-campinas-fecho.webp",
+        "alt": "Balcão da Balão da Informática Anchieta, onde se fecha o PC gamer para GTA 6 em Campinas.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "Balcão curvo, iMac e caixas de computador. É aqui que a configuração vira máquina com seu nome."
     },
+    {
+      "tipo": "pros-contras",
+      "titulo": "Por que resolver aqui",
+      "pros": [
+        "Você vê a máquina ligada antes de pagar.",
+        "Montagem e assistência no mesmo endereço do Cambuí.",
+        "O orçamento parte da sua tela, não de uma lista copiada."
+      ],
+      "contras": [
+        "Quem quer garantia escrita de desempenho no GTA 6. Essa frase a loja não assina.",
+        "Quem precisa retirar fora do horário de balcão sem combinar antes.",
+        "Quem mora longe e não quer frete: dá para adiantar pelo WhatsApp e combinar a retirada."
+      ]
+    },
+    {
+      "tipo": "destaque",
+      "tom": "dica",
+      "titulo": "Horário",
+      "texto": "Segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h. Domingo a loja fecha. Se for sábado, chegue com folga: o balcão para às 13h."
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como chegar e o que esperar do balcão"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "A loja fica na Av. Anchieta, 789, no Cambuí, em Campinas. O letreiro e a fachada vermelha estão na calçada. Lá dentro, o corredor leva ao balcão curvo e à parede de placas. Não é preciso marcar para olhar uma máquina exposta. Para fechar uma montagem no mesmo dia, avise pelo WhatsApp (19) 98751-0267 se a peça que você quer está na loja ou se precisa encomendar. O telefone (19) 3255-1661 tira a mesma dúvida. Sábado o balcão para às 13h. Chegar ao meio-dia com um pedido longo aperta todo mundo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Traga o monitor só se a dúvida for a tela em si. Para o PC, a resolução anotada basta, junto com os jogos. Se a torre atual vier para upgrade, traga o gabinete e a senha do Windows, se houver. A equipe liga, olha e devolve com a peça nova ou com o diagnóstico. Você não deixa o computador e some: o endereço de retirada é o mesmo da entrega. Assistência futura também. É o motivo de montar em Campinas em vez de num anúncio de outra cidade."
+    },
+    {
+      "tipo": "lista",
+      "itens": [
+        "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h.",
+        "WhatsApp (19) 98751-0267 para adiantar a lista de jogos e a resolução.",
+        "Se for upgrade, leve o gabinete. Se for montagem nova, leve a medida da mesa."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se vier de outro bairro, o WhatsApp adianta a lista e você não espera a peça encomendar com você já no balcão. Chegou, olhou a máquina, fechou ou levou o orçamento para casa. As duas saídas são normais. Pressa de sábado à tarde não é: o expediente acaba às 13h. Durante a semana, até as 18h, cabe sentar e ver a tela ligada com calma."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "pc-gamer",
+      "titulo": "Vem ver a máquina ou chama no WhatsApp",
+      "texto": "Balão da Informática Anchieta, loja de informática em Campinas. Av. Anchieta, 789, Cambuí. WhatsApp (19) 98751-0267. Telefone (19) 3255-1661.",
+      "rotulo": "Chamar a loja",
+      "href": "/montagempc",
+      "mensagem": "Olá! Li a matéria de PC gamer para GTA 6 em Campinas e quero um orçamento."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O mapa das matérias está em [GTA 6 no blog](/blog/gta-6). A história da loja, em [sobre nós](/sobre-nos)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "A loja em Campinas garante que o PC roda GTA 6?",
-      resposta: "Não. Até 19 de novembro de 2026 não havia versão de PC nem requisito. A máquina montada na Anchieta é para os jogos que você já joga, mostrada ligada antes do pagamento. GTA 6 não entra como promessa.",
+      "pergunta": "Onde montar um PC gamer em Campinas?",
+      "resposta": "Na Balão da Informática Anchieta, Av. Anchieta, 789, Cambuí. A máquina é montada na loja e você pode vê-la ligada antes de pagar."
     },
     {
-      pergunta: "Dá para jogar GTA 6 no PC no dia 19 em Campinas?",
-      resposta: "O dia 19 de novembro de 2026 é o lançamento de console, no PlayStation 5 e no Xbox Series. A cidade não altera a plataforma. Sem versão de PC anunciada, não há computador local que oficialmente rode o jogo nesse dia.",
+      "pergunta": "A loja garante que o PC roda GTA 6?",
+      "resposta": "Não. A Rockstar não publicou a versão de PC. A configuração é feita para a sua tela e para os jogos que você já joga."
     },
     {
-      pergunta: "O que eu levo para pedir o PC?",
-      resposta: "A resolução do monitor, os jogos que você abre toda semana e se você grava vídeo. Com isso dá para escolher entre entrada, faixa intermediária e faixa alta. Sem isso, qualquer lista vira chute, com ou sem o nome de GTA 6.",
+      "pergunta": "Qual o horário?",
+      "resposta": "Segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h."
     },
     {
-      pergunta: "Preciso de um SSD de 212 GB por causa do jogo?",
-      resposta: "Não por causa da versão de PC, que não existe. 212 GB é tamanho de console: pelo menos 212 GB na PlayStation e até 212 GB conforme o aparelho, na The Verge. O seu disco se planeja com os jogos que você já instala.",
+      "pergunta": "Dá para orçar pelo WhatsApp?",
+      "resposta": "Dá, no (19) 98751-0267. Mande a resolução do monitor e os jogos que você mais abre. O telefone fixo é (19) 3255-1661."
     },
+    {
+      "pergunta": "Tem assistência se der problema?",
+      "resposta": "Tem, no mesmo endereço do Cambuí. Montagem e manutenção ficam juntas, sem mandar a máquina para outra cidade."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    YAHOOPC,
-    PLAYSTATION,
-    VERGETAMANHO,
-    ROCKSTARDATA,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

@@ -1,0 +1,962 @@
+[
+  {
+    "file": "comecar-no-twitch-youtube-ou-kick.ts",
+    "slug": "comecar-no-twitch-youtube-ou-kick",
+    "cat": "guias",
+    "pub": "2026-11-07T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/comecar-no-twitch-youtube-ou-kick.webp",
+        "alt": "Pessoa de óculos e cabelo colorido numa mesa de jogo com neon.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/comecar-no-twitch-youtube-ou-kick-plataformas.webp",
+        "alt": "Pessoa jogando num PC com luz vermelha e azul.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/comecar-no-twitch-youtube-ou-kick-comeco.webp",
+        "alt": "Homem jogando no escuro, com o monitor iluminando o rosto.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/comecar-no-twitch-youtube-ou-kick-fecho.webp",
+        "alt": "Jovem jogando num espaço com luz colorida.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "gta-6-lancamento-19-novembro-2026.ts",
+    "slug": "gta-6-lancamento-19-novembro-2026",
+    "cat": "noticias",
+    "pub": "2026-11-18T16:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/gta-6-lancamento-19-novembro-2026.webp",
+        "alt": "Controle de PlayStation 5 apoiado no console.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/gta-6-lancamento-19-novembro-2026-datas.webp",
+        "alt": "Orla de Miami Beach, com prédios e água, de dia.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-lancamento-19-novembro-2026-confirmado.webp",
+        "alt": "Controle de Xbox em close, carregando.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-lancamento-19-novembro-2026-fecho.webp",
+        "alt": "Pessoa segurando um controle, com a mesa de jogo ao lado.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "gta-6-lucia-e-jason.ts",
+    "slug": "gta-6-lucia-e-jason",
+    "cat": "noticias",
+    "pub": "2026-11-15T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/gta-6-lucia-e-jason.webp",
+        "alt": "Hotéis e palmeiras de Miami Beach no fim da tarde.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/gta-6-lucia-e-jason-dupla.webp",
+        "alt": "Pessoa de headset e controle, jogando com luz verde.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-lucia-e-jason-origem.webp",
+        "alt": "Avenida do centro de Miami à noite, com rastros de luz.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-lucia-e-jason-fecho.webp",
+        "alt": "Miami Beach no crepúsculo, com palmeiras e a rua acesa.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "gta-6-mapa-leonida-e-vice-city.ts",
+    "slug": "gta-6-mapa-leonida-e-vice-city",
+    "cat": "noticias",
+    "pub": "2026-11-16T12:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/gta-6-mapa-leonida-e-vice-city.webp",
+        "alt": "Palmeira na beira do mar em Miami Beach.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/gta-6-mapa-leonida-e-vice-city-nomes.webp",
+        "alt": "Ocean Drive à noite, com letreiros coloridos.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-mapa-leonida-e-vice-city-leitura.webp",
+        "alt": "Rua cheia à noite em Miami Beach, com neon.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-mapa-leonida-e-vice-city-fecho.webp",
+        "alt": "Hotéis iluminados na beira da rua, à noite, em Miami.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "gta-6-perguntas-frequentes.ts",
+    "slug": "gta-6-perguntas-frequentes",
+    "cat": "noticias",
+    "pub": "2026-11-14T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/gta-6-perguntas-frequentes.webp",
+        "alt": "Pessoa de fone jogando no computador, em casa.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/gta-6-perguntas-frequentes-aberto.webp",
+        "alt": "Parede de acessórios em saquinhos, atrás das mesas de atendimento.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-perguntas-frequentes-rota.webp",
+        "alt": "Praia de Siesta Key, na Flórida, vista de drone.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-perguntas-frequentes-fecho.webp",
+        "alt": "Controle branco de PlayStation 5 sobre fundo vermelho.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "gta-6-plataformas-ps5-xbox-e-pc.ts",
+    "slug": "gta-6-plataformas-ps5-xbox-e-pc",
+    "cat": "noticias",
+    "pub": "2026-11-17T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/gta-6-plataformas-ps5-xbox-e-pc.webp",
+        "alt": "PlayStation 5 e controle DualSense numa prateleira.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-aparelhos.webp",
+        "alt": "Console Xbox e controle, em fundo escuro.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-nativo.webp",
+        "alt": "Mesa escura com gabinete iluminado, dois monitores e teclado.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-fecho.webp",
+        "alt": "Gatilhos de um controle de PlayStation, em close.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "gta-6-pre-carga-e-tamanho.ts",
+    "slug": "gta-6-pre-carga-e-tamanho",
+    "cat": "noticias",
+    "pub": "2026-11-14T12:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/gta-6-pre-carga-e-tamanho.webp",
+        "alt": "SSD Samsung sobre uma superfície escura.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/gta-6-pre-carga-e-tamanho-calendario.webp",
+        "alt": "SSD M.2 no formato de palito, sobre fundo claro.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-pre-carga-e-tamanho-espaco.webp",
+        "alt": "Discos rígidos empilhados, do tipo mecânico.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-pre-carga-e-tamanho-fecho.webp",
+        "alt": "Hub com portas USB, HDMI e rede, sobre fundo branco.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "gta-6-preco-e-edicoes.ts",
+    "slug": "gta-6-preco-e-edicoes",
+    "cat": "noticias",
+    "pub": "2026-11-15T12:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/gta-6-preco-e-edicoes.webp",
+        "alt": "Console branco com o controle na frente.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/gta-6-preco-e-edicoes-precos.webp",
+        "alt": "PlayStation 5 em pé, com o controle ao lado, numa mesa.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-preco-e-edicoes-incluso.webp",
+        "alt": "Console Xbox branco e controle, em close.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-preco-e-edicoes-fecho.webp",
+        "alt": "Praia da Flórida vista de cima, com água azul.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "gta-6-trailers-oficiais.ts",
+    "slug": "gta-6-trailers-oficiais",
+    "cat": "noticias",
+    "pub": "2026-11-16T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/gta-6-trailers-oficiais.webp",
+        "alt": "Mesa de jogo com monitor e luz colorida no gabinete.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/gta-6-trailers-oficiais-videos.webp",
+        "alt": "Mouse e teclado mecânico com luz azul.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-trailers-oficiais-limites.webp",
+        "alt": "Horizonte de Miami com palmeiras na frente da água.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-6-trailers-oficiais-fecho.webp",
+        "alt": "Prédios de Miami, palmeiras e o mar sob céu nublado.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "gta-rp-e-o-que-o-gta-6-nao-e.ts",
+    "slug": "gta-rp-e-o-que-o-gta-6-nao-e",
+    "cat": "guias",
+    "pub": "2026-11-07T18:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/gta-rp-e-o-que-o-gta-6-nao-e.webp",
+        "alt": "Pessoa de fone jogando no sofá, à noite.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/gta-rp-e-o-que-o-gta-6-nao-e-existe.webp",
+        "alt": "Console e controle brancos sobre uma superfície reflexiva.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-rp-e-o-que-o-gta-6-nao-e-maquina.webp",
+        "alt": "Pessoa de headset numa mesa de jogo com neon.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/gta-rp-e-o-que-o-gta-6-nao-e-fecho.webp",
+        "alt": "Balão inflável branco e vermelho na calçada da loja.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "internet-para-fazer-live.ts",
+    "slug": "internet-para-fazer-live",
+    "cat": "guias",
+    "pub": "2026-11-08T12:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/internet-para-fazer-live.webp",
+        "alt": "Cabo de rede Ethernet enrolado, com o conector RJ-45.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/internet-para-fazer-live-caminhos.webp",
+        "alt": "Roteador ao lado de um monitor, numa mesa de casa.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/internet-para-fazer-live-teste.webp",
+        "alt": "Roteador Wi-Fi com antenas e cabo, sobre uma mesa de madeira.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/internet-para-fazer-live-fecho.webp",
+        "alt": "Close de uma pessoa de headset, jogando no escuro.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "memoria-ram-para-gta-6.ts",
+    "slug": "memoria-ram-para-gta-6",
+    "cat": "hardware",
+    "pub": "2026-11-13T12:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/memoria-ram-para-gta-6.webp",
+        "alt": "Processador e módulos de memória lado a lado.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/memoria-ram-para-gta-6-usos.webp",
+        "alt": "Módulos de memória DDR5 com iluminação, sobre fundo amarelo.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/memoria-ram-para-gta-6-pilha.webp",
+        "alt": "Computador montado sobre uma mesa preparada para jogar.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/memoria-ram-para-gta-6-fecho.webp",
+        "alt": "Memórias instaladas ao lado do processador num servidor.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "microfone-para-live-de-jogo.ts",
+    "slug": "microfone-para-live-de-jogo",
+    "cat": "guias",
+    "pub": "2026-11-08T18:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/microfone-para-live-de-jogo.webp",
+        "alt": "Microfone e fone num setup de gravação.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/microfone-para-live-de-jogo-tipos.webp",
+        "alt": "Microfone e câmera apontados para a mesma mesa.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/microfone-para-live-de-jogo-ordem-voz.webp",
+        "alt": "Headset e teclado iluminado na frente de dois monitores.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/microfone-para-live-de-jogo-fecho.webp",
+        "alt": "Fone, teclado mecânico e acessórios sobre o mousepad.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "monitor-para-gta-6.ts",
+    "slug": "monitor-para-gta-6",
+    "cat": "hardware",
+    "pub": "2026-11-12T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/monitor-para-gta-6.webp",
+        "alt": "Notebook e monitor lado a lado numa mesa.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/monitor-para-gta-6-telas.webp",
+        "alt": "Monitor e notebook abertos na mesma mesa.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/monitor-para-gta-6-taxa.webp",
+        "alt": "Monitor curvo, teclado e fone sobre a mesa.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/monitor-para-gta-6-fecho.webp",
+        "alt": "Monitor, teclado e equipamento de áudio numa mesa com luz baixa.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "montagem-pc-gamer-campinas.ts",
+    "slug": "montagem-pc-gamer-campinas",
+    "cat": "guias",
+    "pub": "2026-11-10T12:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/montagem-pc-gamer-campinas.webp",
+        "alt": "Porta de vidro da loja e a bandeira vermelha de notebooks, na Av. Anchieta.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/montagem-pc-gamer-campinas-passos-montagem.webp",
+        "alt": "Mesas brancas de atendimento com monitores, na loja do Cambuí.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/montagem-pc-gamer-campinas-bancada.webp",
+        "alt": "Mesa branca e mostruário de placas, no canto do atendimento, sem pessoas no quadro.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/montagem-pc-gamer-campinas-fecho.webp",
+        "alt": "Escada branca e parede vermelha com o quadro da Balão da Informática.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "notebook-gamer-ou-desktop-gta-6.ts",
+    "slug": "notebook-gamer-ou-desktop-gta-6",
+    "cat": "guias",
+    "pub": "2026-11-10T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/notebook-gamer-ou-desktop-gta-6.webp",
+        "alt": "Teclado de notebook e mouse sem fio, em close.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/notebook-gamer-ou-desktop-gta-6-formatos.webp",
+        "alt": "Teclado com luz roxa no balcão da frente do corredor.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/notebook-gamer-ou-desktop-gta-6-escolha.webp",
+        "alt": "Estantes brancas do corredor, com caixas e monitores.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/notebook-gamer-ou-desktop-gta-6-fecho.webp",
+        "alt": "Corredor da loja, com o balcão branco, estantes e as luminárias em X no teto.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "obs-para-live-de-jogo.ts",
+    "slug": "obs-para-live-de-jogo",
+    "cat": "guias",
+    "pub": "2026-11-09T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/obs-para-live-de-jogo.webp",
+        "alt": "Notebook, microfone e câmera numa mesa de gravação.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/obs-para-live-de-jogo-cena.webp",
+        "alt": "Celular na mão, com microfone e fone na mesa de gravação.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/obs-para-live-de-jogo-codifica.webp",
+        "alt": "Mãos no teclado e no mouse, com luz colorida na mesa.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/obs-para-live-de-jogo-fecho.webp",
+        "alt": "Monitores sobre as mesas do corredor da loja.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "pc-gamer-alto-desempenho-gta-6.ts",
+    "slug": "pc-gamer-alto-desempenho-gta-6",
+    "cat": "guias",
+    "pub": "2026-11-11T12:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/pc-gamer-alto-desempenho-gta-6.webp",
+        "alt": "Gabinete aberto sobre uma mesa, pronto para montagem.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-alto-desempenho-gta-6-camadas-alta.webp",
+        "alt": "Gabinete branco aberto no balcão, com a lateral de acrílico.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-alto-desempenho-gta-6-mesa.webp",
+        "alt": "Mesa com gabinete, monitor curvo e caixas de som.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-alto-desempenho-gta-6-fecho.webp",
+        "alt": "Gabinete branco com ventoinhas coloridas, sobre o balcão da loja.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "pc-gamer-entrada-para-gta-6.ts",
+    "slug": "pc-gamer-entrada-para-gta-6",
+    "cat": "guias",
+    "pub": "2026-11-11T18:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/pc-gamer-entrada-para-gta-6.webp",
+        "alt": "Gabinete com luz e monitor numa mesa de jogo.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-entrada-para-gta-6-faixa.webp",
+        "alt": "Monitor, teclado e mouse numa mesa escura.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-entrada-para-gta-6-pedido.webp",
+        "alt": "iMac sobre o balcão curvo, com teclado e mouse ao lado.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-entrada-para-gta-6-fecho.webp",
+        "alt": "Balcão do caixa, com o computador do PDV, teclado e o iMac ao lado.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "pc-gamer-gta-6-campinas.ts",
+    "slug": "pc-gamer-gta-6-campinas",
+    "cat": "guias",
+    "pub": "2026-11-18T18:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/pc-gamer-gta-6-campinas.webp",
+        "alt": "Fachada vermelha da Balão da Informática Anchieta, com o letreiro preto e o logotipo do balão.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-gta-6-campinas-cidade.webp",
+        "alt": "Fundo do corredor, com a parede vermelha e a escada da loja.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-gta-6-campinas-espera.webp",
+        "alt": "Totem de autoatendimento e estante branca, ao lado da vitrine de entrada.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-gta-6-campinas-fecho.webp",
+        "alt": "Balcão curvo vermelho e branco, com um iMac e caixas de computador.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "pc-gamer-intermediario-para-gta-6.ts",
+    "slug": "pc-gamer-intermediario-para-gta-6",
+    "cat": "guias",
+    "pub": "2026-11-11T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/pc-gamer-intermediario-para-gta-6.webp",
+        "alt": "Gabinete branco aberto, com as ventoinhas à mostra.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-intermediario-para-gta-6-faixas.webp",
+        "alt": "Displays da vitrine de entrada, com telas mostrando computadores.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-intermediario-para-gta-6-vram.webp",
+        "alt": "Placa de vídeo e processadores dispostos sobre a mesa.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-gamer-intermediario-para-gta-6-fecho.webp",
+        "alt": "Prateleiras brancas com caixas de placa de vídeo, na parede vermelha da loja.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "pc-para-gta-6-sem-requisito-oficial.ts",
+    "slug": "pc-para-gta-6-sem-requisito-oficial",
+    "cat": "guias",
+    "pub": "2026-11-18T14:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/pc-para-gta-6-sem-requisito-oficial.webp",
+        "alt": "Estação de jogo no escuro, com gabinete e periféricos iluminados.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-precedente.webp",
+        "alt": "Computador, notebook e teclado sobre uma mesa de jogo.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-decisao.webp",
+        "alt": "Monitor, gabinete com luz e headset numa mesa de demonstração.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-fecho.webp",
+        "alt": "Placa de vídeo dentro de um gabinete escuro, com luz colorida.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "pc-para-live-de-gta-6.ts",
+    "slug": "pc-para-live-de-gta-6",
+    "cat": "guias",
+    "pub": "2026-11-09T18:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/pc-para-live-de-gta-6.webp",
+        "alt": "Pessoa de fone e microfone, transmitindo sentada à mesa.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/pc-para-live-de-gta-6-cargas.webp",
+        "alt": "Microfone de mesa, notebook e fone num espaço de gravação.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-para-live-de-gta-6-duas.webp",
+        "alt": "Luz colorida dentro de um gabinete montado.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/pc-para-live-de-gta-6-fecho.webp",
+        "alt": "Gabinete preto numa estante branca, no corredor da loja.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "perifericos-para-gta-6.ts",
+    "slug": "perifericos-para-gta-6",
+    "cat": "hardware",
+    "pub": "2026-11-12T12:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/perifericos-para-gta-6.webp",
+        "alt": "Teclado mecânico e mouse sobre um mousepad.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/perifericos-para-gta-6-pecas.webp",
+        "alt": "Headset branco, mouse e teclado numa mesa de jogo.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/perifericos-para-gta-6-ordem.webp",
+        "alt": "Fone sobre um teclado iluminado, com mouse ao lado.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/perifericos-para-gta-6-fecho.webp",
+        "alt": "Teclado, mouse e headset claros, numa mesa de feira.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "placa-de-video-para-gta-6.ts",
+    "slug": "placa-de-video-para-gta-6",
+    "cat": "hardware",
+    "pub": "2026-11-13T18:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/placa-de-video-para-gta-6.webp",
+        "alt": "Placa de vídeo NVIDIA em close, com o dissipador à mostra.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/placa-de-video-para-gta-6-cenario.webp",
+        "alt": "Caixas de placa de vídeo nas prateleiras do meio, na parede vermelha.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/placa-de-video-para-gta-6-vram.webp",
+        "alt": "Placa GeForce instalada dentro do computador.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/placa-de-video-para-gta-6-fecho.webp",
+        "alt": "Close de uma placa GeForce RTX, com os coolers.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "processador-para-gta-6.ts",
+    "slug": "processador-para-gta-6",
+    "cat": "hardware",
+    "pub": "2026-11-13T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/processador-para-gta-6.webp",
+        "alt": "Interior de PC gamer com water cooler e memórias.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/processador-para-gta-6-troca.webp",
+        "alt": "Processador Ryzen encaixado na placa-mãe.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/processador-para-gta-6-limites.webp",
+        "alt": "Processador Intel instalado na placa-mãe.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/processador-para-gta-6-fecho.webp",
+        "alt": "Placa-mãe com processador e SSD instalados.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "setup-de-streamer-para-gta-6.ts",
+    "slug": "setup-de-streamer-para-gta-6",
+    "cat": "guias",
+    "pub": "2026-11-09T12:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/setup-de-streamer-para-gta-6.webp",
+        "alt": "Pessoa de headset olhando para o monitor, no escuro.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/setup-de-streamer-para-gta-6-zonas.webp",
+        "alt": "Microfone no pedestal, ligado a um notebook.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/setup-de-streamer-para-gta-6-ordem.webp",
+        "alt": "Teclado, mouse e controles numa mesa clara.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/setup-de-streamer-para-gta-6-fecho.webp",
+        "alt": "Notebook, monitor e webcam numa mesa clara.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "ssd-para-gta-6.ts",
+    "slug": "ssd-para-gta-6",
+    "cat": "hardware",
+    "pub": "2026-11-12T18:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/ssd-para-gta-6.webp",
+        "alt": "SSD NVMe Lexar encaixado numa placa.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/ssd-para-gta-6-gigas.webp",
+        "alt": "HD externo com cabo USB, em close.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/ssd-para-gta-6-disco.webp",
+        "alt": "HD portátil com o cabo ao lado.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/ssd-para-gta-6-fecho.webp",
+        "alt": "Interior de um gabinete com ventoinhas e luz colorida.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "upgrade-do-pc-antes-do-gta-6.ts",
+    "slug": "upgrade-do-pc-antes-do-gta-6",
+    "cat": "guias",
+    "pub": "2026-11-10T18:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/upgrade-do-pc-antes-do-gta-6.webp",
+        "alt": "Caixas de placa de vídeo enfileiradas no topo da estante branca da loja.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/upgrade-do-pc-antes-do-gta-6-ordem.webp",
+        "alt": "Interior de um PC gamer, com placa de vídeo e cooler.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/upgrade-do-pc-antes-do-gta-6-linha.webp",
+        "alt": "Módulo de memória visto de cima, com os chips aparentes.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/upgrade-do-pc-antes-do-gta-6-fecho.webp",
+        "alt": "Bancada branca sob a parede de acessórios, com monitor e caixas.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  },
+  {
+    "file": "webcam-para-stream.ts",
+    "slug": "webcam-para-stream",
+    "cat": "guias",
+    "pub": "2026-11-08T15:00:00.000Z",
+    "imgs": [
+      {
+        "src": "/blog/capas/webcam-para-stream.webp",
+        "alt": "Monitor com uma câmera pequena ao lado e fone na mesa.",
+        "largura": 1536,
+        "altura": 1024
+      },
+      {
+        "src": "/blog/figuras/webcam-para-stream-passos-rosto.webp",
+        "alt": "Pessoa de headset sentada numa mesa de jogo, à noite.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/webcam-para-stream-olhar.webp",
+        "alt": "Teclado e monitor do caixa, no balcão vermelho da loja.",
+        "largura": 1600,
+        "altura": 900
+      },
+      {
+        "src": "/blog/figuras/webcam-para-stream-fecho.webp",
+        "alt": "Teto escuro da loja com as luminárias cruzadas em X.",
+        "largura": 1600,
+        "altura": 900
+      }
+    ]
+  }
+]

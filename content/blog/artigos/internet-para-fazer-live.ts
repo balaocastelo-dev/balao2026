@@ -1,268 +1,256 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const OBS: Fonte = {
-  nome: "OBS Project — OBS Studio",
-  url: "https://obsproject.com/",
-  data: "consulta em 19 de novembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "internet-para-fazer-live",
-  titulo: "Internet para fazer live: envio, estabilidade e teste",
-  resumo: "A live depende do envio e da estabilidade, não só do download. Teste no horário em que você vai transmitir e fale com o provedor se o envio oscila.",
-  categoria: "guias",
-  etiquetas: [
-    "GTA 6",
+  "slug": "internet-para-fazer-live",
+  "titulo": "Internet para fazer live: o que medir antes de abrir",
+  "resumo": "Internet para fazer live depende da subida, não do download do anúncio. Use cabo, meça na hora da live e deixe folga acima do bitrate.",
+  "categoria": "guias",
+  "etiquetas": [
     "Internet",
     "Live",
+    "Streaming"
   ],
-  capa: {
-    src: "/blog/capas/internet-para-fazer-live.webp",
-    alt: "Cabo de rede Ethernet enrolado, com o conector RJ-45.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/internet-para-fazer-live.webp",
+    "alt": "Cabo de rede Ethernet com conector RJ-45, o caminho estável de internet para fazer live.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-08T12:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-08T12:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Internet para live: envio, estabilidade e teste",
-    palavrasChave: [
-      "internet para live",
-      "upload para transmitir",
-      "estabilidade de live",
-      "teste de envio",
-    ],
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Internet para fazer live: upload, cabo e teste",
+    "descricao": "Internet para fazer live depende da subida, não do download do anúncio. Use cabo, meça na hora da live e deixe folga acima do bitrate.",
+    "palavrasChave": [
+      "internet para fazer live",
+      "upload para stream",
+      "quantos megas para live",
+      "cabo ou wifi para transmitir"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "A live que engasga para quem assiste, enquanto o seu jogo continua liso, quase sempre está no caminho de subida. Esse caminho é o envio, o upload. O número grande de download, o que você usa para baixar o jogo, não descreve essa subida. Você pode ter uma linha folgada para receber arquivo e uma linha curta, ou instável, para transmitir. São medidas diferentes no mesmo fio.",
+      "tipo": "paragrafo",
+      "texto": "Internet para fazer live é a subida, o upload, estável na hora em que você transmite. A propaganda do plano fala o download, que baixa jogo e página. Quem assiste a sua live depende do caminho contrário. O OBS manda o vídeo para a Twitch, o YouTube ou a Kick. Se essa subida oscila, a imagem para, mesmo com o PC sobrando."
     },
     {
-      tipo: "paragrafo",
-      texto: "Este guia não publica um mega para você copiar. Um número fixo ignoraria o horário, o programa de captura e o que mais a casa faz na mesma rede. O que dá para fazer é testar na hora em que você vai transmitir, olhar o envio, repetir, e falar com o provedor se esse envio oscila. O OBS, em [obsproject.com](https://obsproject.com/), só entrega o que a sua subida consegue carregar.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Cabo Ethernet no PC. Wi-Fi serve para o celular, e oscila quando o micro-ondas ou a parede entram no meio.",
+        "Meça a subida no horário da live, não às três da tarde de um domingo vazio.",
+        "O bitrate do OBS precisa caber na subida com folga. O número certo é o da recomendação atual da plataforma, não um print antigo."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**A live sobe pelo envio.** Download alto não descreve essa subida.",
-        "**Estabilidade pesa mais que um pico.** Um instante bonito não segura a hora.",
-        "**Teste no horário real.** Com o jogo e a captura abertos, se for assim que você transmite.",
-        "**Oscilou: fale com o provedor.** Leve o horário e o que aconteceu, sem mega inventado.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Internet para fazer live: subida, cabo e horário"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "A live sobe pelo envio",
+      "tipo": "paragrafo",
+      "texto": "Faça um teste de velocidade no computador que vai transmitir, com cabo, no horário em que a live acontece. Anote a subida, não só a descida. Repita em dois dias. Se um dia dá um número e no outro cai pela metade, o problema é estabilidade, e bitrate alto só vai piorar. O assistente do OBS sugere um ponto de partida. A Central de Criadores da Twitch e a ajuda de transmissão do YouTube publicam a recomendação vigente. Use a de agora, porque essas tabelas mudam."
     },
     {
-      tipo: "paragrafo",
-      texto: "Quando você assiste a um vídeo, os dados descem até a sua casa. Quando você transmite, a imagem sobe da sua casa até a plataforma, e de lá desce para quem assiste. O plano anuncia a descida com mais destaque. A subida vem menor, às vezes na letra miúda. Para a live, a letra que importa é a do envio. Ler só o download é olhar o caminho contrário.",
+      "tipo": "paragrafo",
+      "texto": "Deixe folga. Se o OBS manda quase o total da sua subida, qualquer outra pessoa da casa num vídeo já derruba a live. Feche backup de nuvem e atualização de jogo antes de ir ao ar. Baixar o GTA e transmitir ao mesmo tempo, no mesmo enlace, é o jeito clássico de culpar a plataforma por um congestionamento que está na sua rede."
     },
     {
-      tipo: "paragrafo",
-      texto: "O programa de captura prepara a imagem, e a rede a carrega. Se o envio não comporta o que o programa tenta subir, quem está de fora vê parada, quadros pulados ou queda. O seu monitor pode seguir normal, porque o jogo não depende dessa subida. Confundir as duas telas faz você trocar peça do computador para consertar um fio. Separe as falhas antes de abrir o gabinete.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/internet-para-fazer-live-caminhos.webp",
-        alt: "Roteador ao lado de um monitor, numa mesa de casa.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/internet-para-fazer-live-caminhos.webp",
+        "alt": "Roteador ao lado de um monitor, cenário de internet para fazer live com cabo em vez de Wi-Fi.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Roteador ao lado de um monitor, numa mesa de casa. Foto de Jaycee300s (Pexels).",
+      "legenda": "Roteador ao lado do monitor: perto do PC o cabo é curto, e curto é bom. Wi-Fi atravessando a casa é que falha."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Um pico bonito não é estabilidade",
+      "tipo": "tabela",
+      "titulo": "O que medir de verdade",
+      "colunas": [
+        "Medida",
+        "Por que importa",
+        "O que ignorar"
+      ],
+      "linhas": [
+        [
+          "Upload no horário da live",
+          "É o vídeo saindo",
+          "O download gigante do anúncio do plano"
+        ],
+        [
+          "Teste repetido",
+          "Mostra se oscila",
+          "Um único teste às 15h"
+        ],
+        [
+          "Cabo no PC da live",
+          "Tira o Wi-Fi do caminho",
+          "O celular ao lado do roteador, que não é o PC"
+        ],
+        [
+          "Bitrate abaixo da subida, com folga",
+          "Cabe o vídeo e o resto da casa",
+          "O maior número que um tutorial de 2021 citou"
+        ]
+      ],
+      "nota": "Método de teste. O valor em megabits recomendado está na documentação atual da Twitch, do YouTube e do assistente do OBS."
     },
     {
-      tipo: "paragrafo",
-      texto: "Estabilidade é o envio se manter durante a hora da live, não um instante alto no começo do teste. Muita linha sobe bem por trinta segundos e oscila quando o bairro enche, ou quando o wi-fi disputa com a parede. A live dura mais que o instante do medidor. O que derruba a transmissão é a oscilação no meio.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Wi-Fi, cabo e o resto da casa"
     },
     {
-      tipo: "paragrafo",
-      texto: "Cabo, com a máquina perto do roteador, tira oscilação que o wi-fi acrescenta na distância e na parede. Não transforma envio curto em envio largo. Serve para tirar o rádio da equação e ver a linha em si. Se no cabo o envio ainda sobe e desce, o assunto é o provedor. Se só no wi-fi oscila, o assunto é o caminho até o roteador.",
+      "tipo": "paragrafo",
+      "texto": "Wi-Fi 5 GHz, perto do roteador, às vezes aguenta uma live leve. Parede, micro-ondas e o videogame de outra pessoa no mesmo rádio derrubam quadro sem o PC ter culpa. Cabo não discute com a parede. Se o roteador está longe, um cabo passado com cuidado, ou um par de adaptadores que você teste de verdade, vale mais do que trocar de plano às cegas. Meça de novo depois da mudança. Se o número não mudou, o limite é o plano ou o horário, não o rádio."
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "A casa inteira usa o mesmo envio",
+      "tipo": "paragrafo",
+      "texto": "Quem divide a conexão combina a regra da noite de live: sem download grande na mesma hora. Isso é conversa de casa, e resolve mais do que o modo turbo do roteador. O PC em si, se a gravação local é boa e só a live ao vivo trava, está inocente. A matéria de [PC para live](/blog/pc-para-live-de-gta-6) separa esse diagnóstico. O [OBS](/blog/obs-para-live-de-jogo) é onde o bitrate se ajusta."
     },
     {
-      tipo: "paragrafo",
-      texto: "Videochamada, backup de foto e outra televisão disputam a mesma rede no mesmo horário. Uma live testada com a casa vazia mente sobre a live das nove da noite. Combine o teste com o uso real: quem mais está em casa e se o computador está no cabo ou no wi-fi. Anotar isso evita culpar o jogo por um envio que já saiu dividido.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Testar na hora em que você transmite",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/internet-para-fazer-live-teste.webp",
-        alt: "Roteador Wi-Fi com antenas e cabo, sobre uma mesa de madeira.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/internet-para-fazer-live-teste.webp",
+        "alt": "Roteador Wi-Fi com antenas e cabo, escolha de internet para fazer live pelo Ethernet.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Roteador Wi-Fi com antenas e cabo, sobre uma mesa de madeira. Foto de Pascal (Pexels).",
+      "legenda": "Antena e cabo no mesmo roteador. Para a live, use o cabo. Deixe o Wi-Fi para o celular do chat, se precisar."
     },
     {
-      tipo: "paragrafo",
-      texto: "Escolha um medidor que mostre o envio, não só o download. Rode na hora em que a live aconteceria, não de manhã se você transmite à noite. Deixe o jogo e o programa de captura abertos, porque é nesse estado que a rede vai trabalhar. Anote o horário, o que estava aberto e se o envio oscilou. Não anote uma meta tirada de outro texto.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Repita em outro dia, no mesmo horário. Um único teste pega um acaso: obra na rua, chuva no rádio, alguém baixando atualização. Dois ou três registros no mesmo período mostram um padrão. Se o envio segura, a folga do computador volta à conversa, como no guia de [PC para live de GTA 6](/blog/pc-para-live-de-gta-6). Se oscila, o próximo chamado não é a placa de vídeo.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "O que anotar num teste de live",
-      colunas: [
-        "O que anotar",
-        "Para que serve",
-        "O que não anotar",
+      "tipo": "pros-contras",
+      "titulo": "Live sem travar no meio",
+      "pros": [
+        "Ethernet no computador que transmite.",
+        "Upload medido no horário real, com folga acima do bitrate.",
+        "Download grande pausado enquanto você está no ar."
       ],
-      linhas: [
-        [
-          "Horário",
-          "Bater com a hora da live",
-          "Um mega copiado de guia",
-        ],
-        [
-          "Envio",
-          "Ver se a subida existe",
-          "Só o download do plano",
-        ],
-        [
-          "Oscilação",
-          "Ver se cai no meio",
-          "O pico do primeiro segundo",
-        ],
-        [
-          "O que estava aberto",
-          "Jogo, captura, outra pessoa",
-          "Teste com a casa vazia",
-        ],
-      ],
-      nota: "A tabela não traz velocidade de referência. O dado é o comportamento da sua linha no horário real.",
+      "contras": [
+        "Testar a velocidade no celular e achar que o PC, do outro lado da casa, tem o mesmo número.",
+        "Subir o bitrate porque a imagem “ficou mais nítida no preview” e a subida não cabe.",
+        "Trocar de plano sem medir. Às vezes o cabo já resolvia."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que dizer ao provedor",
+      "tipo": "paragrafo",
+      "texto": "Onde abrir o canal, depois que a rede passa no teste, está em [Twitch, YouTube ou Kick](/blog/comecar-no-twitch-youtube-ou-kick)."
     },
     {
-      tipo: "paragrafo",
-      texto: "Se o envio oscila no horário da live, fale com o provedor com o bilhete na mão. Diga o horário, diga que a transmissão depende da subida, e diga que o envio cai enquanto o teste roda. Peça para olharem a linha nesse período. Não invente um número de mega para exigir. Você mediu o que a sua linha fez. O provedor enxerga o enlace.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Leve também o que você já separou: cabo ou wi-fi, casa em uso ou vazia, um dia ou três. Quanto mais concreto o relato, menos a conversa vira um “a internet está ruim”. Se o provedor ajustar a linha e o envio passar a segurar no mesmo horário, a live ganha o caminho que faltava. Se continuar oscilando, o registro serve para a conversa seguinte.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Não copie mega de outro guia",
-      texto: "Um valor de envio que serviu na casa de outra pessoa não é a sua meta. Teste no seu horário, anote se oscilou e, se oscilou, fale com o seu provedor. O número universal não existe nesta página.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a rede não conserta no PC",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Envio estável não acerta microfone longe, câmera no escuro nem processador no limite. Se o teste segura e a live ainda falha, olhe a máquina e o programa. Cena, fonte e codificador estão em [OBS para live de jogo](/blog/obs-para-live-de-jogo). A luz do rosto está em [webcam para stream](/blog/webcam-para-stream). Trocar de plataforma não alarga o envio: Twitch, YouTube e Kick, no guia de [como começar](/blog/comecar-no-twitch-youtube-ou-kick), recebem a mesma subida.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Enviar a mesma imagem para mais de um destino ao mesmo tempo pede mais da subida. No começo, um destino só já mostra se a linha aguenta. GTA 6 de PC não entra com um requisito de rede, porque essa versão não tinha ficha publicada. A internet que você prova é a da live de hoje. O jogo sem versão de computador não fornece um número para copiar.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/internet-para-fazer-live-fecho.webp",
-        alt: "Close de uma pessoa de headset, jogando no escuro.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/internet-para-fazer-live-fecho.webp",
+        "alt": "Pessoa de headset jogando no escuro, live que depende de internet estável para fazer live.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Close de uma pessoa de headset, jogando no escuro. Foto de Yan Krukau (Pexels).",
+      "legenda": "Headset e tela no escuro: se a imagem parar, olhe a subida antes de culpar o jogo."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "Você separa download de envio e deixa de ler o número do caminho contrário",
-        "O teste no horário real, repetido, mostra oscilação em vez de um pico isolado",
-        "O relato para o provedor leva horário e sintoma, sem meta inventada",
-      ],
-      contras: [
-        "Um instante alto no medidor não segura a hora inteira da live",
-        "Wi-fi, outra pessoa em casa e dois destinos ao mesmo tempo mudam o envio",
-        "Linha estável não conserta voz, luz nem máquina no limite",
-      ],
+      "tipo": "destaque",
+      "tom": "dica",
+      "titulo": "Ordem do diagnóstico",
+      "texto": "Grave local primeiro. Se o arquivo no disco está liso e só a transmissão ao vivo trava, é rede. Se o arquivo local já soluça, é PC, e a internet nem foi testada ainda."
     },
     {
-      tipo: "chamada",
-      tema: "geral",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que pausar na hora de abrir"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Levar o teste junto com a máquina",
+      "tipo": "paragrafo",
+      "texto": "Atualização de jogo, backup de nuvem e o download de outra pessoa na mesma rede comem a subida que você mediu de manhã. Combine em casa: na hora da live, ninguém baixa filme. Pause a loja de jogos. Se o roteador tiver um modo de prioridade para o PC da transmissão, ligue e teste, não assuma que o nome do botão faz o serviço. Meça de novo com o cabo, no horário, e compare com o teste anterior. Número parecido significa que a prioridade ajudou ou que o cabo já bastava."
     },
     {
-      tipo: "paragrafo",
-      texto: "Na Balão da Informática Anchieta, Av. Anchieta, 789, Cambuí, Campinas, leve o bilhete do teste: horário, se o envio oscilou, se estava no cabo, se o jogo e a captura estavam abertos. Se a subida cai, o primeiro chamado é o provedor, não uma peça nova. Se a subida segura e a live ainda falha, a conversa passa para a folga do computador.",
+      "tipo": "paragrafo",
+      "texto": "Quando a imagem para e o arquivo local está liso, anote a hora. Se para sempre no mesmo horário, é a rede do bairro ou o plano no pico, e bitrate menor naquele horário transmite melhor do que insistir no número alto. Se para o tempo todo, olhe o cabo e o Wi-Fi. O diagnóstico continua o mesmo: local bom e ao vivo ruim é internet. Local ruim é PC, e a matéria do computador para live é o próximo passo, não a troca de operadora."
     },
     {
-      tipo: "paragrafo",
-      texto: "O WhatsApp é (19) 98751-0267. A decisão é não trocar de máquina para consertar envio que oscila, e não culpar a rede quando o teste já segurou. Cada uma dessas frases pede um próximo passo diferente, e as duas cabem numa mensagem curta.",
+      "tipo": "lista",
+      "itens": [
+        "Pause atualização e backup antes de ir ao ar.",
+        "Combine o horário com quem divide a rede.",
+        "Bitrate menor no pico ainda é live. Bitrate alto que não cabe é tela parada."
+      ]
     },
     {
-      tipo: "chamada",
-      titulo: "A Balão da Informática Anchieta lê o teste com você.",
-      texto: "No WhatsApp (19) 98751-0267, diga se o envio oscilou no horário da live. A decisão segue esse registro, sem um mega copiado.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Três testes valem mais do que um anúncio"
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Anote três testes de subida, em três dias, no horário da live, no cabo. A mediana é o número com que você conversa com o bitrate, não o pico bonito. Se a mediana não cabe a qualidade que você quer, baixe a qualidade ou mude o horário. Trocar de plano sem essa anotação é chute, e o chute continua oscilando no mesmo horário do bairro."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Guarde o print com a data. Quando a live cair na semana seguinte, você compara com o número antigo em vez de discutir no escuro. Subida estável é o que segura a transmissão. O download do plano, sozinho, não diz nada sobre essa queda."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "geral",
+      "titulo": "A rede passa e o PC não?",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas olha memória, placa e disco no Cambuí. Av. Anchieta, 789, Campinas. WhatsApp (19) 98751-0267.",
+      "rotulo": "Chamar a loja",
+      "href": "/fale-conosco",
+      "mensagem": "Olá! Li a matéria de internet para fazer live e quero ver se o travamento é o PC ou a rede."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Internet para fazer live segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Download alto garante que a live vai bem?",
-      resposta: "Não. Download é o que desce até a sua casa. A live sobe pelo envio. Um plano com descida larga pode ter subida curta ou instável. Leia as duas medidas e teste a subida no horário em que você transmite.",
+      "pergunta": "Quantos megas preciso para fazer live?",
+      "resposta": "O número que importa é a subida, e ele tem de caber o bitrate do OBS com folga. A recomendação vigente está na Twitch, no YouTube e no assistente do OBS. Meça no seu horário, não copie um tutorial antigo."
     },
     {
-      pergunta: "Que horas eu testo a internet da live?",
-      resposta: "Na hora em que a transmissão acontece, com o jogo e o programa de captura abertos, se for assim que você vai ao ar. Repita em outro dia no mesmo horário. Manhã vazia não descreve a noite cheia.",
+      "pergunta": "Wi-Fi serve para transmitir?",
+      "resposta": "Perto do roteador, às vezes. Cabo é mais estável. Parede e outros aparelhos no mesmo Wi-Fi derrubam a live sem o PC ter culpa."
     },
     {
-      pergunta: "O que eu falo para o provedor se o envio oscila?",
-      resposta: "Diga o horário, diga que a live depende da subida e diga que o envio cai ou varia durante o teste. Peça para olharem a linha nesse período. Não invente um número de mega para exigir.",
+      "pergunta": "Download alto garante a live?",
+      "resposta": "Não. Download baixa arquivo. A live usa a subida. Plano com download enorme e upload curto trava a transmissão."
     },
     {
-      pergunta: "Trocar de computador resolve envio oscilando?",
-      resposta: "Não, se o teste já mostra a subida caindo. Aí o caminho é o provedor, o cabo ou o uso da casa na mesma rede. Troca de máquina entra na conversa quando o envio segura e a live ainda falha.",
+      "pergunta": "Como saber se o problema é a internet?",
+      "resposta": "Grave no disco. Se o arquivo local está bom e só a live ao vivo trava, é a subida ou a estabilidade da rede."
     },
     {
-      pergunta: "Posso transmitir para duas plataformas ao mesmo tempo?",
-      resposta: "Pode, e a subida precisa carregar os dois envios. No começo, um destino só já mostra se a linha aguenta. Se um destino oscila, dois destinos não ficam mais folgados.",
-    },
+      "pergunta": "Posso baixar o jogo durante a live?",
+      "resposta": "Pode, e a imagem vai sofrer se os dois dividirem o mesmo enlace no limite. Pause atualização e backup antes de abrir."
+    }
   ],
-  fontes: [
-    OBS,
-  ],
+  "fontes": [
+    {
+      "nome": "OBS Studio — guia de início rápido",
+      "url": "https://obsproject.com/kb/quick-start-guide",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Twitch — Central de Criadores",
+      "url": "https://help.twitch.tv/s/article/creator-dashboard",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Ajuda do YouTube — transmitir ao vivo",
+      "url": "https://support.google.com/youtube/answer/2474026",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

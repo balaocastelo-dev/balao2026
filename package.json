@@ -15,6 +15,7 @@
     "whatsapp:server:start": "npm --prefix whatsapp-server run start",
     "blog:novo": "node scripts/blog-novo.mjs",
     "blog:conferir": "vitest run __tests__/lib/blog.test.ts",
+    "blog:checar-gta6": "vitest run __tests__/lib/serie-gta6-editorial.test.ts",
     "blog:soro": "node scripts/blog-soro.mjs",
     "blog:publicar": "node scripts/blog-publicar.mjs"
   },

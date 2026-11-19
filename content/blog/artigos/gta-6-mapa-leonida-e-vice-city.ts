@@ -1,262 +1,232 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const PLAYSTATION: Fonte = {
-  nome: "PlayStation — página de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const TAKETWO: Fonte = {
-  nome: "Take-Two Interactive — comunicado de pré-venda de Grand Theft Auto VI",
-  url: "https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/",
-  data: "24 de junho de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "gta-6-mapa-leonida-e-vice-city",
-  titulo: "Mapa de GTA 6: Leonida, Vice City e o que foi mostrado",
-  resumo: "A sinopse de GTA 6 situa a história no estado de Leonida. Vice City está no nome do pacote, e os outros lugares não formam um mapa.",
-  categoria: "noticias",
-  etiquetas: [
+  "slug": "gta-6-mapa-leonida-e-vice-city",
+  "titulo": "Mapa de GTA 6: Leonida, Vice City e o que já foi mostrado",
+  "resumo": "O mapa de GTA 6 confirmado tem o estado de Leonida e a cidade de Vice City. Veja a sinopse oficial e o que ainda é só clima de Flórida.",
+  "categoria": "noticias",
+  "etiquetas": [
     "GTA 6",
-    "Mapa",
     "Leonida",
     "Vice City",
+    "Mapa"
   ],
-  capa: {
-    src: "/blog/capas/gta-6-mapa-leonida-e-vice-city.webp",
-    alt: "Palmeira na beira do mar em Miami Beach.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/gta-6-mapa-leonida-e-vice-city.webp",
+    "alt": "Palmeira na beira do mar em Miami Beach, clima do mapa de GTA 6 em Vice City.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-16T12:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-16T12:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Mapa de GTA 6: Leonida e Vice City",
-    palavrasChave: [
-      "mapa gta 6",
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Mapa de GTA 6: Leonida, Vice City e o que se sabe",
+    "descricao": "O mapa de GTA 6 confirmado tem o estado de Leonida e a cidade de Vice City. Veja a sinopse oficial e o que ainda é só clima de Flórida.",
+    "palavrasChave": [
+      "mapa de gta 6",
       "leonida gta 6",
       "vice city gta 6",
-      "mapa de gta 6",
-    ],
+      "cenário gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Quem busca o mapa de GTA 6 espera bairro, distância e o desenho de Vice City. O que saiu com nome de lugar é mais curto que um atlas. Dá para repetir a frase da sinopse, o nome de um pacote e sete nomes de uma descrição de edição. Não dá para traçar caminho com isso.",
+      "tipo": "paragrafo",
+      "texto": "O mapa de GTA 6, no que a Rockstar escreveu, cabe em dois nomes: o estado de Leonida e a cidade de Vice City. A sinopse oficial coloca Jason e Lucia no meio de uma conspiração que atravessa Leonida, “no lado mais escuro do lugar mais ensolarado dos Estados Unidos”. O resto é cenário de divulgação, não uma planta com escala."
     },
     {
-      tipo: "paragrafo",
-      texto: "A sinopse oficial situa a conspiração no estado de Leonida e fala no lado mais escuro do lugar mais ensolarado dos Estados Unidos. Vice City, nos textos usados aqui, aparece no nome Vintage Vice City Pack. Os sete outros nomes estão na descrição da Ultimate Edition na PlayStation. A lista não se apresenta como mapa completo.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Leonida é o estado fictício. Vice City é a cidade. Os dois nomes estão no site da Rockstar.",
+        "A sinopse não entrega bairros, estradas nem tempo de travessia. Mapa completo é coisa de jogar, ou de um guia posterior da própria Rockstar.",
+        "As fotos desta matéria são de Miami e de Miami Beach, para o clima. Não são captura do jogo."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**Leonida é o estado da sinopse.** A frase fala em conspiração nesse estado, não em quilômetros.",
-        "**Vice City está no nome do pacote.** Vintage Vice City Pack não é um mapa da cidade.",
-        "**Sete nomes vêm da descrição da Ultimate.** São nomes da edição, não um atlas.",
-        "**Distância e mapa completo não saíram.** Citar o nome não mede a viagem.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Mapa de GTA 6: os nomes que já estão no site"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a sinopse fixa sobre o lugar",
+      "tipo": "paragrafo",
+      "texto": "Vice City volta como cidade. Na série, ela sempre foi a leitura da Rockstar de uma metrópole costeira, com praia, neon e excesso. Leonida é o estado em volta, o nome novo que a campanha usa para dizer que a história não fica presa num bairro só. A página de mídia separa capturas com o rótulo Vice City e outras com Jason e Lucia. Isso confirma que a cidade é cenário mostrado, não um easter egg de fã."
     },
     {
-      tipo: "paragrafo",
-      texto: "A [página oficial](https://www.rockstargames.com/VI) descreve Jason e Lucia no lado mais escuro do lugar mais ensolarado dos Estados Unidos, numa conspiração no estado de Leonida. Essa é a frase de cenário. Ela não lista cidade, não mede o estado e não desenha estrada. O que os dois fazem nessa história está na matéria de [Lucia e Jason](/blog/gta-6-lucia-e-jason), junto com a sinopse completa.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "“Lugar mais ensolarado dos Estados Unidos” é imagem da sinopse, não coordenada. Não transforma Leonida num mapa que dê para imprimir, e não autoriza completar a geografia com o que um leitor espera de jogos anteriores. O que está escrito é o estado e essa frase. O que não está escrito continua fora.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Quais nomes aparecem na descrição da Ultimate",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A descrição da Ultimate Edition na [PlayStation](https://www.playstation.com/en-us/games/grand-theft-auto-vi/) cita sete nomes: Mount Kalaga, Lake Leonida, Washington Beach, Gambit Bay, Watson Bay, Stockyard e Vercetti Estate. São nomes dessa descrição. Não são apresentados como a lista inteira de lugares, nem como bônus com endereço, nem como rota.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "Nomes na descrição da Ultimate Edition",
-      colunas: [
-        "Nome",
-        "Onde está escrito",
-      ],
-      linhas: [
-        [
-          "Mount Kalaga",
-          "Descrição da Ultimate na PlayStation",
-        ],
-        [
-          "Lake Leonida",
-          "Descrição da Ultimate na PlayStation",
-        ],
-        [
-          "Washington Beach",
-          "Descrição da Ultimate na PlayStation",
-        ],
-        [
-          "Gambit Bay",
-          "Descrição da Ultimate na PlayStation",
-        ],
-        [
-          "Watson Bay",
-          "Descrição da Ultimate na PlayStation",
-        ],
-        [
-          "Stockyard",
-          "Descrição da Ultimate na PlayStation",
-        ],
-        [
-          "Vercetti Estate",
-          "Descrição da Ultimate na PlayStation",
-        ],
-      ],
-      fonte: PLAYSTATION,
-      nota: "Nomes da descrição da edição. Não formam um mapa completo nem um atlas.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-mapa-leonida-e-vice-city-nomes.webp",
-        alt: "Ocean Drive à noite, com letreiros coloridos.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "citacao",
+      "texto": "Jason and Lucia have always known the deck is stacked against them. But when an easy score goes wrong, they find themselves on the darkest side of the sunniest place in America, in the middle of a criminal conspiracy stretching across the state of Leonida.",
+      "autor": "Rockstar Games",
+      "cargo": "sinopse oficial de Grand Theft Auto VI",
+      "fonte": {
+        "nome": "Rockstar Games — sinopse oficial de Grand Theft Auto VI",
+        "url": "https://www.rockstargames.com/VI",
+        "data": "consulta em 19 de novembro de 2026"
       },
-      legenda: "Ocean Drive à noite, com letreiros coloridos. Foto de Luis Erives (Pexels).",
+      "traduzida": true
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Nome na descrição não é rota",
+      "tipo": "paragrafo",
+      "texto": "A frase está em inglês no site. Em português direto: os dois sabem que o jogo é desfavorável, um golpe fácil dá errado, e eles param no lado mais escuro do lugar mais ensolarado dos Estados Unidos, no meio de uma conspiração que cruza Leonida. É gancho de história. Não é lista de regiões."
     },
     {
-      tipo: "paragrafo",
-      texto: "Dá para dizer que Mount Kalaga e Watson Bay aparecem nessa descrição. Não dá para dizer quanto tempo a viagem leva, o que existe no meio ou se os dois ficam no mesmo condado. A tabela esgota o que essa página lista. Qualquer mapa desenhado em cima dela é ilustração de fã, não comunicado.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Por que essa lista não é o mapa",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-mapa-leonida-e-vice-city-leitura.webp",
-        alt: "Rua cheia à noite em Miami Beach, com neon.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-mapa-leonida-e-vice-city-nomes.webp",
+        "alt": "Ocean Drive à noite com letreiros coloridos, referência visual do mapa de GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Rua cheia à noite em Miami Beach, com neon. Foto de Luis Erives (Pexels).",
+      "legenda": "Ocean Drive à noite é o tipo de rua que Vice City cita. A foto é Miami Beach de verdade."
     },
     {
-      tipo: "paragrafo",
-      texto: "Um mapa responde vizinhança, escala e o que ficou de fora. Essa lista não responde nenhuma das três. São sete nomes, numa descrição de edição, mais o estado na sinopse. Tratar isso como o território inteiro de GTA 6 é concluir o que a página não concluiu. Se sair um mapa oficial depois, a lista pode crescer. Até lá, o honesto é citar a fonte e parar.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que dá para esperar de um mundo aberto da Rockstar"
     },
     {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Sete nomes não fecham Leonida",
-      texto: "Dá para repetir Mount Kalaga, Lake Leonida, Washington Beach, Gambit Bay, Watson Bay, Stockyard e Vercetti Estate com a descrição da Ultimate. Não dá para medir a viagem entre eles.",
+      "tipo": "paragrafo",
+      "texto": "Quem jogou GTA V lembra de Los Santos e do condado em volta: cidade densa, estrada, interior, e a travessia como parte da brincadeira. Leonida, pelo texto, pede um desenho parecido, com a conspiração atravessando o estado. Parecido não é igual. Enquanto a Rockstar não publicar um mapa com nomes de bairro, qualquer “lista completa de distritos” que circule em vídeo é fã completando o que ainda não foi entregue."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Onde Vice City aparece no anúncio",
+      "tipo": "paragrafo",
+      "texto": "Para o computador, isso muda uma escolha prática mesmo sem ficha do GTA 6. Mundo aberto grande pede disco rápido, porque a cidade entra na memória conforme você dirige, e pede placa à altura da tela, porque a rua cheia é o que a GPU desenha. Esse raciocínio está no guia de [SSD](/blog/ssd-para-gta-6) e no de [placa de vídeo](/blog/placa-de-video-para-gta-6), sempre como preparação para jogos desse tipo, não como requisito oficial."
     },
     {
-      tipo: "paragrafo",
-      texto: "No [comunicado da Take-Two](https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/), de 24 de junho de 2026, compras feitas antes de 20 de novembro de 2026 incluem o Vintage Vice City Pack. Vice City, aqui, é parte do nome desse pacote. O comunicado não descreve o conteúdo do pacote e não desenha a cidade. Preço e prazo dessa compra estão na matéria de [preço e edições](/blog/gta-6-preco-e-edicoes).",
+      "tipo": "tabela",
+      "titulo": "O que está confirmado e o que é clima",
+      "colunas": [
+        "Elemento",
+        "Situação",
+        "Fonte"
+      ],
+      "linhas": [
+        [
+          "Estado de Leonida",
+          "Nome oficial na sinopse",
+          "Site da Rockstar"
+        ],
+        [
+          "Vice City",
+          "Cidade oficial, com capturas rotuladas",
+          "Página de mídia"
+        ],
+        [
+          "Miami e Miami Beach",
+          "Inspiração visual desta matéria, não mapa do jogo",
+          "Fotos de arquivo"
+        ],
+        [
+          "Lista de bairros e tempo de viagem",
+          "Não publicada",
+          "Fora do site oficial"
+        ]
+      ],
+      "fonte": {
+        "nome": "Rockstar Games — mídia oficial de Grand Theft Auto VI",
+        "url": "https://www.rockstargames.com/VI/media",
+        "data": "consulta em 19 de novembro de 2026"
+      }
     },
     {
-      tipo: "paragrafo",
-      texto: "Os [trailers oficiais](/blog/gta-6-trailers-oficiais) também não servem, neste texto, como fonte de geografia. A página de mídia dá nome e data de vídeo, não uma legenda de cada plano. Quem quer o que foi mostrado com fonte fica com Leonida, com a frase do lugar ensolarado, com o pacote e com os sete nomes. A série está em [GTA 6 no blog](/blog/gta-6).",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-mapa-leonida-e-vice-city-fecho.webp",
-        alt: "Hotéis iluminados na beira da rua, à noite, em Miami.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-mapa-leonida-e-vice-city-leitura.webp",
+        "alt": "Rua de Miami Beach à noite com neon, clima do mapa de GTA 6 em Vice City.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Hotéis iluminados na beira da rua, à noite, em Miami. Foto de Luis Erives (Pexels).",
+      "legenda": "Rua cheia e neon ajudam a ler o tom. Não desenham a missão."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "Cada nome fica com a página que o publicou, e a sinopse não é obrigada a funcionar como atlas",
-        "Vice City permanece no nome do pacote, em vez de virar mapa da cidade sem texto que diga isso",
-        "A descrição da Ultimate deixa de ser lida como a lista inteira de lugares",
-      ],
-      contras: [
-        "Não dá para planejar caminho entre Mount Kalaga e Watson Bay com o que foi publicado",
-        "Um mapa oficial posterior pode ampliar essa lista",
-        "Cena de trailer não entra como fonte de lugar neste texto",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como usar isso na hora de jogar"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Se o nome do lugar virou desculpa para trocar de PC",
+      "tipo": "lista",
+      "itens": [
+        "Quer a história: leia a sinopse e veja o Trailer 2, em que a dupla aparece junta. O roteiro dos vídeos está em [trailers](/blog/gta-6-trailers-oficiais).",
+        "Quer não tomar spoiler de mapa: evite vídeo com “todos os segredos do mapa”. O jogo acaba de estrear nos consoles.",
+        "Quer reconhecer o clima: Vice City é praia, noite e excesso. As fotos de Miami ilustram isso e param por aí."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "Um nome de lugar não escolhe processador nem tela. Na Balão da Informática Anchieta, Av. Anchieta, 789, no Cambuí, em Campinas, a conversa começa pelo computador que você usa agora. A equipe liga a máquina para você ver. Leonida não entra como ficha de peça.",
+      "tipo": "paragrafo",
+      "texto": "Quem são os dois no meio dessa conspiração está na matéria de [Lucia e Jason](/blog/gta-6-lucia-e-jason). O dia de entrar no estado, de console, está no [lançamento](/blog/gta-6-lancamento-19-novembro-2026). Se você vai jogar no sofá, carregue o controle de dia e deixe o console atualizado. A meia-noite não é hora de descobrir que o sistema pediu um patch."
     },
     {
-      tipo: "paragrafo",
-      texto: "O WhatsApp (19) 98751-0267 recebe o que você já joga. Os nomes desta matéria ficam na sinopse e na descrição da edição. Se houver compra de computador, ela é pelos jogos de hoje, com a máquina ligada na sua frente, não por um atlas que a Rockstar ainda não publicou.",
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-mapa-leonida-e-vice-city-fecho.webp",
+        "alt": "Hotéis iluminados à noite em Miami, paisagem associada a Vice City no mapa de GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "Hotéis na beira da rua, de noite: o postal que a série usa desde os Vice City antigos."
     },
     {
-      tipo: "chamada",
-      titulo: "O lugar publicado não escolhe o computador.",
-      texto: "Conte o que você roda agora. A máquina é montada para esse uso, e você a vê ligada.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "chamada",
+      "tema": "pc-gamer",
+      "titulo": "Mundo aberto no PC que você já tem",
+      "texto": "Enquanto Leonida não chega ao computador, a Balão da Informática Anchieta, loja de informática em Campinas ajusta o PC para os mundos abertos que já rodam. Av. Anchieta, 789, Cambuí, Campinas. WhatsApp (19) 98751-0267.",
+      "rotulo": "Falar da minha máquina",
+      "href": "/pcgamer",
+      "mensagem": "Olá! Li a matéria do mapa de GTA 6 e quero ver se meu PC aguenta os mundos abertos que eu já jogo."
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Mapa de GTA 6 segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "GTA 6 se passa em Vice City?",
-      resposta: "Nos textos usados aqui, Vice City aparece no nome Vintage Vice City Pack, do comunicado da Take-Two. A sinopse oficial nomeia o estado de Leonida. Um mapa da cidade não foi publicado nessas páginas.",
+      "pergunta": "Qual é o mapa de GTA 6?",
+      "resposta": "O que a Rockstar nomeou é o estado de Leonida e a cidade de Vice City. Não há um mapa oficial com todos os bairros publicado no site."
     },
     {
-      pergunta: "O que é Leonida em GTA 6?",
-      resposta: "É o estado citado na sinopse oficial, onde a história envolve uma conspiração. A mesma frase fala no lado mais escuro do lugar mais ensolarado dos Estados Unidos. Não há medida nem mapa desse estado nessas páginas.",
+      "pergunta": "Vice City é Miami?",
+      "resposta": "Vice City é a cidade fictícia da série, no estado fictício de Leonida. O visual conversa com a Flórida. As fotos de Miami ilustram o clima e não são cena do jogo."
     },
     {
-      pergunta: "A lista da Ultimate Edition é o mapa inteiro?",
-      resposta: "Não. Mount Kalaga, Lake Leonida, Washington Beach, Gambit Bay, Watson Bay, Stockyard e Vercetti Estate são nomes da descrição da edição na PlayStation. A própria lista não é apresentada como atlas completo.",
+      "pergunta": "Dá para atravessar o estado inteiro?",
+      "resposta": "A sinopse diz que a conspiração atravessa Leonida. O tamanho jogável, as estradas e o tempo de viagem a Rockstar ainda não publicou numa ficha."
     },
     {
-      pergunta: "Dá para saber a distância entre esses lugares?",
-      resposta: "Não com o que foi publicado. As páginas citam os nomes e não informam vizinhança, escala nem tempo de viagem. Tratar a lista como rota é um acréscimo que a fonte não faz.",
+      "pergunta": "O mapa muda a escolha do PC?",
+      "resposta": "Mundo aberto costuma pedir SSD e uma placa à altura da sua tela. Isso é padrão de jogos grandes atuais, não um requisito publicado para o GTA 6."
     },
+    {
+      "pergunta": "Onde ver a cidade sem spoiler de missão?",
+      "resposta": "Nas capturas rotuladas Vice City, na página de mídia da Rockstar, e nos trailers oficiais. Fuja de compilação de “todos os lugares secretos”."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    PLAYSTATION,
-    TAKETWO,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — sinopse oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — mídia oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI/media",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

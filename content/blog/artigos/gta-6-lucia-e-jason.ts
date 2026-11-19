@@ -1,277 +1,238 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const PLAYSTATION: Fonte = {
-  nome: "PlayStation — página de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const VERGEATRASO: Fonte = {
-  nome: "The Verge — “Grand Theft Auto VI launch delayed until November 2026”, Jay Peters",
-  url: "https://www.theverge.com/news/816005/grand-theft-auto-vi-gta-g-delayed-november-2026",
-  data: "6 de novembro de 2025",
-};
-
-const PSSUPORTE: Fonte = {
-  nome: "PlayStation — suporte de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/support/games/gta-vi-support/",
-  data: "consulta em 19 de novembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "gta-6-lucia-e-jason",
-  titulo: "Lucia e Jason em GTA 6: o que se sabe dos dois",
-  resumo: "O texto oficial de GTA 6 chama os dois de Jason e Lucia. Os sobrenomes Duval e Caminos saem na The Verge, não na Rockstar.",
-  categoria: "noticias",
-  etiquetas: [
+  "slug": "gta-6-lucia-e-jason",
+  "titulo": "Lucia e Jason em GTA 6: a dupla que a Rockstar apresentou",
+  "resumo": "Lucia e Jason são a dupla jogável de GTA 6. A Rockstar os apresenta como Lucia Caminos e Jason Duval, no meio de uma conspiração em Leonida.",
+  "categoria": "noticias",
+  "etiquetas": [
     "GTA 6",
     "Lucia",
     "Jason",
+    "História"
   ],
-  capa: {
-    src: "/blog/capas/gta-6-lucia-e-jason.webp",
-    alt: "Hotéis e palmeiras de Miami Beach no fim da tarde.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/gta-6-lucia-e-jason.webp",
+    "alt": "Hotéis e palmeiras de Miami Beach, cenário que ambienta Lucia e Jason em GTA 6.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-15T15:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-15T15:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Lucia e Jason em GTA 6: o que se sabe",
-    palavrasChave: [
-      "lucia gta 6",
-      "jason gta 6",
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Lucia e Jason: quem são os protagonistas de GTA 6",
+    "descricao": "Lucia e Jason são a dupla jogável de GTA 6. A Rockstar os apresenta como Lucia Caminos e Jason Duval, no meio de uma conspiração em Leonida.",
+    "palavrasChave": [
+      "lucia e jason",
       "lucia caminos",
       "jason duval",
-    ],
+      "protagonistas gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Quem pesquisa Lucia e Jason em GTA 6 mistura nome oficial, sobrenome de reportagem e frase que a Rockstar não escreveu. Dá para separar as três coisas. O texto oficial usa Jason e Lucia. Os sobrenomes Jason Duval e Lucia Caminos estão numa matéria da The Verge. Biografia além da sinopse não está nessas páginas.",
+      "tipo": "paragrafo",
+      "texto": "Lucia e Jason são os dois protagonistas de Grand Theft Auto VI. A página de mídia da Rockstar batiza os clipes como Lucia Caminos e Jason Duval. A sinopse oficial não entrega a biografia inteira: entrega o vínculo. Quando um golpe fácil dá errado, os dois precisam um do outro para sair vivos de uma conspiração que atravessa Leonida."
     },
     {
-      tipo: "paragrafo",
-      texto: "A sinopse diz que os dois sempre souberam que o jogo está contra eles, que um golpe fácil dá errado, e que a história corre no lado mais escuro do lugar mais ensolarado dos Estados Unidos, numa conspiração no estado de Leonida. É uma experiência de um jogador. O resto que circula sobre a vida deles não tem, aqui, uma frase para acompanhar.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Lucia Caminos e Jason Duval são os nomes nos clipes oficiais. No texto corrido, a Rockstar usa Lucia e Jason.",
+        "A campanha é a história dos dois em Vice City e no estado de Leonida, não um modo solo com personagem mudo.",
+        "Trailer 1 apresenta Lucia. Trailer 2 coloca Jason ao lado dela. O vídeo longo de agosto de 2026 mostra os dois em ação."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**Os nomes oficiais são Jason e Lucia.** É assim que a sinopse os chama.",
-        "**Duval e Caminos são da The Verge.** A data dessa matéria é 6 de novembro de 2025.",
-        "**A sinopse diz o conflito, não a ficha.** Golpe fácil que dá errado, no estado de Leonida.",
-        "**Não há voz em português do Brasil.** O anúncio traz inglês com voz e português só em texto.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quem são Lucia e Jason, pelo que a Rockstar escreveu"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Quais nomes estão no texto oficial",
+      "tipo": "paragrafo",
+      "texto": "A sinopse diz que os dois sempre souberam que as regras estão contra eles. Não é um casal colado no cartaz por marketing vazio: o texto marca dependência. Um precisa do outro. Isso muda o jeito de ler os trailers. Quando a câmera corta de um para o outro, a Rockstar está mostrando a dupla da campanha, no mesmo espírito de Michael, Franklin e Trevor em GTA V, só que aqui são dois e a sinopse apoia o laço entre eles."
     },
     {
-      tipo: "paragrafo",
-      texto: "A [página de Grand Theft Auto VI](https://www.rockstargames.com/VI) apresenta os dois como Jason e Lucia. Não é apelido de fórum nem abreviação. Quando o texto oficial precisa dizer quem vive a história, usa esses nomes. A matéria dos [trailers](/blog/gta-6-trailers-oficiais) não substitui essa frase: vídeo datado não é a sinopse, e cena não entra como fonte de nome neste texto.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-lucia-e-jason-dupla.webp",
-        alt: "Pessoa de headset e controle, jogando com luz verde.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "citacao",
+      "texto": "Jason and Lucia have always known the deck is stacked against them. But when an easy score goes wrong, they find themselves on the darkest side of the sunniest place in America, in the middle of a criminal conspiracy stretching across the state of Leonida.",
+      "autor": "Rockstar Games",
+      "cargo": "sinopse oficial de Grand Theft Auto VI",
+      "fonte": {
+        "nome": "Rockstar Games — sinopse oficial de Grand Theft Auto VI",
+        "url": "https://www.rockstargames.com/VI",
+        "data": "consulta em 19 de novembro de 2026"
       },
-      legenda: "Pessoa de headset e controle, jogando com luz verde. Foto de Ian van der Linde (Pexels).",
+      "traduzida": true
     },
     {
-      tipo: "paragrafo",
-      texto: "O jogo é anunciado como experiência de um jogador, na página da PlayStation e no comunicado da Take-Two. Jason e Lucia são as pessoas dessa campanha solo, no que a sinopse conta. Um modo online no dia do lançamento não está nessa resposta. Procurar os dois dentro de um modo que a página não promete é adiantar um anúncio que não existe.",
+      "tipo": "paragrafo",
+      "texto": "Em português: eles sabem que o jogo é desfavorável, o golpe fácil dá errado, e os dois caem no lado mais escuro do lugar mais ensolarado dos Estados Unidos, no meio de uma conspiração que cruza o estado de Leonida. A sinopse oficial para nesse gancho. Apelido, idade e ficha criminal completa não estão nesse parágrafo, e por isso ficam de fora."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "De onde saem os sobrenomes",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Jason Duval e Lucia Caminos aparecem na [The Verge de 6 de novembro de 2025](https://www.theverge.com/news/816005/grand-theft-auto-vi-gta-g-delayed-november-2026). A reportagem é de imprensa, no dia em que a data do jogo mudou para 19 de novembro de 2026. O sobrenome cabe numa citação dessa matéria. Não cabe como se fosse uma linha da sinopse, porque o trecho oficial usado aqui diz Jason e Lucia.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-lucia-e-jason-origem.webp",
-        alt: "Avenida do centro de Miami à noite, com rastros de luz.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-lucia-e-jason-dupla.webp",
+        "alt": "Pessoa de headset e controle jogando, no clima da campanha de Lucia e Jason em GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Avenida do centro de Miami à noite, com rastros de luz. Foto de Marcelo Gonzalez (Pexels).",
+      "legenda": "Jogar a campanha, na estreia, é no console. A dupla já está nomeada no site."
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Sobrenome de imprensa não é frase da Rockstar",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que cada trailer acrescenta sobre a dupla"
     },
     {
-      tipo: "paragrafo",
-      texto: "As duas informações podem conviver, desde que cada uma leve a fonte. Escrever “Lucia Caminos, como a Rockstar apresentou” atribui à empresa uma frase que, nestas páginas, está na The Verge. Escrever só Lucia, quando a pergunta é o nome oficial, fica fiel ao texto da Rockstar. A escolha depende de qual fonte você está disposto a mostrar.",
+      "tipo": "paragrafo",
+      "texto": "O Trailer 1, de 4 de dezembro de 2023, é o vídeo de Lucia. É por ele que o público conhece a protagonista antes de saber o par. O Trailer 2, de 6 de maio de 2025, traz Jason para o mesmo quadro. Se você só tem dez minutos, assista esses dois nessa ordem e deixe o resto para quando quiser mais gameplay. A lista com duração está em [trailers de GTA 6](/blog/gta-6-trailers-oficiais)."
     },
     {
-      tipo: "tabela",
-      titulo: "O que cada fonte põe no nome",
-      colunas: [
-        "Dado",
-        "Onde está",
-        "Limite",
+      "tipo": "paragrafo",
+      "texto": "An Extended Look, de 27 de agosto de 2026, dura quase 27 minutos. A PlayStation descreve esse vídeo como captura in-game no PS5. É o lugar para ver os dois se movendo no mundo, não só posando. Se você quer chegar na campanha sem saber o golpe, pare antes desse vídeo: meia hora mostra bem mais do que um teaser."
+    },
+    {
+      "tipo": "tabela",
+      "titulo": "Onde a dupla aparece no material oficial",
+      "colunas": [
+        "Material",
+        "O que mostra da dupla",
+        "Data"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Jason e Lucia",
-          "Texto oficial",
-          "Nomes da sinopse",
+          "Trailer 1",
+          "Lucia, Vice City e Leonida",
+          "4 de dezembro de 2023"
         ],
         [
-          "Jason Duval",
-          "The Verge, 6 nov 2025",
-          "Não é linha da sinopse",
+          "Trailer 2",
+          "Jason ao lado de Lucia",
+          "6 de maio de 2025"
         ],
         [
-          "Lucia Caminos",
-          "The Verge, 6 nov 2025",
-          "Não é linha da sinopse",
+          "Clipes da página de mídia",
+          "Lucia Caminos e Jason Duval, com nome e sobrenome",
+          "página de mídia"
         ],
         [
-          "Golpe fácil dá errado",
-          "Sinopse oficial",
-          "Sem idade nem ofício",
-        ],
-        [
-          "Voz em português",
-          "PlayStation",
-          "Português do Brasil é só texto",
-        ],
+          "An Extended Look",
+          "Os dois em gameplay longo no PS5",
+          "27 de agosto de 2026"
+        ]
       ],
-      nota: "Sinopse na página da Rockstar. Sobrenomes na The Verge. Idioma na PlayStation.",
+      "fonte": {
+        "nome": "Rockstar Games — mídia oficial de Grand Theft Auto VI",
+        "url": "https://www.rockstargames.com/VI/media",
+        "data": "consulta em 19 de novembro de 2026"
+      }
     },
     {
-      tipo: "destaque",
-      tom: "nota",
-      titulo: "Como assinar o sobrenome",
-      texto: "Jason Duval e Lucia Caminos pedem a The Verge de 6 de novembro de 2025. O texto oficial usado aqui diz Jason e Lucia.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a sinopse diz que os dois enfrentam",
-    },
-    {
-      tipo: "citacao",
-      texto: "Jason e Lucia sempre souberam que o jogo está contra eles. Um golpe fácil dá errado, no lado mais escuro do lugar mais ensolarado dos Estados Unidos, numa conspiração no estado de Leonida.",
-      autor: "Rockstar Games",
-      cargo: "sinopse oficial de Grand Theft Auto VI",
-      fonte: ROCKSTARVI,
-      traduzida: true,
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A frase responde o conflito, não a ficha civil. Não há idade, ofício, parentesco nem cidade de origem nesse trecho. “O jogo está contra eles” é a formulação da sinopse, no sentido de que a situação pesa contra os dois. Não é uma lista de sistemas do videogame. O lugar chamado na frase, o estado de Leonida, está destrinchado na matéria do [mapa](/blog/gta-6-mapa-leonida-e-vice-city).",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A [PlayStation](https://www.playstation.com/en-us/games/grand-theft-auto-vi/) publica a mesma sinopse: os dois, o golpe que dá errado e Leonida. Esse texto não acrescenta família nem emprego. O que a sinopse firma é o nome, o golpe e o estado. Frase que não está nesse texto não deve ser assinada pela Rockstar.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que não dá para afirmar sobre os dois",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Idioma é outra pergunta, e a resposta não é biografia. No anúncio da PlayStation, inglês tem voz e texto. Português do Brasil tem texto, sem voz. Você pode ler o jogo em português. Não há, nesse anúncio, dublagem em português do Brasil para Jason, Lucia ou qualquer outro personagem. Isso não diz de que país eles são. Diz qual faixa de áudio foi anunciada.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O que sobra de concreto é pouco, e é o que dá para repetir: dois nomes oficiais, dois sobrenomes numa reportagem, um golpe que dá errado, um estado e uma campanha solo. A série junta o resto em [GTA 6 no blog](/blog/gta-6). Personagem anunciado não publica versão de PC, não publica requisito e não escolhe peça de computador.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-lucia-e-jason-fecho.webp",
-        alt: "Miami Beach no crepúsculo, com palmeiras e a rua acesa.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-lucia-e-jason-origem.webp",
+        "alt": "Avenida de Miami à noite com rastros de luz, clima de Vice City para Lucia e Jason.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Miami Beach no crepúsculo, com palmeiras e a rua acesa. Foto de Jojo Tesini (Pexels).",
+      "legenda": "A avenida de Miami à noite sugere a cidade. A conspiração, no texto, atravessa o estado inteiro."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "Jason e Lucia ficam como os nomes do texto oficial, fáceis de checar na página da Rockstar",
-        "Duval e Caminos ficam atribuídos à The Verge, com data",
-        "A sinopse diz o conflito sem completar idade, ofício ou parentesco",
-      ],
-      contras: [
-        "Não há ficha biográfica nessas páginas",
-        "Português do Brasil não traz voz no anúncio",
-        "Frase que não está na sinopse não deve ser assinada pela Rockstar",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que ainda não dá para afirmar"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Se a dúvida saiu do nome e foi para o computador",
+      "tipo": "lista",
+      "itens": [
+        "Não há ficha oficial de idade, emprego ou endereço dos dois além do que a sinopse e os vídeos mostram.",
+        "Elenco secundário só entra aqui quando a Rockstar assina o nome. Lista de wiki não substitui o site.",
+        "Não há campanha de PC anunciada. Jogar Lucia e Jason na estreia é no PS5 ou no Xbox Series X|S."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "Saber o nome dos dois não muda o aparelho. Quem quiser falar do computador passa na Balão da Informática Anchieta, Av. Anchieta, 789, Cambuí, Campinas, ou chama no WhatsApp (19) 98751-0267. A conversa é o que você joga hoje, não a sinopse.",
+      "tipo": "paragrafo",
+      "texto": "O estado e a cidade estão na matéria do [mapa](/blog/gta-6-mapa-leonida-e-vice-city). O dia de começar a campanha está no [lançamento](/blog/gta-6-lancamento-19-novembro-2026)."
     },
     {
-      tipo: "paragrafo",
-      texto: "A equipe mostra a máquina ligada e separa essa visita da ficha de Jason e Lucia. Nome anunciado não substitui versão de PC, que segue sem data. Você vê o computador funcionar com os jogos que já tem, e a decisão fica nesse uso.",
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-lucia-e-jason-fecho.webp",
+        "alt": "Miami Beach no crepúsculo com palmeiras, paisagem ligada a Lucia e Jason em GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "Crepúsculo, palmeira e rua acesa: o postal da dupla, fotografado em Miami Beach."
     },
     {
-      tipo: "chamada",
-      titulo: "Nome de personagem não é ficha de hardware.",
-      texto: "Fale dos jogos e da tela que você já tem. A máquina é mostrada ligada antes de você decidir.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "destaque",
+      "tom": "dica",
+      "titulo": "Ordem boa para conhecer os dois",
+      "texto": "Sinopse no site, Trailer 1, Trailer 2. Só depois, se você quiser gameplay, An Extended Look. A página de mídia confirma os sobrenomes nos clipes."
     },
+    {
+      "tipo": "chamada",
+      "tema": "games",
+      "titulo": "Vai jogar a campanha no console?",
+      "texto": "Se o controle falha ou o console não liga na hora H, a Balão da Informática Anchieta, loja de informática em Campinas avalia PlayStation e Xbox no Cambuí. Av. Anchieta, 789. WhatsApp (19) 98751-0267.",
+      "rotulo": "Levar o console",
+      "href": "/assistenciagames",
+      "mensagem": "Olá! Li a matéria de Lucia e Jason e quero ver meu console antes de jogar GTA 6."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se você vai chegar na campanha sem spoiler, pare no Trailer 2. O vídeo longo de agosto mostra os dois em movimento por quase meia hora, e aí a surpresa do golpe diminui. A série está reunida em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Qual é o nome oficial de Lucia e de Jason?",
-      resposta: "O texto oficial os chama de Lucia e Jason. Os sobrenomes Lucia Caminos e Jason Duval aparecem na The Verge de 6 de novembro de 2025, e pedem essa fonte quando forem usados.",
+      "pergunta": "Quem são Lucia e Jason em GTA 6?",
+      "resposta": "São os protagonistas da campanha. A Rockstar os apresenta como Lucia Caminos e Jason Duval e descreve os dois presos a uma conspiração no estado de Leonida."
     },
     {
-      pergunta: "O que a sinopse diz que acontece com os dois?",
-      resposta: "Diz que sempre souberam que o jogo está contra eles, que um golpe fácil dá errado e que há uma conspiração no estado de Leonida, no lado mais escuro do lugar mais ensolarado dos Estados Unidos.",
+      "pergunta": "Dá para jogar só com um deles?",
+      "resposta": "A sinopse trata a história como a dos dois, obrigados a contar um com o outro. A Rockstar não publicou um modo em que você escolhe um e apaga o outro."
     },
     {
-      pergunta: "Jason e Lucia falam português?",
-      resposta: "O anúncio não traz voz em português do Brasil. Inglês tem voz e texto. Português do Brasil fica só no texto. Isso informa a faixa de áudio, não a origem dos personagens.",
+      "pergunta": "Qual vídeo apresenta cada um?",
+      "resposta": "O Trailer 1, de dezembro de 2023, apresenta Lucia. O Trailer 2, de maio de 2025, coloca Jason na mesma história."
     },
     {
-      pergunta: "Dá para completar a biografia dos dois com o que foi anunciado?",
-      resposta: "Não. A sinopse dá os nomes, o golpe que dá errado e o estado de Leonida. Idade, ofício, parentesco e frase que não está nesse texto ficam de fora.",
+      "pergunta": "Os sobrenomes são oficiais?",
+      "resposta": "Sim. A página de mídia da Rockstar nomeia os clipes como Lucia Caminos e Jason Duval."
     },
+    {
+      "pergunta": "A campanha já está no PC?",
+      "resposta": "Não foi anunciada para computador. Na estreia de 19 de novembro de 2026, Lucia e Jason estão no PS5 e no Xbox Series X|S."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    PLAYSTATION,
-    VERGEATRASO,
-    PSSUPORTE,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — sinopse oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — mídia oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI/media",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — Launch Trailer e a lista dos vídeos oficiais",
+      "url": "https://www.rockstargames.com/VI/launch-trailer",
+      "data": "15 de outubro de 2026"
+    }
+  ]
 };
 
 export default artigo;

@@ -1,274 +1,256 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
-
-const ROCKSTARDATA: Fonte = {
-  nome: "Rockstar Games — “Grand Theft Auto VI is Now Set to Launch November 19, 2026”",
-  url: "https://www.rockstargames.com/newswire/article/ak3ak31a49a221/grand-theft-auto-vi-is-now-set-to-launch-november-19-2026",
-  data: "6 de novembro de 2025",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "notebook-gamer-ou-desktop-gta-6",
-  titulo: "Notebook gamer ou desktop para quando sair o GTA 6",
-  resumo: "A placa do notebook em geral não se troca. RAM e SSD às vezes sim, conforme o modelo. O desktop troca peça com mais ar e mais espaço.",
-  categoria: "guias",
-  etiquetas: [
+  "slug": "notebook-gamer-ou-desktop-gta-6",
+  "titulo": "Notebook gamer ou desktop para GTA 6: qual combina",
+  "resumo": "Notebook gamer ou desktop para GTA 6: um você leva, o outro você abre e troca a peça. Veja qual combina com a mesa, a tomada e a tela.",
+  "categoria": "guias",
+  "etiquetas": [
     "GTA 6",
     "Notebook",
     "Desktop",
-    "Upgrade",
+    "PC gamer"
   ],
-  capa: {
-    src: "/blog/capas/notebook-gamer-ou-desktop-gta-6.webp",
-    alt: "Teclado de notebook e mouse sem fio, em close.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/notebook-gamer-ou-desktop-gta-6.webp",
+    "alt": "Teclado de notebook e mouse sem fio, escolha entre notebook gamer ou desktop para GTA 6.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-10T15:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-10T15:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Notebook gamer ou desktop para o GTA 6",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Notebook gamer ou desktop para GTA 6",
+    "descricao": "Notebook gamer ou desktop para GTA 6: um você leva, o outro você abre e troca a peça. Veja qual combina com a mesa, a tomada e a tela.",
+    "palavrasChave": [
       "notebook gamer ou desktop",
       "notebook para gta 6",
       "desktop ou notebook gamer",
-      "upgrade de notebook gamer",
-    ],
+      "qual comprar para gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Notebook gamer ou desktop, para quando sair GTA 6, é uma escolha de formato, não de requisito. O jogo de computador não foi anunciado até 19 de novembro de 2026, então nenhum dos dois “já vem pronto para o GTA”. O que muda agora é o que você consegue trocar depois e quanto ar a peça tem para trabalhar.",
+      "tipo": "paragrafo",
+      "texto": "Notebook gamer ou desktop para GTA 6 é uma escolha de vida de mesa, não de ficha do jogo. A versão de PC não foi anunciada. Os dois formatos já rodam os mundos abertos de hoje, com uma diferença que não muda com o próximo lançamento: o notebook você leva, o desktop você abre e troca."
     },
     {
-      tipo: "paragrafo",
-      texto: "A placa de vídeo do notebook, em geral, não se troca. Memória e SSD às vezes se trocam, às vezes não, e isso depende do modelo, não da palavra gamer na tampa. O desktop troca placa, fonte e disco com mais folga e dissipa calor com mais ar. Dizer que todo notebook aceita upgrade é o erro que este texto evita.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Desktop ganha em peça trocável, temperatura e preço da mesma performance.",
+        "Notebook gamer ganha se você joga em mais de um lugar ou não tem mesa fixa.",
+        "Os dois pedem a mesma pergunta: qual tela, Full HD ou Quad HD, você vai usar de verdade."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**A placa do notebook em geral fica.** Ela não é uma peça de gaveta como a do desktop.",
-        "**RAM e SSD às vezes entram.** Só o modelo, olhado por dentro, confirma o encaixe.",
-        "**O desktop troca com mais espaço e mais ar.** A contrapartida é ficar na mesa.",
-        "**GTA 6 não escolhe o formato.** Não há versão de PC nem requisito para copiar.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Notebook gamer ou desktop: o que cada um faz melhor"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que cada formato deixa você trocar",
+      "tipo": "paragrafo",
+      "texto": "No desktop, a placa de vídeo é a de mesa, com mais consumo e mais folga térmica. Daqui a dois anos você troca essa placa e o resto fica. A fonte se troca. A memória se troca. O gabinete fica no lugar, ligado num monitor de verdade, que é onde a imagem do jogo aparece grande. Se a sua vida de jogar acontece numa mesa só, em casa, o desktop é o formato que envelhece melhor."
     },
     {
-      tipo: "paragrafo",
-      texto: "O desktop é uma caixa de peças com padrão de encaixe. Placa de vídeo, fonte, SSD e, dentro do que a placa-mãe aceita, memória e processador podem sair. O limite é compatibilidade e espaço, o mesmo limite do guia de [upgrade](/blog/upgrade-do-pc-antes-do-gta-6). O notebook é um volume fechado, desenhado em torno de uma placa que quase sempre nasce soldada.",
+      "tipo": "paragrafo",
+      "texto": "No notebook, tudo está soldado ou quase. A placa é a versão de baixo consumo, com outro nome e outro fôlego. Ele esquenta no colo e no edredom, e precisa de mesa e de respiro embaixo. Em troca, você joga na sala, no quarto e na viagem, numa tela que já vem no pacote. Para quem divide a casa, muda de cômodo ou não quer um gabinete ocupando o canto, o notebook é o formato honesto."
     },
     {
-      tipo: "tabela",
-      titulo: "O que cada formato costuma permitir",
-      colunas: [
-        "Peça",
-        "Notebook gamer",
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/notebook-gamer-ou-desktop-gta-6-formatos.webp",
+        "alt": "Teclado iluminado no balcão da loja, comparação de notebook gamer ou desktop para GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "No balcão, o teclado com luz já dá o tamanho da escolha: máquina que você carrega ou torre que fica."
+    },
+    {
+      "tipo": "tabela",
+      "titulo": "Desktop e notebook, no uso real",
+      "colunas": [
+        "",
         "Desktop",
+        "Notebook gamer"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Placa de vídeo",
-          "Em geral não se troca",
-          "Troca, se fonte e espaço aguentam",
+          "Trocar a placa daqui a anos",
+          "Sim",
+          "Quase nunca"
         ],
         [
-          "Memória",
-          "Às vezes, conforme o modelo",
-          "Troca no limite da placa-mãe",
+          "Levar para outro cômodo",
+          "Com esforço",
+          "Sim"
         ],
         [
-          "SSD",
-          "Às vezes, conforme o modelo",
-          "Troca com mais folga de baia",
+          "Temperatura em sessão longa",
+          "Melhor, se o gabinete respira",
+          "Esquenta, precisa de mesa firme"
         ],
         [
-          "Calor",
-          "Volume fino e menos ar",
-          "Gabinete com mais ar em volta",
+          "Tela",
+          "Você escolhe o monitor",
+          "A que vem na tampa, mais um monitor externo se quiser"
         ],
+        [
+          "Tomada e barulho",
+          "Fonte grande, mais controle do ruído",
+          "Carregador forte, ventoinha perto do microfone"
+        ]
       ],
+      "nota": "Comparação de formato. Nenhum dos dois tem configuração oficial de Grand Theft Auto VI."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/notebook-gamer-ou-desktop-gta-6-formatos.webp",
-        alt: "Teclado com luz roxa no balcão da frente do corredor.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Tela, tomada e live"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Notebook Full HD de 15 ou 16 polegadas conversa com uma GPU de entrada ou de meio. A mesma polegada em Quad HD pede mais placa e mais bateria na tomada, porque jogar no carregador é o normal: na bateria, o desempenho cai. Desktop em Quad HD é a matéria do [PC intermediário](/blog/pc-gamer-intermediario-para-gta-6). Não misture os alvos."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Para live, o desktop deixa o microfone longe da ventoinha e cabe uma segunda tela para o chat. O notebook dá, com fone e microfone externos, e com o carregador na parede. Os dois sofrem se você tapa a entrada de ar. A matéria de [PC para live](/blog/pc-para-live-de-gta-6) assume uma torre. Dá para adaptar, sabendo que a margem é menor."
+    },
+    {
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/notebook-gamer-ou-desktop-gta-6-escolha.webp",
+        "alt": "Estantes da loja com caixas e monitores, onde se compara notebook gamer ou desktop para GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Teclado com luz roxa no balcão da frente do corredor. Foto da loja, na Av. Anchieta, 789, Cambuí.",
+      "legenda": "Estantes com caixa e monitor: dá para ver os dois formatos no corredor, ligados, antes de decidir."
     },
     {
-      tipo: "paragrafo",
-      texto: "Portabilidade puxa o outro lado. Se você joga em mais de um cômodo, viaja ou não tem mesa fixa, o notebook carrega a sessão. O desktop não. Essa vantagem é real e não precisa ser disfarçada de upgrade. São critérios diferentes. Misturar os dois num “melhor para GTA 6” finge uma ficha que a [página oficial](https://www.rockstargames.com/VI) não publicou.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "A placa do notebook quase sempre fica",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "No notebook gamer, a placa de vídeo costuma estar soldada na placa principal. Não há um slot largo para você sacar uma e enfiar outra, como no desktop. Quando a placa fica curta para o jogo que você já joga, o caminho usual não é troca de GPU. É conviver com o ajuste gráfico mais baixo ou trocar o aparelho.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Existem módulos externos e um ou outro projeto raro com placa substituível. Não são a regra da prateleira, e este texto não trata exceção como norma. Se o vendedor diz que “depois você troca a placa”, peça o nome do encaixe. Na maior parte dos modelos, esse encaixe não existe. A promessa só vale se o modelo mostrar o caminho.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Memória e SSD dependem do modelo",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "RAM e SSD são o pedaço que às vezes se abre. Alguns notebooks têm soquete de memória e baia de SSD. Outros trazem a memória soldada e um único SSD já ocupado. Outros aceitam um segundo disco e não aceitam mais RAM. A tampa é que mostra. Foto de divulgação e a palavra gamer não mostram.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Modelo parecido não é o mesmo encaixe",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Dois notebooks da mesma marca, com tela parecida, podem divergir por dentro de um ano para o outro. Um aceita pente. O outro soldou a memória. Por isso ninguém honesto promete upgrade de notebook sem ver o modelo. A [página de notebooks](/notebooks) é o catálogo. A resposta de encaixe continua sendo do aparelho concreto, não da categoria.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/notebook-gamer-ou-desktop-gta-6-escolha.webp",
-        alt: "Estantes brancas do corredor, com caixas e monitores.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
-      },
-      legenda: "Estantes brancas do corredor, com caixas e monitores. Foto da loja, na Av. Anchieta, 789, Cambuí.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Não é todo notebook que abre",
-      texto: "Dizer que dá para aumentar a RAM ou trocar o SSD de qualquer notebook gamer é falso. Dá em alguns modelos. A placa de vídeo, na regra geral, permanece a que veio de fábrica.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O desktop respira e aceita peça com mais folga",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O mesmo jogo esquenta menos apertado quando há mais ar e um cooler à altura da peça. O desktop ganha nisso: gabinete, ventoinha e fonte ficam acessíveis. Dá para trocar a placa se a fonte e o espaço permitem, e dá para completar a memória se a placa-mãe aceita. É o caminho de quem pretende ficar vários anos na mesma caixa, trocando o que ficar curto.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Essa folga não é requisito de GTA 6. É física de computador. A faixa de [entrada](/blog/pc-gamer-entrada-para-gta-6), a intermediária e a alta descrevem uso de tela e de captura, e cabem num desktop com mais naturalidade justamente porque a peça se troca. No notebook, você escolhe a faixa inteira no dia da compra, porque a placa tende a ficar.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Os dois esperam a mesma ficha, que não existe",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O [Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html), em 15 de novembro de 2026, não encontrou versão de PC, pré-venda nem requisito. O dia 19 de novembro de 2026 continua sendo de console. Esperar “o notebook do GTA” ou “o desktop do GTA” é esperar um documento que não está no ar. O guia [sem requisito](/blog/pc-para-gta-6-sem-requisito-oficial) é o que dá para ler enquanto isso.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Se o orçamento não fecha num aparelho novo, o [seminovo](/seminovos) existe como caminho, com o mesmo cuidado: no notebook, a placa que está dentro é a placa que fica. No desktop seminovo, ainda cabe perguntar fonte, espaço e memória. Nenhum dos dois formatos recebe um selo de GTA 6 por ser seminovo ou por ser novo.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/notebook-gamer-ou-desktop-gta-6-fecho.webp",
-        alt: "Corredor da loja, com o balcão branco, estantes e as luminárias em X no teto.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
-      },
-      legenda: "Corredor da loja, com o balcão branco, estantes e as luminárias em X no teto. Foto da loja, na Av. Anchieta, 789, Cambuí.",
-    },
-    {
-      tipo: "pros-contras",
-      pros: [
-        "O notebook leva o jogo com você, e essa vantagem fica explícita em vez de virar promessa de upgrade",
-        "O desktop deixa trocar placa, fonte e disco, com mais ar, quando a compatibilidade fecha",
-        "RAM e SSD de notebook ficam condicionados ao modelo, então a tampa decide no lugar do folheto",
+      "tipo": "pros-contras",
+      "titulo": "Desktop na mesa fixa",
+      "pros": [
+        "Você troca a placa daqui a anos sem trocar o resto.",
+        "A temperatura em sessão longa fica mais fácil de controlar.",
+        "O monitor é o que você escolhe, no tamanho da sua mesa."
       ],
-      contras: [
-        "A placa do notebook, na regra geral, não se troca quando o jogo de hoje aperta",
-        "Nem todo notebook aceita mais memória ou outro SSD, mesmo entre modelos parecidos",
-        "Nenhum formato antecipa GTA 6 no PC, porque a versão de computador não foi anunciada",
-      ],
+      "contras": [
+        "A torre não vai na mochila.",
+        "O monitor é uma compra à parte.",
+        "Se você muda de cômodo toda semana, o notebook incomoda menos."
+      ]
     },
     {
-      tipo: "chamada",
-      tema: "notebooks",
+      "tipo": "paragrafo",
+      "texto": "Quem fica no desktop segue para [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial). Quem fica no notebook pode ver os modelos em [notebooks](/notebooks) e, se for máquina usada com procedência, os [seminovos](/seminovos)."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Olhar a tampa antes de prometer troca",
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/notebook-gamer-ou-desktop-gta-6-fecho.webp",
+        "alt": "Corredor da Balão da Informática Anchieta, loja onde se escolhe notebook gamer ou desktop para GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "O corredor da loja junta balcão, estante e as luminárias do teto. É o caminho entre a pergunta e a máquina ligada."
     },
     {
-      tipo: "paragrafo",
-      texto: "Na Balão da Informática Anchieta, Av. Anchieta, 789, no Cambuí, Campinas, a equipe olha a tampa do notebook porque é isso que diz se a RAM e o SSD daquele modelo se trocam. A placa de vídeo, em geral, permanece. No desktop, a conversa é outra: fonte, espaço e placa-mãe. Você vê o aparelho ligado antes de pagar.",
+      "tipo": "destaque",
+      "tom": "dica",
+      "titulo": "Prove os dois",
+      "texto": "Peça para abrir um jogo no notebook e no desktop, na mesma resolução. O barulho e o calor aparecem em dez minutos, coisa que ficha técnica não mostra."
     },
     {
-      tipo: "paragrafo",
-      texto: "Mande o modelo no WhatsApp (19) 98751-0267. O orçamento é o do dia, porque o preço muda. A resposta pode ser que aquele notebook não aceita o upgrade que você imaginou. Essa resposta é o serviço. Não é falta de peça “para o GTA”, já que essa peça oficial não existe.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Tomada, calor e a mesa do notebook"
     },
     {
-      tipo: "chamada",
-      titulo: "Notebook ou desktop: qual dos dois você usa hoje?",
-      texto: "Diga o modelo do notebook ou as peças do desktop. A equipe olha o que dá para trocar e o que permanece.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "paragrafo",
+      "texto": "Notebook gamer na cama, em cima do edredom, tapa a entrada de ar e o clock cai em minutos. A sessão longa pede mesa firme, o carregador na parede e um apoio que levante a traseira meio centímetro, se o fabricante deixou a ventilação embaixo. Na bateria, o desempenho é outro: o jogo fica mais lento para não desligar. Para comparar com um desktop, ligue os dois na tomada, na mesma resolução, e jogue o mesmo trecho. A diferença de barulho aparece sem planilha."
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Teclado de notebook esquenta na mão em cidade cheia. Isso é normal até o ponto em que trava ou desliga. Se desligar, é assunto de assistência, não de “jogo pesado demais”. A bancada limpa a ventoinha e avalia a pasta. Desktop não tem esse colo quente, e em troca não vai para a sala sem um monitor. Se você joga nos dois cômodos da casa, o notebook ganha mesmo perdendo na troca de placa daqui a três anos."
+    },
+    {
+      "tipo": "lista",
+      "itens": [
+        "Jogue no notebook em cima da mesa, na tomada.",
+        "Compare com o desktop no mesmo jogo e na mesma resolução.",
+        "Desligar sozinho é manutenção, não característica."
+      ]
+    },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Prova rápida dos dois, na tomada"
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Peça os dois ligados no mesmo jogo e na mesma resolução, o notebook na tomada e o desktop com o monitor que representa a sua mesa. Caminhe pela cidade por cinco minutos em cada um. Ouça, sinta o teclado e olhe se a imagem que você quer cabe. A ficha técnica não entrega esse minuto. O balcão entrega."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o notebook ganhar pela mobilidade, pergunte da assistência de ventoinha e de tela no mesmo endereço. Se o desktop ganhar pela folga, pergunte do espaço na sua mesa e do monitor. A decisão fecha com uma frase sua, não com a preferência de quem vende. Os dois saem testados. Nenhum promete o GTA 6."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Quem viaja com o notebook toda semana aceita menos peça trocável. Quem fica na mesma mesa aceita o gabinete. Os dois jogam os mundos abertos de hoje. Escrever os dois no orçamento e riscar um depois de sentar na cadeira é melhor do que decidir pelo anúncio. Se ainda empatar, escolha o que você consegue levar para a assistência no Cambuí sem chamar um carro só para isso."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "notebooks",
+      "titulo": "Quer ver os dois ligados, lado a lado?",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas tem notebook e desktop no Cambuí. Av. Anchieta, 789. WhatsApp (19) 98751-0267. Telefone (19) 3255-1661.",
+      "rotulo": "Ver notebooks",
+      "href": "/notebooks",
+      "mensagem": "Olá! Li a matéria de notebook gamer ou desktop para GTA 6 e quero ver os dois na loja."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Notebook gamer ou desktop para GTA 6 segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Dá para trocar a placa de vídeo do notebook gamer?",
-      resposta: "Em geral, não. A placa costuma vir soldada. Troca de GPU é regra de desktop, não de notebook. Se alguém promete a troca, peça o encaixe daquele modelo. Sem esse encaixe, a promessa não se sustenta.",
+      "pergunta": "Notebook gamer roda GTA 6?",
+      "resposta": "Não há ficha de PC para afirmar. Um notebook gamer atual roda os mundos abertos de hoje na resolução da tela dele, ligado na tomada."
     },
     {
-      pergunta: "Todo notebook gamer aceita mais RAM e SSD?",
-      resposta: "Não. Alguns têm soquete de memória e baia livre. Outros trazem a memória soldada ou o SSD único já cheio. Modelos parecidos divergem. Só a tampa daquele modelo responde.",
+      "pergunta": "Desktop é sempre melhor?",
+      "resposta": "É melhor para trocar peça, temperatura e o mesmo desempenho por menos dinheiro. Perde se você precisa levar o computador para outro lugar."
     },
     {
-      pergunta: "Desktop esquenta menos que notebook?",
-      resposta: "O desktop tem mais ar e mais espaço para trocar o que refrigera a peça. O notebook concentra a mesma carga num volume fino. Isso não torna o desktop a configuração de GTA 6. Torna o formato mais folgado para upgrade.",
+      "pergunta": "Dá para usar monitor externo no notebook?",
+      "resposta": "Dá, e a imagem fica maior. A placa continua sendo a do notebook, então Quad HD externo pede uma GPU que aguente esses pixels."
     },
     {
-      pergunta: "Qual dos dois compro para o dia 19 de novembro?",
-      resposta: "Nenhum dos dois, se a meta é GTA 6 nesse dia. O lançamento publicado é de PlayStation 5 e Xbox Series. Notebook e desktop continuam sendo escolha para os jogos de PC que você já joga.",
+      "pergunta": "Notebook esquentando é defeito?",
+      "resposta": "Sessão longa esquenta. Defeito é desligar, travar ou a ventoinha gritar desde o primeiro minuto. A bancada limpa e avalia antes de condenar a máquina."
     },
+    {
+      "pergunta": "Qual dos dois a loja recomenda?",
+      "resposta": "Desktop se a mesa é fixa. Notebook se a mochila faz parte da rotina. Os dois se provam ligados na loja, no Cambuí."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    YAHOOPC,
-    ROCKSTARDATA,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

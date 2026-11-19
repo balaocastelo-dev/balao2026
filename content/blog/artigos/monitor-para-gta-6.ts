@@ -1,280 +1,242 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const STEAM: Fonte = {
-  nome: "Steam — Pesquisa de hardware e software",
-  url: "https://store.steampowered.com/hwsurvey/",
-  data: "setembro de 2026",
-};
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "monitor-para-gta-6",
-  titulo: "Monitor para GTA 6: Full HD, Quad HD e a taxa",
-  resumo: "A tela comprada agora define a placa. Full HD é o mais comum na Steam, Quad HD pede mais placa e taxa alta nem sempre é a meta.",
-  categoria: "hardware",
-  etiquetas: [
+  "slug": "monitor-para-gta-6",
+  "titulo": "Monitor para GTA 6: a tela que define o resto do PC",
+  "resumo": "Monitor para GTA 6: a tela define a placa. Full HD, Quad HD ou 4K, mais a taxa, mudam o PC antes mesmo de existir ficha oficial.",
+  "categoria": "hardware",
+  "etiquetas": [
     "GTA 6",
     "Monitor",
     "Full HD",
+    "Quad HD"
   ],
-  capa: {
-    src: "/blog/capas/monitor-para-gta-6.webp",
-    alt: "Notebook e monitor lado a lado numa mesa.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/monitor-para-gta-6.webp",
+    "alt": "Notebook e monitor lado a lado, comparação de tela para jogar de olho em GTA 6.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-12T15:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-12T15:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Monitor para GTA 6: Full HD, Quad HD e taxa",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Monitor para GTA 6: Full HD, Quad HD e taxa",
+    "descricao": "Monitor para GTA 6: a tela define a placa. Full HD, Quad HD ou 4K, mais a taxa, mudam o PC antes mesmo de existir ficha oficial.",
+    "palavrasChave": [
       "monitor para gta 6",
       "full hd ou quad hd",
-      "taxa de atualização",
-      "monitor para mundo aberto",
-    ],
+      "monitor gamer 144 hz",
+      "tela para gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Monitor para GTA 6 parece uma compra de jogo e é uma compra de placa. A tela que você leva agora define quanta placa faz sentido nos jogos que você já abre. Monitor para um jogo de PC, no entanto, só teria ficha com versão de PC. Até 19 de novembro de 2026 essa versão não existia no anúncio da Rockstar. A tela se escolhe pelo uso desta semana.",
+      "tipo": "paragrafo",
+      "texto": "O monitor para GTA 6 é a compra que deveria vir antes da placa, não depois. A Rockstar não publicou resolução oficial de PC, porque não publicou a versão. A sua tela, essa sim, já existe. Ela diz quantos pixels a placa vai desenhar toda vez que você girar a câmera, em qualquer mundo aberto que já esteja instalado."
     },
     {
-      tipo: "paragrafo",
-      texto: "Full HD é a resolução mais comum na pesquisa da Steam de setembro de 2026. Quad HD mostra mais detalhe e pede mais da placa. Taxa alta, bem acima de 60 Hz, muda o competitivo e nem sempre é o teto que um mundo aberto usa. Nenhuma dessas três frases é requisito de GTA 6. São critérios da tela que você vai olhar todo dia.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Full HD gasta menos placa e combina com quem quer fluidez alta sem trocar a GPU inteira.",
+        "Quad HD é o meio-termo em que a cidade fica nítida e a placa precisa acompanhar.",
+        "Taxa de 144 Hz só aparece se a placa entrega quadros perto disso. Monitor rápido com placa fraca mostra a mesma fluidez de antes, só que na tela nova."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**A tela trava a placa.** Full HD e Quad HD não pedem o mesmo chip nos jogos de hoje.",
-        "**Full HD lidera o parque.** Em setembro de 2026, 47,91% dos PCs na Steam usavam essa resolução.",
-        "**Quad HD é outra compra.** 1440p estava em 27,04% e exige mais placa para o mesmo ajuste.",
-        "**Taxa alta tem hora.** Pesa no competitivo. Mundo aberto nem sempre usa o teto do monitor.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Monitor para GTA 6: escolha a resolução com calma"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "A tela travada agora trava a placa",
+      "tipo": "paragrafo",
+      "texto": "Full HD, 1920 por 1080, continua o caminho de quem joga em tela de 24 polegadas e quer folga. O pixel é maior, a placa sofre menos, e uma GPU de entrada ainda segura qualidade alta nos jogos atuais. Quad HD, 2560 por 1440, em 27 polegadas, é onde a maior parte de quem troca de tela hoje para. A imagem fica mais limpa em textura de rua, placa e letreiro. O custo é direto: a placa trabalha bem mais por quadro. 4K em monitor grande é vitrine. Sem uma GPU à altura, você baixa a resolução interna e pagou a tela à toa."
     },
     {
-      tipo: "paragrafo",
-      texto: "Quem escolhe o monitor por último descobre tarde que a placa ficou curta ou sobrou. Cada quadro em Quad HD tem bem mais pixels do que em Full HD, e a placa desenha esses pixels nos jogos que você já roda. GTA 6 não entra nessa multiplicação enquanto não houver versão de PC. A matéria de [placa de vídeo](/blog/placa-de-video-para-gta-6) começa justamente por essa ordem.",
+      "tipo": "paragrafo",
+      "texto": "GTA V no PC, em 2015, já deixava o jogador escolher resolução alta, mais de um monitor e um controle de densidade da cidade. É recurso daquele jogo, citado no newswire da Rockstar, não uma especificação do GTA 6. A lição que sobra é prática: num mundo aberto, resolução e quantidade de coisa na tela são ajustes seus. Comprar os dois no escuro, tela 4K e placa de Full HD, é o combo que a bancada mais desfaz."
     },
     {
-      tipo: "paragrafo",
-      texto: "Se você já tem tela e ela te atende, a compra nova é opcional. Trocar de monitor “porque o jogo vai pedir” inventa uma exigência. Trocar porque você já quer mais nitidez nos jogos atuais é uma decisão observável: você vê a diferença na mesa, antes de qualquer anúncio. A [página da Rockstar](https://www.rockstargames.com/VI) não lista resolução de PC.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Full HD é o parque que a Steam mostra",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Na pesquisa de hardware da Steam de setembro de 2026, 47,91% dos jogadores usam 1920 por 1080 como resolução principal. Outros 27,04% estão em 2560 por 1440. O [artigo da loja sobre essa pesquisa](/blog/steam-setembro-2026-vram-16gb) registra os dois números. Eles descrevem telas que já estão nas mesas. Não dizem em qual resolução GTA 6 vai rodar no computador.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/monitor-para-gta-6-telas.webp",
-        alt: "Monitor e notebook abertos na mesma mesa.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/monitor-para-gta-6-telas.webp",
+        "alt": "Monitor e notebook abertos na mesma mesa, escolha de monitor para GTA 6 pela resolução.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Monitor e notebook abertos na mesma mesa. Foto de Pexels (Pexels).",
+      "legenda": "Notebook na frente e monitor atrás: a tela grande é a que define a placa, não o tamanho do gabinete."
     },
     {
-      tipo: "paragrafo",
-      texto: "Full HD continua sendo o casamento mais folgado com uma placa de entrada ou intermediária, nos jogos de agora. É também a tela em que 8 GB de memória de vídeo ainda acompanham ajuste moderado, lição que está na comparação da [RTX 5060 Ti](/blog/rtx-5060-ti-8gb-ou-16gb) e que não se transfere para uma ficha inexistente. A [checagem do Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html), em 15 de novembro de 2026, não achou essa ficha.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Vinte e sete polegadas mudam o painel",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O mesmo Full HD numa tela de 27 polegadas espalha os pixels e a imagem fica mais grossa do que num painel de 24. Por isso 27 polegadas costumam casar com Quad HD, se a mesa e a placa aguentam. É uma decisão de nitidez que você enxerga na loja, encostando os dois painéis. Não é uma especificação de GTA 6.",
-    },
-    {
-      tipo: "destaque",
-      tom: "nota",
-      titulo: "A pesquisa não escolhe a sua mesa",
-      texto: "47,91% em Full HD dizem o que é mais comum, não o que você deve comprar. Se a sua mesa e os seus jogos já pedem Quad HD, o parque não te obriga a ficar para trás. Ele também não cria requisito de GTA 6.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Quad HD é outra compra de placa",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Sair de Full HD para Quad HD sem trocar a placa empurra o ajuste para baixo nos jogos que você já acha pesados. A nitidez sobe e a folga da placa desce. Se a placa atual já trabalha no limite em Full HD, ela não ganha um modo secreto em 1440p. A categoria de [monitores gamer](/categoria/computadores-monitores-monitor-gamer) e a de [placas](/categoria/hardware-placa-de-video-vga) se visitam juntas por esse motivo.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "O que cada tela pede da placa hoje",
-      colunas: [
+      "tipo": "tabela",
+      "titulo": "Resolução, tamanho e o que a placa sente",
+      "colunas": [
         "Tela",
-        "O que pede agora",
-        "O que não significa",
+        "Tamanho em que fica boa",
+        "Consequência no PC"
       ],
-      linhas: [
+      "linhas": [
         [
           "Full HD",
-          "Menos placa para os jogos atuais",
-          "Que GTA 6 será em Full HD",
+          "24 polegadas",
+          "Placa de entrada ainda joga qualidade alta nos títulos atuais"
         ],
         [
           "Quad HD",
-          "Mais placa para o mesmo ajuste",
-          "Que 1440p é requisito oficial",
-        ],
-        [
-          "Taxa alta",
-          "Placa que segure a taxa no competitivo",
-          "Que mundo aberto usa o teto",
+          "27 polegadas",
+          "Pede placa de meio de tabela e folga de VRAM"
         ],
         [
           "4K",
-          "Ainda mais placa, se você já joga assim",
-          "Uma meta obrigatória do jogo",
-        ],
+          "32 polegadas ou mais",
+          "Pede placa de topo e 16 GB de VRAM na geração atual"
+        ]
       ],
-      colunaDestaque: 1,
-      fonte: STEAM,
-      nota: "Full HD em 47,91% e 1440p em 27,04% na Steam de setembro de 2026. 4K não é a tela desta compra se você não joga assim hoje.",
+      "nota": "Combinação usada na loja para os jogos de hoje. Não é resolução oficial de Grand Theft Auto VI."
     },
     {
-      tipo: "paragrafo",
-      texto: "4K entra na tabela para ser recusado como padrão. Se você não joga em 4K nos títulos atuais, não é a tela para comprar por causa de um jogo sem versão de PC. A nitidez é real e a placa que ela pede também. A decisão honesta é a resolução em que a sua sessão de hoje já quer viver.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Taxa, painel e o que não muda o jogo"
     },
     {
-      tipo: "chamada",
-      tema: "pc-gamer",
+      "tipo": "paragrafo",
+      "texto": "144 Hz é o salto que você sente em câmera rápida, corrida e tiro. Em jogo cinematográfico, com a câmera mais parada, a diferença para 60 Hz existe e é menor do que o anúncio sugere. Mundo aberto fica no meio: a cidade se mexe, o carro vira, e a taxa alta ajuda se a placa acompanha. Ligue o cabo certo. HDMI velho ou o cabo que veio com a TV da sala podem limitar a tela a 60 Hz mesmo com o monitor anunciando 165. DisplayPort, na maioria dos monitores gamer, é o cabo que entrega a taxa da caixa."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Taxa alta tem hora, e mundo aberto nem sempre é essa hora",
+      "tipo": "paragrafo",
+      "texto": "IPS favorece cor e ângulo, bom para quem também trabalha na mesma tela. VA entrega contraste mais fundo, bom de noite. Os dois jogam bem. TN ficou para trás em cor. Curvatura em 27 polegadas é gosto. Em 32, ela ajuda a não virar a cabeça. Nada disso substitui a pergunta da resolução. Um monitor curvo Full HD continua sendo Full HD na hora de escolher a [placa de vídeo](/blog/placa-de-video-para-gta-6)."
     },
     {
-      tipo: "paragrafo",
-      texto: "Taxa de atualização alta muda jogo competitivo: a mira acompanha a mão com menos atraso, desde que a placa sustente a taxa. Monitor de 144 Hz e acima virou peça comum nesse uso. Mundo aberto, com mais cenário e menos reflexo de competição, muitas vezes não usa o teto do monitor. Taxa alta para todo gênero pede um número que a sessão não alcança.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/monitor-para-gta-6-taxa.webp",
-        alt: "Monitor curvo, teclado e fone sobre a mesa.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/monitor-para-gta-6-taxa.webp",
+        "alt": "Monitor curvo com teclado e fone, setup de monitor para GTA 6 em Quad HD ou Full HD.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Monitor curvo, teclado e fone sobre a mesa. Foto de Minh Phuc (Pexels).",
+      "legenda": "Monitor curvo, teclado e fone: a mesa fecha em volta da tela, não o contrário."
     },
     {
-      tipo: "paragrafo",
-      texto: "Sincronia adaptativa, aqueles modos que casam a taxa da placa com a da tela, evita o rasgo da imagem quando os quadros variam. É um recurso do monitor atual, útil nos jogos que você já tem. Não é uma exigência publicada para GTA 6. O guia de [PC sem requisito](/blog/pc-para-gta-6-sem-requisito-oficial) mantém a mesma fronteira: o que a mesa mostra hoje fica; o que seria ficha fica de fora.",
+      "tipo": "pros-contras",
+      "titulo": "Uma tela nova vale a pena quando",
+      "pros": [
+        "A atual é Full HD de 60 Hz e você já tem placa sobrando, medida no contador de quadros.",
+        "Você trabalha e joga no mesmo lugar e a tela pequena cansou a vista.",
+        "O próximo PC vai ser escolhido em volta dessa resolução, com orçamento honesto."
+      ],
+      "contras": [
+        "Comprar 4K para “ver o GTA 6 bonito” sem GPU que desenhe 4K nos jogos de hoje.",
+        "Ignorar o suporte VESA e descobrir que o braço articulado não fura a tela.",
+        "Usar o cabo antigo e achar que o monitor veio com defeito."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Tamanho do painel e o que cabe na mesa",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que medir na sua mesa antes de pedir"
     },
     {
-      tipo: "paragrafo",
-      texto: "Antes do tamanho em polegadas, meça a profundidade da mesa e a distância dos olhos. Um painel largo demais vira pescoço, não nitidez. Ultrawide é outra compra, com mais pixels na horizontal e outra exigência de placa. Se a mesa é funda e o uso é trabalho junto com jogo, o ultrawide pode fazer sentido hoje. Se a mesa é rasa, ele só aproxima a tela do rosto.",
+      "tipo": "lista",
+      "itens": [
+        "Profundidade da mesa. Monitor de 27 com pé grande come o mousepad.",
+        "Se você quer braço articulado. Confira o padrão VESA atrás da tela.",
+        "A resolução que a placa aguenta hoje, num jogo que você já tem, no contador de quadros.",
+        "Se a segunda tela é para live, chat ou mapa. Aí o combo é outro, e está no [setup de streamer](/blog/setup-de-streamer-para-gta-6)."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "Painel, taxa e resolução se escolhem juntos porque a placa vê os três. Um Full HD de taxa alta pede menos placa do que um Quad HD de taxa alta. Quem quer os dois sobe de faixa de placa nos jogos de agora, não num requisito futuro. A série de [GTA 6](/blog/gta-6) separa o que já foi anunciado, e resolução de PC não está nesse anúncio.",
+      "tipo": "paragrafo",
+      "texto": "As faixas de máquina que conversam com cada tela estão no [PC de entrada](/blog/pc-gamer-entrada-para-gta-6), no [intermediário](/blog/pc-gamer-intermediario-para-gta-6) e no [alto desempenho](/blog/pc-gamer-alto-desempenho-gta-6)."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/monitor-para-gta-6-fecho.webp",
-        alt: "Monitor, teclado e equipamento de áudio numa mesa com luz baixa.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/monitor-para-gta-6-fecho.webp",
+        "alt": "Monitor, teclado e equipamento de áudio numa mesa, canto de jogo pensado como monitor para GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Monitor, teclado e equipamento de áudio numa mesa com luz baixa. Foto de Amar Preciado (Pexels).",
+      "legenda": "Luz baixa, tela e áudio no mesmo plano: é a mesa de quem joga de noite e também grava."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "A tela é escolhida pelo uso de hoje e trava a placa com clareza",
-        "Full HD e Quad HD entram com os percentuais da Steam, sem virar ficha",
-        "Taxa alta fica no competitivo, onde ela se percebe",
-      ],
-      contras: [
-        "Não há resolução oficial de GTA 6 no PC",
-        "Quad HD com a placa de Full HD só reduz o ajuste",
-        "Taxa alta em mundo aberto pode ser um teto que você não usa",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Cabo, taxa e o modo jogo da tela"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Antes de trocar o monitor",
+      "tipo": "paragrafo",
+      "texto": "Monitor novo em 60 Hz com a caixa dizendo 144 é quase sempre cabo ou configuração. No Windows, a taxa fica nas configurações de vídeo avançadas. No jogo, há outro limite, e o VSync pode prender tudo em 60. DisplayPort costuma entregar a taxa que o HDMI antigo da gaveta não entrega. Troque o cabo antes de trocar a tela de novo. E desligue o “modo cinema” da TV, se for o caso: esse processamento deixa a imagem bonita e atrasada. O modo jogo existe para cortar esse atraso."
     },
     {
-      tipo: "paragrafo",
-      texto: "Traga a medida da mesa e diga se o uso é competitivo ou mundo aberto. A Balão da Informática Anchieta fica na Av. Anchieta, 789, no Cambuí, em Campinas. O WhatsApp é (19) 98751-0267. Ver dois painéis lado a lado resolve mais do que ler a caixa.",
+      "tipo": "paragrafo",
+      "texto": "Distância também muda a polegada. Numa mesa funda, 27 polegadas em Quad HD ficam confortáveis. Na mesa rasa de apartamento, o mesmo 27 invade o mouse. Meça da parede até onde o teclado termina e leve esse número. Suporte VESA, aqueles quatro furos atrás, permite prender a tela num braço e devolver a mesa. Sem o padrão, o braço não serve e o pé original fica. Vale virar a tela na loja e olhar atrás antes de comprar o acessório."
     },
     {
-      tipo: "paragrafo",
-      texto: "Diga também qual placa está no computador. Sem ela, a tela nova pode nascer sem quem a alimente. A decisão é comprar a tela do uso de agora, porque é ela que define a placa, e não uma taxa imaginada para um jogo sem ficha.",
+      "tipo": "lista",
+      "itens": [
+        "Confira a taxa no Windows, não só na caixa.",
+        "Leve um cabo DisplayPort se o seu for antigo.",
+        "Olhe os furos VESA se a mesa for pequena."
+      ]
     },
     {
-      tipo: "chamada",
-      titulo: "A tela nova é Full HD ou Quad HD?",
-      texto: "Diga a distância da mesa e se você joga competitivo ou mundo aberto. A tela sai desse uso, e a placa vem depois.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "chamada",
+      "tema": "pc-gamer",
+      "titulo": "Quer ver a tela ligada, do tamanho real?",
+      "texto": "Na Balão da Informática Anchieta, loja de informática em Campinas o monitor sai da caixa e liga no balcão. Av. Anchieta, 789, Cambuí, Campinas. WhatsApp (19) 98751-0267.",
+      "rotulo": "Ver monitores gamer",
+      "href": "/categoria/computadores-monitores-monitor-gamer",
+      "mensagem": "Olá! Li a matéria de monitor para GTA 6 e quero ver Full HD e Quad HD na loja."
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Monitor para GTA 6 segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Qual monitor comprar para GTA 6?",
-      resposta: "Não há monitor oficial, porque não há requisito de PC. Até 19 de novembro de 2026 a Rockstar não anunciou versão de computador. Compre a tela em que você já quer jogar os títulos de hoje. Essa escolha define a placa.",
+      "pergunta": "Qual monitor comprar para GTA 6?",
+      "resposta": "Não há resolução oficial de PC. Escolha Full HD se a prioridade é fluidez com a placa que você tem, ou Quad HD se quer mais nitidez e aceita uma GPU à altura."
     },
     {
-      pergunta: "Full HD ou Quad HD?",
-      resposta: "Full HD é o mais comum na Steam de setembro de 2026, com 47,91%, e pede menos placa. Quad HD, 27,04% em 1440p, mostra mais e exige mais da placa nos jogos atuais. Nenhum dos dois é resolução publicada para GTA 6.",
+      "pergunta": "144 Hz faz diferença em mundo aberto?",
+      "resposta": "Faz na câmera e na direção, se a placa entrega quadros perto disso. Monitor de 144 Hz com jogo travado em 60 mostra 60."
     },
     {
-      pergunta: "Preciso de taxa alta num mundo aberto?",
-      resposta: "Taxa alta importa quando o jogo é competitivo e a placa consegue alimentar o monitor. Mundo aberto nem sempre usa esse teto. Comprar 144 Hz para todo uso paga por um número que a sessão pode não alcançar. Não é exigência de GTA 6.",
+      "pergunta": "27 ou 24 polegadas?",
+      "resposta": "24 combina com Full HD. 27 combina com Quad HD. Full HD em 27 deixa o pixel grande e a imagem mais mole."
     },
     {
-      pergunta: "A tela muda a placa que eu compro?",
-      resposta: "Muda. Quad HD pede mais placa do que Full HD para o mesmo ajuste, nos jogos que você já roda. Escolher a placa antes da tela inverte a ordem e erra uma das duas. GTA 6 não altera essa conta enquanto não tiver ficha de PC.",
+      "pergunta": "Posso usar a TV da sala?",
+      "resposta": "Pode, em modo jogo, para reduzir atraso. Confira se o cabo e a entrada entregam a taxa que você quer. Muita TV trava em 60 Hz na entrada errada."
     },
+    {
+      "pergunta": "A tela muda a placa que eu preciso?",
+      "resposta": "Muda mais do que qualquer outro periférico. Quad HD e 4K puxam a GPU para cima. Full HD deixa a placa de entrada viva por mais tempo."
+    }
   ],
-  fontes: [
-    STEAM,
-    ROCKSTARVI,
-    YAHOOPC,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — “Grand Theft Auto V Is Now Available for PC”",
+      "url": "https://www.rockstargames.com/newswire/article/25o2411812a31k/grand-theft-auto-v-is-now-available-for-pc",
+      "data": "14 de abril de 2015"
+    }
+  ]
 };
 
 export default artigo;

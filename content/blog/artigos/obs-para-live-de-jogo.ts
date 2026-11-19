@@ -1,280 +1,268 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const OBS: Fonte = {
-  nome: "OBS Project — OBS Studio",
-  url: "https://obsproject.com/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "obs-para-live-de-jogo",
-  titulo: "OBS para live de jogo: o que configurar antes de ir ao ar",
-  resumo: "O OBS Studio é gratuito e organiza cena, fonte e codificador. Bitrate e resolução ficam na documentação atual do projeto, não numa receita fixa.",
-  categoria: "guias",
-  etiquetas: [
-    "GTA 6",
+  "slug": "obs-para-live-de-jogo",
+  "titulo": "OBS para live de jogo: como montar a primeira transmissão",
+  "resumo": "OBS para live de jogo: uma cena simples, o codificador da placa e um teste gravado. O passo a passo antes de abrir a Twitch ou o YouTube.",
+  "categoria": "guias",
+  "etiquetas": [
     "OBS",
     "Live",
-    "Transmissão",
+    "Streaming",
+    "GTA 6"
   ],
-  capa: {
-    src: "/blog/capas/obs-para-live-de-jogo.webp",
-    alt: "Notebook, microfone e câmera numa mesa de gravação.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/obs-para-live-de-jogo.webp",
+    "alt": "Notebook, microfone e câmera numa mesa, o ponto de partida do OBS para live de jogo.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-09T15:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-09T15:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "OBS para live: o que configurar antes de ir ao ar",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "OBS para live de jogo: cenas, encoder e teste",
+    "descricao": "OBS para live de jogo: uma cena simples, o codificador da placa e um teste gravado. O passo a passo antes de abrir a Twitch ou o YouTube.",
+    "palavrasChave": [
       "obs para live de jogo",
-      "configurar obs studio",
-      "obs codificador",
-      "cena e fonte no obs",
-    ],
+      "configurar obs",
+      "obs studio live",
+      "cena obs gta"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "OBS para live de jogo é o OBS Studio, o programa gratuito do [OBS Project](https://obsproject.com/). Ele não joga por você. Ele monta o que o espectador vê: cenas, fontes e um codificador que comprime o vídeo. Antes de ir ao ar, essas três peças precisam existir. O número de bitrate, a resolução “certa” e o preset milagroso não saem deste texto.",
+      "tipo": "paragrafo",
+      "texto": "OBS para live de jogo é o programa gratuito que junta a tela, a sua voz e a câmera num vídeo só. O guia de início rápido do próprio OBS é a fonte. Esta matéria traduz isso para quem quer transmitir GTA, hoje no GTA V, sem se perder em filtro. O GTA 6 de PC não foi anunciado. O OBS que você aprende agora serve para qualquer jogo que já esteja instalado."
     },
     {
-      tipo: "paragrafo",
-      texto: "A documentação publicada pelo próprio projeto é quem atualiza esses números. Eles mudam com a versão do programa e com o destino da live. Copiar um valor velho daqui deixaria o artigo mentindo daqui a um mês. Você configura a estrutura hoje e consulta a documentação atual na hora de preencher o campo numérico. É assim que este guia se mantém honesto.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Uma cena com o jogo em tela cheia, a webcam num canto e o microfone na mistura já é uma live.",
+        "Prefira o codificador da placa. O guia de NVENC da OBS explica o caminho nas GeForce.",
+        "Grave em disco antes de ir ao ar. A Central de Criadores da Twitch e a ajuda do YouTube entram depois que o arquivo local está bom."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**OBS Studio é o programa gratuito em obsproject.com.** Cena, fonte e codificador são o miolo.",
-        "**Codificador por hardware entra quando a placa oferece.** Se não oferece, codifica o processador.",
-        "**Um teste gravado vem antes da live aberta.** O erro aparece sem plateia.",
-        "**Bitrate, resolução e preset numérico ficam na documentação atual.** Este texto não fixa esses valores.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "OBS para live de jogo: a primeira cena"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que é o OBS Studio",
+      "tipo": "paragrafo",
+      "texto": "Abra o OBS e crie uma cena chamada Jogo. Nela, uma fonte de captura do jogo, ou da tela, em tela cheia. Por cima, a webcam, pequena, num canto que não tape o minimapa. O microfone entra no misturador, não como enfeite. Alerta de seguidor, borda animada e três câmeras ficam para a segunda semana. A primeira live boa é legível: dá para ver o jogo e ouvir você."
     },
     {
-      tipo: "paragrafo",
-      texto: "O OBS Studio é o programa gratuito de gravar e transmitir mantido pelo OBS Project, em obsproject.com. Você instala, cria um perfil e passa a empilhar fontes dentro de cenas. Não é painel da placa de vídeo nem aplicativo do jogo. É a camada que decide o que entra no vídeo e quem comprime esse vídeo.",
+      "tipo": "paragrafo",
+      "texto": "O áudio estoura com facilidade. Fale no volume em que você comenta a partida e olhe a barrinha. Se ela bate no vermelho, baixe o ganho. Se o teclado aparece mais alto do que a voz, afaste o microfone das teclas ou troque o tipo, assunto da matéria de [microfone](/blog/microfone-para-live-de-jogo). Fone fechado evita que o som do jogo volte para o microfone."
     },
     {
-      tipo: "paragrafo",
-      texto: "Na série sobre GTA 6, o OBS entra porque a live de jogo no PC usa essa camada. O jogo ainda não tem versão de computador: a [página oficial](https://www.rockstargames.com/VI), até 19 de novembro de 2026, lista console, e o [Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html) não achou requisito. O OBS que você configura agora é o da live que já existe. A máquina está no guia de [PC para live](/blog/pc-para-live-de-gta-6).",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Cena e fonte, antes do número",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Cena é um arranjo: uma de jogo, uma de intervalo e, se a voz continua quando o jogo sai, uma só com a câmera. Você troca de cena em vez de arrastar janela no meio da live. Fonte é cada ingrediente, como a captura do jogo ou o microfone. Sem uma cena com esses dois, a live abre em tela vazia.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/obs-para-live-de-jogo-cena.webp",
-        alt: "Celular na mão, com microfone e fone na mesa de gravação.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/obs-para-live-de-jogo-cena.webp",
+        "alt": "Celular, microfone e fone na mesa, fontes de uma cena de OBS para live de jogo.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Celular na mão, com microfone e fone na mesa de gravação. Foto de Jakub Zerdzicki (Pexels).",
+      "legenda": "Celular, microfone e fone na mesma mesa. No OBS, cada um vira uma fonte. Comece com poucos."
     },
     {
-      tipo: "paragrafo",
-      texto: "Captura do jogo e captura da tela não são a mesma fonte. A primeira pede o jogo. A segunda pede o monitor inteiro e leva o que estiver visível, inclusive notificação. Para jogar, a captura do jogo costuma ser o caminho limpo. A de tela serve quando o programa não aceita a primeira. Você escolhe pelo que o OBS lista nessa máquina.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Codificador: deixe a placa trabalhar"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Codificador de placa ou de processador",
+      "tipo": "paragrafo",
+      "texto": "No menu de configuração, a saída em modo avançado deixa escolher o codificador. Nas GeForce, NVENC é a escolha que o guia da OBS detalha: a placa codifica e o processador continua com o jogo. Qualidade, preset e bitrate mudam com a sua internet. Não copie um número de vídeo de 2022. Use o assistente de configuração automática do OBS como ponto de partida e compare com a recomendação atual da plataforma, na Central de Criadores da Twitch ou na ajuda de transmissão do YouTube."
     },
     {
-      tipo: "paragrafo",
-      texto: "O codificador comprime o quadro. Quando a placa de vídeo tem codificador por hardware e o driver expõe isso ao OBS, a opção aparece na lista. A compressão sai pela placa e o processador fica mais disponível para o jogo. Quando a placa não oferece, o codificador é o do processador, em software. Os dois caminhos são legítimos. Nenhum deles é um botão secreto de qualidade.",
+      "tipo": "paragrafo",
+      "texto": "x264 no processador serve quando a placa não tem codificador decente ou quando você grava um arquivo pesado com o jogo fechado. No meio da partida, ele compete com a cidade. Se o teste mostrar queda de quadro só quando a live arma, volte o codificador para a GPU."
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "O número mora na documentação",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Bitrate, resolução de saída, quadro do vídeo e preset são campos numéricos do OBS, e a combinação boa depende da sua rede, do destino e da versão do programa. O OBS Project mantém essa orientação na documentação do site. Abra a página atual e use o valor de lá. Um número colado neste artigo envelheceria e ainda passaria por recomendação. Este texto não traz esse número.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "O que fechar no OBS e o que consultar na documentação",
-      colunas: [
-        "Item",
-        "Onde se decide",
-        "O que este texto faz",
+      "tipo": "tabela",
+      "titulo": "Três cenas que bastam no começo",
+      "colunas": [
+        "Cena",
+        "O que tem",
+        "Quando usar"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Cena",
-          "No OBS, antes de ir ao ar",
-          "Explica o arranjo",
+          "Jogo",
+          "Captura, webcam pequena, microfone",
+          "Quase a live inteira"
         ],
         [
-          "Fonte do jogo e do microfone",
-          "Na cena",
-          "Separa jogo e tela",
+          "Pausa",
+          "Tela parada e a sua câmera maior",
+          "Banheiro, água, carregando"
         ],
         [
-          "Tipo de codificador",
-          "Na lista que a sua máquina mostra",
-          "Placa se houver, senão processador",
-        ],
-        [
-          "Bitrate, resolução, preset",
-          "Documentação atual do OBS",
-          "Não fixa número",
-        ],
+          "Começo e fim",
+          "Seu nome e o jogo do dia",
+          "Trinta segundos, não um filme"
+        ]
       ],
-      fonte: OBS,
-      nota: "Os valores numéricos mudam com a versão do programa e com o destino da live.",
+      "nota": "Roteiro simples. O manual do programa é o guia de início rápido da OBS."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/obs-para-live-de-jogo-codifica.webp",
-        alt: "Mãos no teclado e no mouse, com luz colorida na mesa.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/obs-para-live-de-jogo-codifica.webp",
+        "alt": "Mãos no teclado e no mouse com luz colorida, captura de jogo dentro do OBS para live.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Mãos no teclado e no mouse, com luz colorida na mesa. Foto de Alena Darmel (Pexels).",
+      "legenda": "Mãos no teclado e no mouse: a captura do jogo é a fonte principal. O resto não pode tapar a mira."
     },
     {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Sem receita numérica",
-      texto: "Cena, fonte e o tipo de codificador dá para fechar lendo este texto. Bitrate, resolução e preset você confere na documentação atual do OBS, no dia em que for preencher.",
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Instale o OBS pelo site oficial e rode o assistente.",
+        "Monte a cena Jogo com captura, câmera e microfone.",
+        "Fale um minuto e olhe se a barra de áudio estoura.",
+        "Grave localmente, assista, e só então conecte a chave da plataforma.",
+        "A chave da Twitch ou do YouTube fica no painel do criador, não em print de terceiros."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que conferir com a transmissão fechada",
+      "tipo": "pros-contras",
+      "titulo": "OBS estável",
+      "pros": [
+        "Poucas fontes. Cada navegador aberto na cena come memória.",
+        "Codificador da placa e teste gravado.",
+        "Cena de pausa pronta, para você não transmitir a área de trabalho sem querer."
+      ],
+      "contras": [
+        "Dez alertas piscando em cima do minimapa.",
+        "Bitrate copiado de um vídeo antigo, maior do que a sua subida aguenta.",
+        "Atualizar o OBS no minuto em que a live ia começar."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "Antes de abrir a live para alguém, grave um trecho curto no disco. Assista. A voz está presente. O jogo está no quadro. O alerta de notificação não atravessou a tela. O áudio do jogo não cobre a sua fala a ponto de sumir. Esse ensaio usa a mesma cena da live e custa um arquivo, não uma plateia. Se o ensaio falha, a live ia falhar do mesmo jeito.",
+      "tipo": "paragrafo",
+      "texto": "A máquina que segura isso está em [PC para live](/blog/pc-para-live-de-gta-6). A subida da rede, em [internet para fazer live](/blog/internet-para-fazer-live). Onde criar o canal, em [Twitch, YouTube ou Kick](/blog/comecar-no-twitch-youtube-ou-kick)."
     },
     {
-      tipo: "paragrafo",
-      texto: "Confira também o dispositivo do microfone pelo nome, não pelo “padrão do sistema”, que muda quando você espeta outro fone. Separe a faixa da voz e a faixa do jogo se o OBS mostrar as duas, para abaixar uma sem abaixar a outra. O arranjo físico da mesa, da luz e do retorno está no texto de [setup de quem transmite](/blog/setup-de-streamer-para-gta-6). Aqui a checagem é a do programa.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que este texto não fixa",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Não fixa bitrate de upload, não fixa 1080p como obrigação, não fixa preset lento nem rápido, não fixa intervalo de keyframe. Esses nomes existem no OBS e os valores corretos para o seu caso estão na documentação atual, porque mudam. Também não fixa que toda placa nova codifica por hardware: a lista do OBS na sua máquina é a prova, não a geração da placa.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Não fixa, por fim, que o OBS deixa qualquer computador pronto para GTA 6. Sem versão de PC, não há jogo para capturar. A [máquina da live](/blog/pc-para-live-de-gta-6) se dimensiona pelos jogos que você já transmite, com folga além do jogo para a codificação. O OBS entra em cima dessa folga. Não cria a folga.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/obs-para-live-de-jogo-fecho.webp",
-        alt: "Monitores sobre as mesas do corredor da loja.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/obs-para-live-de-jogo-fecho.webp",
+        "alt": "Monitores na Balão da Informática Anchieta, referência de tela para configurar o OBS para live de jogo.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Monitores sobre as mesas do corredor da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
+      "legenda": "Monitores no corredor da loja: é o tipo de tela em que a cena do OBS tem de continuar legível."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "Cena, fonte e codificador ficam separados, então você sabe o que montar antes de procurar número",
-        "O codificador da placa entra quando existe, e o do processador cobre o caso em que não existe",
-        "O teste gravado acha voz, tela e notificação com a live ainda fechada",
-      ],
-      contras: [
-        "Bitrate e resolução não estão neste texto de propósito: um valor fixo aqui ficaria velho",
-        "Captura de tela pode vazar notificação se você escolher a fonte errada",
-        "O OBS não compensa máquina sem folga, nem antecipa um GTA 6 de PC que não foi anunciado",
-      ],
+      "tipo": "destaque",
+      "tom": "atencao",
+      "titulo": "Chave de transmissão",
+      "texto": "A chave é a senha da sua live. Não cole em print, não mande em grupo. Se vazou, gere outra no painel da plataforma."
     },
     {
-      tipo: "chamada",
-      tema: "pc-gamer",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Áudio que não briga com o jogo"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Se o jogo não couber na máquina",
+      "tipo": "paragrafo",
+      "texto": "No misturador do OBS, o jogo e o microfone são faixas separadas. Baixe o jogo até você se ouvir por cima do motor do carro, sem sumir. Fone fechado é o que impede o som do jogo de voltar ao microfone e criar eco. Se você usa caixa, abaixe até quase nada ou aceite o eco. Filtro de ruído no microfone ajuda ventilador constante. Não recupera um mic em cima do teclado. A posição do microfone, na matéria própria, resolve mais do que mais um plugin."
     },
     {
-      tipo: "paragrafo",
-      texto: "Se a cena está certa e o ensaio gravado ainda soluça, o limite deixou de ser o OBS e passou a ser o computador. Na Balão da Informática Anchieta, Av. Anchieta, 789, no Cambuí, em Campinas, a conversa é essa folga: jogo que você já transmite, codificador pela placa ou pelo processador, memória e disco. O ensaio é na máquina acesa, antes de você decidir.",
+      "tipo": "paragrafo",
+      "texto": "Atalhos evitam o pânico. Defina uma tecla para mutar o microfone e outra para cortar para a cena de pausa. Teste as duas com a gravação local, não na primeira live com gente. Atualize o OBS num dia sem transmissão: versão nova muda botão e você não quer descobrir isso ao vivo. A chave da plataforma fica salva no programa. Se alguém sentar no seu PC, remova a chave. Gerar outra no painel da Twitch ou do YouTube leva um minuto e fecha a porta."
     },
     {
-      tipo: "paragrafo",
-      texto: "O WhatsApp (19) 98751-0267 recebe o modelo da placa e se o OBS lista codificador por hardware. O orçamento é o do dia, porque o preço muda. A assistência é no mesmo endereço. O programa continua gratuito em obsproject.com. A documentação de lá é quem diz o número. A loja não inventa bitrate no balcão.",
+      "tipo": "lista",
+      "itens": [
+        "Jogo mais baixo do que a voz, no fone.",
+        "Tecla de mudo e tecla de pausa, testadas.",
+        "Atualize o OBS fora do horário da live."
+      ]
     },
     {
-      tipo: "chamada",
-      titulo: "A cena já existe e o jogo ainda soluça?",
-      texto: "Conte o que você transmite e se o OBS mostra codificador da placa. A conversa é a folga da máquina, não um número mágico.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Quando a live cai, o que olhar primeiro"
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a imagem parou e o jogo na sua tela continua, é codificador ou rede. Olhe a estatística do OBS: quadros perdidos por rede apontam a subida. Quadro perdido por codificação aponta preset pesado demais para a placa. Baixe um degrau, grave de novo e compare. Não mude cinco coisas de uma vez, senão você não sabe qual salvou."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se o jogo em si caiu de fluidez, feche a pré-visualização do OBS, que também custa. Ainda ruim, a máquina está no limite e a matéria do PC para live é o próximo passo. O programa certo numa máquina curta não cria quadro. Ele só organiza o que a máquina entrega."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "pc-gamer",
+      "titulo": "O OBS está pronto e o PC não acompanha?",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas vê se falta memória, placa ou disco. Av. Anchieta, 789, Cambuí. WhatsApp (19) 98751-0267.",
+      "rotulo": "Ver a máquina",
+      "href": "/montagempc",
+      "mensagem": "Olá! Li a matéria de OBS para live de jogo e quero ver se meu PC aguenta transmitir."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "OBS para live de jogo segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "OBS Studio é pago?",
-      resposta: "Não. O OBS Studio é o programa gratuito do OBS Project, em obsproject.com. Você baixa, cria cenas e fontes e escolhe o codificador. O que este guia não inclui de graça são os números de bitrate e de resolução: esses ficam na documentação atual do projeto.",
+      "pergunta": "OBS serve para live de GTA?",
+      "resposta": "Serve. É o programa gratuito que captura o jogo, a câmera e o microfone. Hoje isso vale para o GTA V. O GTA 6 de PC ainda não foi anunciado."
     },
     {
-      pergunta: "Qual bitrate eu coloco no OBS?",
-      resposta: "O deste artigo, nenhum. Bitrate, resolução e preset dependem da sua rede, do destino da live e da versão do OBS. A documentação atual em obsproject.com é o lugar do número. Um valor fixado aqui envelheceria.",
+      "pergunta": "Qual codificador usar?",
+      "resposta": "O da placa, quando ela tem. Nas GeForce, a OBS documenta o NVENC. Deixe o x264 para quando a GPU não puder codificar."
     },
     {
-      pergunta: "Uso codificador da placa ou do processador?",
-      resposta: "Use o da placa quando o OBS listar um codificador por hardware. Use o do processador quando essa opção não aparecer. Os dois comprimem o vídeo. Nenhum é um preset universal, e a prova é a lista da sua máquina, não a geração da placa.",
+      "pergunta": "Quantas cenas eu preciso?",
+      "resposta": "Três chegam: jogo, pausa, e uma de começo e fim. O resto é enfeite que come memória."
     },
     {
-      pergunta: "O que eu testo antes de abrir a live?",
-      resposta: "Grave um trecho com a mesma cena. Veja se a voz entra, se o jogo está no quadro e se uma notificação não atravessou a captura de tela. Troque o microfone pelo nome do dispositivo. Se o ensaio falha, a live aberta falharia igual.",
+      "pergunta": "Como testar sem ir ao ar?",
+      "resposta": "Grave localmente por alguns minutos e assista. Quadro caindo ou voz estourando se resolve antes da plateia entrar."
     },
     {
-      pergunta: "O OBS deixa o PC pronto para GTA 6?",
-      resposta: "Não. Até 19 de novembro de 2026 não havia versão de PC para capturar. O OBS organiza a live dos jogos que você já transmite, desde que a máquina tenha folga para codificar vídeo além de rodar o jogo.",
-    },
+      "pergunta": "Onde pego a chave da live?",
+      "resposta": "No painel de criador da Twitch ou na ajuda de transmissão do YouTube, na sua conta. Não use chave que apareceu em tutorial."
+    }
   ],
-  fontes: [
-    OBS,
-    ROCKSTARVI,
-    YAHOOPC,
-  ],
+  "fontes": [
+    {
+      "nome": "OBS Studio — guia de início rápido",
+      "url": "https://obsproject.com/kb/quick-start-guide",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "OBS Studio — guia de NVENC",
+      "url": "https://obsproject.com/kb/nvenc-performance-guide",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Twitch — Central de Criadores",
+      "url": "https://help.twitch.tv/s/article/creator-dashboard",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Ajuda do YouTube — transmitir ao vivo",
+      "url": "https://support.google.com/youtube/answer/2474026",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

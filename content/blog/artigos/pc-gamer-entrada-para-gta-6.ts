@@ -1,295 +1,261 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
-
-const STEAM: Fonte = {
-  nome: "Steam — Pesquisa de hardware e software",
-  url: "https://store.steampowered.com/hwsurvey/",
-  data: "setembro de 2026",
-};
-
-const TAKETWO: Fonte = {
-  nome: "Take-Two Interactive — comunicado de pré-venda de Grand Theft Auto VI",
-  url: "https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/",
-  data: "24 de junho de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "pc-gamer-entrada-para-gta-6",
-  titulo: "PC gamer de entrada pensando no GTA 6",
-  resumo: "Entrada, aqui, é jogar em Full HD os jogos de agora, com placa dedicada, 16 GB e SSD. Peça orçamento. Não é um PC de GTA 6.",
-  categoria: "guias",
-  etiquetas: [
+  "slug": "pc-gamer-entrada-para-gta-6",
+  "titulo": "PC gamer de entrada para GTA 6: o que montar em Full HD",
+  "resumo": "PC gamer de entrada para GTA 6 em Full HD: placa com folga de VRAM, 16 GB e SSD. Para os jogos de hoje, sem a ficha que a Rockstar não publicou.",
+  "categoria": "guias",
+  "etiquetas": [
     "GTA 6",
     "PC gamer",
-    "Entrada",
+    "Full HD",
+    "Entrada"
   ],
-  capa: {
-    src: "/blog/capas/pc-gamer-entrada-para-gta-6.webp",
-    alt: "Gabinete com luz e monitor numa mesa de jogo.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/pc-gamer-entrada-para-gta-6.webp",
+    "alt": "Gabinete com luz e monitor numa mesa, exemplo de PC gamer de entrada para GTA 6 em Full HD.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-11T18:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-11T18:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "PC gamer de entrada pensando no GTA 6",
-    palavrasChave: [
-      "pc gamer de entrada",
-      "pc gamer full hd",
-      "montar pc de entrada",
-      "placa dedicada 16 gb ssd",
-    ],
+  "origem": "autoral",
+  "seo": {
+    "titulo": "PC gamer de entrada para GTA 6 em Full HD",
+    "descricao": "PC gamer de entrada para GTA 6 em Full HD: placa com folga de VRAM, 16 GB e SSD. Para os jogos de hoje, sem a ficha que a Rockstar não publicou.",
+    "palavrasChave": [
+      "pc gamer de entrada para gta 6",
+      "pc gamer barato full hd",
+      "pc de entrada gta 6",
+      "computador gamer full hd"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "PC gamer de entrada pensando no GTA 6 mistura uma faixa de máquina com um jogo sem ficha de PC. Chamar esse computador de “PC de GTA 6” ignora o corte: até 19 de novembro de 2026 não havia requisito para copiar. A [página da Rockstar](https://www.rockstargames.com/VI) lista console. A faixa de entrada se define sem esse nome.",
+      "tipo": "paragrafo",
+      "texto": "PC gamer de entrada para GTA 6, do jeito que a loja monta, é uma máquina de Full HD para os jogos que já estão no mercado. A Rockstar não publicou a versão de computador, então esta faixa não promete “roda o GTA 6”. Ela promete outra coisa, que a gente sustenta: cidade fluida em 1080p nos mundos abertos atuais, com SSD e memória que não estouram no primeiro mês."
     },
     {
-      tipo: "paragrafo",
-      texto: "Entrada, nesta página, é o computador que joga em Full HD os jogos de agora, com placa de vídeo dedicada, 16 GB de memória e SSD. O orçamento não fica escrito aqui. O pedido é de orçamento, feito no dia, com a sua lista de jogos. Não é uma configuração oficial de GTA 6.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "A faixa de entrada mira Full HD, em geral numa tela de 24 polegadas.",
+        "16 GB de RAM jogam com o sistema enxuto. SSD NVMe guarda o Windows e os jogos da semana.",
+        "Transmitir em qualidade alta fica para a faixa de cima. Aqui o foco é jogar bem."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**Entrada joga Full HD agora.** É a faixa para os títulos que você já abre, não para uma ficha futura.",
-        "**Placa dedicada entra.** Vídeo integrado fica de fora quando o jogo de hoje já pede placa própria.",
-        "**16 GB e SSD são o piso comum.** Memória para a sessão e disco para o jogo não morar num HD.",
-        "**O nome certo não é PC de GTA 6.** Até 19 de novembro de 2026 esse requisito não existia.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "PC gamer de entrada para GTA 6: para quem é"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Entrada é a faixa que joga os títulos de agora",
+      "tipo": "paragrafo",
+      "texto": "É para quem está saindo de um computador de escritório ou de um notebook fino e quer jogar de verdade em Full HD. Também é para quem já tem um monitor de 1080p bom e não pretende trocar a tela este ano. Se o plano é um Quad HD de 27 polegadas, esta faixa fica curta e o texto certo é o [PC intermediário](/blog/pc-gamer-intermediario-para-gta-6)."
     },
     {
-      tipo: "paragrafo",
-      texto: "Faixa de entrada não é o gabinete com luz mais fraco da prateleira. É a máquina em que os jogos que você lista rodam em Full HD, no ajuste que você aceita. Se a lista tem jogo pesado de hoje, a faixa sobe dentro do Full HD. GTA 6 não está na lista, porque não tem versão de PC.",
+      "tipo": "paragrafo",
+      "texto": "A placa de vídeo é o centro do orçamento. Em Full HD, dá para jogar qualidade alta nos lançamentos atuais sem ir ao topo da tabela, desde que a memória de vídeo não seja o menor número da prateleira. A comparação entre 8 GB e 16 GB na mesma família de chip está na análise da [RTX 5060 Ti](/blog/rtx-5060-ti-8gb-ou-16gb). Use aquilo como exemplo de geração atual, não como modelo obrigatório do GTA 6."
     },
     {
-      tipo: "paragrafo",
-      texto: "Full HD é também o parque mais comum. Na Steam de setembro de 2026, 47,91% dos PCs usavam essa resolução, como está no [artigo da pesquisa](/blog/steam-setembro-2026-vram-16gb). Entrada casa com esse parque de propósito. Quad HD é outra faixa, tratada na matéria de [monitor](/blog/monitor-para-gta-6), e pede mais placa. Começar em Quad HD e chamar de entrada empurra o orçamento para fora do nome.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-gamer-entrada-para-gta-6-faixa.webp",
-        alt: "Monitor, teclado e mouse numa mesa escura.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-gamer-entrada-para-gta-6-faixa.webp",
+        "alt": "Monitor, teclado e mouse numa mesa, PC gamer de entrada para GTA 6 em Full HD.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Monitor, teclado e mouse numa mesa escura. Foto de Chelsey Horne (Pexels).",
+      "legenda": "Mesa escura, monitor e teclado: a entrada bem feita parece setup de quem joga, não sobra de escritório."
     },
     {
-      tipo: "paragrafo",
-      texto: "O [comunicado da Take-Two](https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/) marca o dia 19 de novembro de 2026 para console. A [checagem do Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html), em 15 de novembro de 2026, não achou PC. Por isso a faixa de entrada não “se prepara para o lançamento”. Ela atende a semana em que você vai usar a máquina.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Full HD, placa dedicada, 16 GB e SSD",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Placa dedicada é a linha que separa esta faixa de um computador de escritório. O vídeo integrado do processador desenha tela de trabalho e jogo leve. Nos jogos pesados de agora, em Full HD, ele é o primeiro a ficar sem fôlego. A categoria de [placas de vídeo](/categoria/hardware-placa-de-video-vga) existe para essa peça ter nome, escolhido pelos seus jogos, não pelo nome GTA 6.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Vídeo integrado fica fora dessa faixa",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Dá para jogar coisa leve no vídeo integrado. Não é a faixa desta página. Se o pedido é “PC gamer de entrada”, a placa dedicada entra. Se o pedido é só estudo e um jogo ocasional muito leve, a conversa muda de caminho. Misturar os dois pedidos produz uma máquina que não atende nenhum dos dois.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Memória de 16 GB é o piso comum do PC de jogo hoje, e SSD tira o jogo do HD. Os dois estão explicados, sem virar ficha, nas matérias de [memória](/blog/memoria-ram-para-gta-6) e de [SSD](/blog/ssd-para-gta-6). Trinta e dois gigabytes só entram se você já grava ou deixa muita janela aberta. Não entram porque “GTA 6 vai pedir”.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Entrada não é PC de GTA 6",
-      texto: "Placa dedicada, 16 GB e SSD em Full HD descrevem uma faixa para os jogos de agora. Até 19 de novembro de 2026 a Rockstar não publicou requisito que transforme essa faixa numa configuração de GTA 6.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que essa faixa não promete",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Não promete Quad HD, não promete taxa alta de competitivo e não promete um jogo sem versão de PC. Duas placas dedicadas diferentes cabem em Full HD, conforme os jogos da sua lista. Cravar um chip como “o de entrada para GTA 6” seria fabricar a ficha que a Rockstar não publicou.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "O que a faixa de entrada faz e o que ela não promete",
-      colunas: [
+      "tipo": "tabela",
+      "titulo": "O que entra numa configuração de Full HD",
+      "colunas": [
         "Peça",
-        "Papel nos jogos de agora",
-        "O que não promete",
+        "Nesta faixa",
+        "Pode ficar para depois"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Placa dedicada",
-          "Tira o jogo pesado do vídeo integrado",
-          "Rodar GTA 6 sem ficha",
+          "Placa de vídeo",
+          "Modelo atual com folga de VRAM para 1080p",
+          "Topo de linha pensado em 4K"
         ],
         [
-          "16 GB de RAM",
-          "Piso comum da sessão de jogo",
-          "Requisito do título",
+          "Processador",
+          "Chip recente de 6 núcleos",
+          "O mais caro da soquete, se você não transmite"
         ],
         [
-          "SSD",
-          "Abre jogo grande sem esperar o HD",
-          "Um tamanho oficial de PC",
+          "Memória",
+          "16 GB em dois pentes",
+          "32 GB, a menos que você já deixe tudo aberto"
         ],
         [
-          "Tela Full HD",
-          "Combina com essa faixa de placa",
-          "Quad HD, que pede outra máquina",
+          "Disco",
+          "SSD NVMe de 1 TB",
+          "HD “porque cabe mais jogo”"
         ],
+        [
+          "Fonte",
+          "Com folga e conector da placa",
+          "Fonte genérica sem marca legível"
+        ]
       ],
-      colunaDestaque: 1,
-      fonte: YAHOOPC,
-      nota: "Até 15 de novembro de 2026 a reportagem do Yahoo não achou requisito de PC. A faixa é de uso atual.",
+      "nota": "Faixa de montagem da loja para jogos atuais em Full HD. Não é lista oficial de Grand Theft Auto VI."
     },
     {
-      tipo: "paragrafo",
-      texto: "Processador desta faixa acompanha a placa, em vez de sobrar ou faltar. A matéria de [processador](/blog/processador-para-gta-6) mostra como ver esse equilíbrio sem citar um modelo “certo”. Fonte e gabinete cabem a placa escolhida. A categoria de [PCs gamer](/categoria/computadores-pc-pc-gamer) junta o conjunto, ainda sem o rótulo do jogo.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Onde a entrada economiza, e onde não pode"
     },
     {
-      tipo: "chamada",
-      tema: "pc-gamer",
+      "tipo": "paragrafo",
+      "texto": "Economiza no processador de vitrine, no cooler extravagante e no gabinete que parece aquário. Não economiza na fonte nem no SSD. Fonte fraca desliga a máquina no pico da placa. HD no lugar do SSD devolve a tela de carregamento que você queria deixar para trás. Gabinete pequeno demais, que não respira, transforma peça boa em peça quente. A bancada mede isso antes de fechar a tampa."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que dizer no pedido de orçamento",
+      "tipo": "paragrafo",
+      "texto": "Dezesseis gigabytes de RAM, em dois pentes, fecham a faixa. Se você já sabe que joga com dez guias e o Discord, suba para 32 GB agora: é o upgrade mais simples e evita abrir o gabinete de novo em dois meses. A conta está em [memória RAM](/blog/memoria-ram-para-gta-6)."
     },
     {
-      tipo: "paragrafo",
-      texto: "O orçamento só presta se você disser o uso. Liste dois ou três jogos que você abre hoje, diga se o monitor é Full HD e se a máquina também grava ou estuda com muitas abas. Com isso, placa, memória e disco saem de uma faixa real. O pedido se faz em [qual PC gamer](/qual-pc-gamer) ou na [montagem](/montagempc).",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-gamer-entrada-para-gta-6-pedido.webp",
-        alt: "iMac sobre o balcão curvo, com teclado e mouse ao lado.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-gamer-entrada-para-gta-6-pedido.webp",
+        "alt": "Balcão da Balão da Informática Anchieta, onde se pede um PC gamer de entrada para GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "iMac sobre o balcão curvo, com teclado e mouse ao lado. Foto da loja, na Av. Anchieta, 789, Cambuí.",
+      "legenda": "O pedido começa no balcão, com a tela e os jogos que você realmente abre."
     },
     {
-      tipo: "paragrafo",
-      texto: "Notebook de entrada é outro pedido: a tela vem junto, a placa é a que cabe no chassi e a memória às vezes vem soldada. Se a mobilidade importa na sua semana, a conversa está em [notebooks](/notebooks). Se a mesa é fixa, o desktop de entrada continua sendo a faixa desta página. GTA 6 não escolhe entre os dois.",
+      "tipo": "pros-contras",
+      "titulo": "A entrada acerta quando",
+      "pros": [
+        "O monitor é Full HD e vai continuar assim.",
+        "Você joga mais do que transmite.",
+        "A fonte e o SSD não foram o item cortado do orçamento."
+      ],
+      "contras": [
+        "Você já separou um Quad HD e quer “ir levando” com placa de Full HD.",
+        "O gabinete não tem entrada de ar e a placa fica colada no vidro.",
+        "A compra só se justifica se alguém garantir o GTA 6. Ninguém pode."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que conferir na máquina ligada",
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Diga a resolução e o tamanho do monitor.",
+        "Cite dois jogos que você quer ver fluidos.",
+        "Diga se o PC também é de trabalho ou de aula, para não faltar porta e memória.",
+        "Peça para ver a máquina ligada antes de levar. É o padrão da loja."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "Antes de fechar, a máquina ligada abre um jogo da sua lista, em Full HD, e mostra a placa dedicada em uso, não o vídeo integrado. O SSD aparece como disco do sistema. A memória aparece com 16 GB reconhecidos. São conferências sobre os jogos de agora, feitas na sua frente. Não são uma pontuação de GTA 6.",
+      "tipo": "paragrafo",
+      "texto": "Um degrau acima está o [intermediário](/blog/pc-gamer-intermediario-para-gta-6). Quem já tem PC e só troca peça olha o [upgrade](/blog/upgrade-do-pc-antes-do-gta-6). A visão geral, sem faixa, está em [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial)."
     },
     {
-      tipo: "paragrafo",
-      texto: "Se alguma dessas conferências falha, a faixa não foi entregue, mesmo que a caixa diga gamer. O guia geral, com o mesmo corte de data, está em [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial). A leitura local, para quem vai montar em Campinas, continua em [PC gamer e GTA 6](/blog/pc-gamer-gta-6-campinas), sem transformar a cidade num requisito.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-gamer-entrada-para-gta-6-fecho.webp",
-        alt: "Balcão do caixa, com o computador do PDV, teclado e o iMac ao lado.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-gamer-entrada-para-gta-6-fecho.webp",
+        "alt": "Balcão do caixa da loja em Campinas, retirada de um PC gamer de entrada para GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Balcão do caixa, com o computador do PDV, teclado e o iMac ao lado. Foto da loja, na Av. Anchieta, 789, Cambuí.",
+      "legenda": "Caixa e atendimento no mesmo balcão: a máquina não sai sem alguém conferir o pedido."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "A faixa fica definida por uso: Full HD nos jogos de agora",
-        "Placa dedicada, 16 GB e SSD são peças observáveis, não slogan",
-        "O orçamento pede a sua lista, então não nasce genérico",
-      ],
-      contras: [
-        "Não é um PC de GTA 6 e não cabe esse rótulo",
-        "Quad HD e competitivo de taxa alta são outra faixa",
-        "Sem a lista de jogos, o orçamento não tem o que acertar",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que a entrada aguenta numa noite comum"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Antes de pedir o orçamento",
+      "tipo": "paragrafo",
+      "texto": "Numa noite típica dessa faixa você abre um mundo aberto em Full HD, com qualidade alta, Discord em segundo plano se a memória for 16 GB bem administrada, e fecha o navegador de dez guias. A partida flui. A gravação em qualidade alta, com câmera e alerta, já pede cuidado: dá para ensaiar, e a live pesada mora na faixa de cima. Se o seu plano é transmitir toda quinta, diga isso no pedido e a entrada cresce em memória e em codificador, ou você sobe de faixa com honestidade."
     },
     {
-      tipo: "paragrafo",
-      texto: "Peça o orçamento pelo WhatsApp (19) 98751-0267 ou no balcão da Balão da Informática Anchieta, Av. Anchieta, 789, Cambuí, Campinas. Diga os jogos, a tela e se a máquina também grava. O valor é o do dia em que você pergunta, e esta página não o antecipa.",
+      "tipo": "paragrafo",
+      "texto": "Gabinete da entrada ainda precisa de uma entrada de ar na frente e de espaço para a placa. O modelo mais barato, lacrado, com a GPU colada no vidro, esquenta em dezembro em Campinas e o clock cai. Vale gastar a diferença num gabinete que respira e guardar o RGB para depois. Fonte com selo de fabricante conhecido entra no mesmo raciocínio. É a peça que ninguém fotografa e a que desliga o PC quando a cidade fica cheia de carro."
     },
     {
-      tipo: "paragrafo",
-      texto: "Você vê a máquina ligada com um jogo da sua lista antes de decidir. Se o que você quer é jogar GTA 6 no dia 19, o publicado até aqui é o console, e a resposta tem de ser essa. A decisão é pedir orçamento de um PC de entrada para Full HD atual, e não de um PC de GTA 6.",
+      "tipo": "lista",
+      "itens": [
+        "Full HD com qualidade alta é o alvo, não o 4K.",
+        "Live pesada não é promessa desta faixa.",
+        "Gabinete com ar e fonte de marca fecham o pedido."
+      ]
     },
     {
-      tipo: "chamada",
-      titulo: "Quer orçamento de entrada para Full HD?",
-      texto: "Mande os jogos que você abre hoje e a resolução da tela. O retorno descreve essa faixa, sem chamar a máquina de PC de GTA 6.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Uma noite de Full HD para validar a máquina"
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Atualize o Windows e a loja, instale um jogo que você já conhece e ande por uma cidade em 1080p. A textura tem de chegar no tempo, a ventoinha fica num ronco constante e o cabo da fonte não esquenta na mão. Dez minutos nesse passeio dizem se a entrada cumpriu o combinado, melhor do que qualquer selo na caixa."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Se a imagem só fica boa com tudo no baixo, a placa ficou curta para a tela ou o jogo está no HD. Os dois têm conserto diferente, e a loja separa um do outro antes de você trocar a peça errada. Full HD bem feito dura. Full HD no limite, com live por cima, pede a faixa seguinte."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "pc-gamer",
+      "titulo": "Quer fechar um Full HD sem peça sobrando?",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas monta a faixa de entrada e mostra ligada. Av. Anchieta, 789, Cambuí. WhatsApp (19) 98751-0267.",
+      "rotulo": "Montar em Full HD",
+      "href": "/montagempc",
+      "mensagem": "Olá! Li a matéria de PC gamer de entrada para GTA 6 e quero uma máquina de Full HD."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "As máquinas prontas também estão na categoria de [PC gamer](/categoria/computadores-pc-pc-gamer). A série do jogo fica em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "O que é um PC gamer de entrada?",
-      resposta: "Nesta página, é o computador que joga em Full HD os títulos de agora, com placa de vídeo dedicada, 16 GB de memória e SSD. Não é um modelo único. O orçamento sai da lista de jogos que você informa.",
+      "pergunta": "PC de entrada roda GTA 6?",
+      "resposta": "Não há como afirmar: a Rockstar não publicou a versão de PC. A faixa de entrada é desenhada para jogos atuais em Full HD."
     },
     {
-      pergunta: "Esse PC roda GTA 6?",
-      resposta: "Não há como afirmar. Até 19 de novembro de 2026 a Rockstar não anunciou versão de PC nem requisito. A faixa de entrada atende os jogos de hoje em Full HD. Chamá-la de PC de GTA 6 é o rótulo que esta página recusa.",
+      "pergunta": "Quantos GB de RAM na entrada?",
+      "resposta": "16 GB em dois pentes, se você joga com o resto fechado. 32 GB se Discord, navegador e jogo ficam abertos juntos."
     },
     {
-      pergunta: "Dá para começar sem placa dedicada?",
-      resposta: "Dá para um uso leve, e esse uso não é a faixa de entrada descrita aqui. Nos jogos pesados de agora, em Full HD, o vídeo integrado é o primeiro limite. Se o pedido é PC gamer de entrada, a placa dedicada faz parte da definição.",
+      "pergunta": "Precisa de SSD?",
+      "resposta": "Sim. HD no lugar do SSD devolve carregamento longo. Um NVMe de 1 TB cabe sistema e os jogos da rotação."
     },
     {
-      pergunta: "O que informar no orçamento?",
-      resposta: "Os jogos que você abre hoje, se a tela é Full HD e se a máquina também grava ou estuda com muitas abas. Com isso, placa, memória e disco têm critério. Sem isso, o pedido vira um chassi genérico, e GTA 6 continua sem ficha para preencher o buraco.",
+      "pergunta": "Dá para transmitir nessa faixa?",
+      "resposta": "Dá uma live simples, com o codificador da placa, se o jogo estiver folgado. Qualidade alta e jogo pesado juntos pedem a faixa de cima."
     },
     {
-      pergunta: "Entrada serve para Quad HD?",
-      resposta: "Não é a proposta desta faixa. Quad HD pede mais placa para o mesmo ajuste, nos jogos que você já roda. Se a tela nova é Quad HD, o pedido deixa de ser entrada e a conversa muda de faixa. Full HD é o casamento desta página.",
-    },
+      "pergunta": "Qual o preço?",
+      "resposta": "Não fixamos preço no blog. O orçamento sai na loja, com as peças do dia, para o seu monitor."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    YAHOOPC,
-    STEAM,
-    TAKETWO,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
+      "url": "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
+      "data": "15 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

@@ -1,251 +1,257 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const PLAYSTATION: Fonte = {
-  nome: "PlayStation — página de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const XBOX: Fonte = {
-  nome: "Xbox Wire — Grand Theft Auto VI no Xbox Cloud Gaming",
-  url: "https://news.xbox.com/en-us/2026/11/10/grand-theft-auto-6-comes-to-xbox-cloud-gaming-november-19/",
-  data: "10 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
-
-const TAKETWO: Fonte = {
-  nome: "Take-Two Interactive — comunicado de pré-venda de Grand Theft Auto VI",
-  url: "https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/",
-  data: "24 de junho de 2026",
-};
-
-const PSSUPORTE: Fonte = {
-  nome: "PlayStation — suporte de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/support/games/gta-vi-support/",
-  data: "consulta em 19 de novembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "gta-6-plataformas-ps5-xbox-e-pc",
-  titulo: "GTA 6 no PS5 e no Xbox Series: e o PC, foi anunciado?",
-  resumo: "No lançamento, GTA 6 está no PS5 e no Xbox Series. O PC não foi anunciado até 19 de novembro de 2026. Veja o que cada aparelho faz.",
-  categoria: "noticias",
-  etiquetas: [
+  "slug": "gta-6-plataformas-ps5-xbox-e-pc",
+  "titulo": "GTA 6 vai sair para PC? O que a Rockstar confirmou",
+  "resumo": "GTA 6 vai sair para PC? Até a estreia, a Rockstar só confirmou PS5 e Xbox Series X|S. Veja cada aparelho e o histórico de GTA V e RDR2.",
+  "categoria": "noticias",
+  "etiquetas": [
     "GTA 6",
     "PS5",
-    "Xbox",
-    "PC",
+    "Xbox Series",
+    "PC"
   ],
-  capa: {
-    src: "/blog/capas/gta-6-plataformas-ps5-xbox-e-pc.webp",
-    alt: "PlayStation 5 e controle DualSense numa prateleira.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/gta-6-plataformas-ps5-xbox-e-pc.webp",
+    "alt": "PlayStation 5 e controle DualSense, um dos aparelhos em que GTA 6 vai sair.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-17T15:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-17T15:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "GTA 6 no PS5 e no Xbox: e o PC foi anunciado?",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "GTA 6 vai sair para PC? Plataformas oficiais",
+    "descricao": "GTA 6 vai sair para PC? Até a estreia, a Rockstar só confirmou PS5 e Xbox Series X|S. Veja cada aparelho e o histórico de GTA V e RDR2.",
+    "palavrasChave": [
+      "gta 6 vai sair para pc",
       "gta 6 ps5",
-      "gta 6 xbox",
-      "gta 6 pc",
-      "gta 6 plataformas",
-    ],
+      "gta 6 xbox series",
+      "plataformas gta 6"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "A pergunta de balcão, nesta semana, é se o computador que a pessoa já tem roda GTA 6 no dia do lançamento. A página do jogo não lista PC. Lista PlayStation 5 e Xbox Series X|S.",
+      "tipo": "paragrafo",
+      "texto": "GTA 6 vai sair para PC? Até 19 de novembro de 2026, a resposta publicada pela Rockstar é que o lançamento é de PlayStation 5 e Xbox Series X|S. A página oficial não tem computador, e a cobertura da Yahoo em 15 de novembro registrou o mesmo: sem data de PC, sem pré-venda e sem ficha de computador."
     },
     {
-      tipo: "paragrafo",
-      texto: "Até 19 de novembro de 2026 a Rockstar não anunciou versão de computador, pré-venda de PC nem requisito. Dá para jogar no dia 19 num PS5 ou num Xbox Series. Nos outros aparelhos, ou não roda, ou só existe um caminho de nuvem com letra miúda.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "No dia da estreia, Grand Theft Auto VI está anunciado para PS5, PS5 Pro e Xbox Series X|S.",
+        "Não há versão de PC anunciada, nem ficha técnica, nem página de pré-venda para computador.",
+        "GTA V e Red Dead Redemption 2 chegaram ao PC depois dos consoles. Isso é histórico, não um calendário do GTA 6."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**PS5, PS5 Pro e Xbox Series são o lançamento.** É o que a Rockstar e a Take-Two publicaram.",
-        "**PS4 fica de fora.** A PlayStation diz isso na pergunta frequente, sem ambiguidade.",
-        "**Xbox One entra só pela nuvem.** O Xbox Wire avisa que o gráfico é o do Series S e que o jogo se compra à parte.",
-        "**PC não está na lista.** Relato de imprensa não substitui a página da Rockstar.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "GTA 6 vai sair para PC? O que está escrito"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a página oficial coloca no dia 19",
+      "tipo": "paragrafo",
+      "texto": "A lista que importa é a da própria Rockstar: PlayStation 5 e Xbox Series X|S, com a frase de que o jogo roda melhor no PS5. A PlayStation acrescenta o PS5 Pro na página do jogo. PS4 não aparece. Xbox One não aparece. Steam, Epic Games Store e Rockstar Launcher não têm página de Grand Theft Auto VI."
     },
     {
-      tipo: "paragrafo",
-      texto: "A [página da Rockstar](https://www.rockstargames.com/VI) mostra dois selos: PlayStation 5 e Xbox Series X|S, e diz que o jogo rende melhor no PS5. A [Take-Two](https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/) repete essas plataformas no comunicado de pré-venda. Não há uma terceira coluna para Windows.",
+      "tipo": "paragrafo",
+      "texto": "Um anúncio de loja, um código vazado ou um vídeo com “ficha vazada” não substitui essa lista. Quando a versão de computador existir, ela deve sair no newswire da Rockstar, num comunicado da Take-Two ou numa loja oficial. Até lá, tratar rumor como ficha é o jeito mais rápido de comprar peça pelo motivo errado."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-aparelhos.webp",
-        alt: "Console Xbox e controle, em fundo escuro.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-aparelhos.webp",
+        "alt": "Console Xbox e controle, plataforma em que GTA 6 vai sair na estreia.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Console Xbox e controle, em fundo escuro. Foto de Martin Martz (Pexels).",
+      "legenda": "O Xbox Series está na lista oficial, ao lado do PlayStation 5."
     },
     {
-      tipo: "paragrafo",
-      texto: "No ecossistema da Sony, a [página do jogo](https://www.playstation.com/en-us/games/grand-theft-auto-vi/) marca PS5 e PS5 Pro. O Pro ganha clareza extra pelo PSSR, a reconstrução de imagem da Sony, e sombra com ray tracing, desde que a tela seja compatível. O mesmo texto diz que o DualSense usa vibração e gatilho adaptativo. Nada disso aparece como promessa de PC, porque o PC não está nessa página.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que cada aparelho anunciado entrega"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "PlayStation 4 e Xbox One não são o mesmo “não”",
+      "tipo": "paragrafo",
+      "texto": "No PS5 e no PS5 Pro, a página da PlayStation é a ficha de compra: reserva, pré-carga a partir de 10 de novembro à meia-noite local, e pelo menos 212 GB livres. No Xbox Series X e no Series S, a compra é pela Microsoft Store ou pelo varejo. Os dois estão no mesmo anúncio da Rockstar. A empresa não publicou uma tabela comparando resolução ou taxa de quadros entre Series X e Series S, então não há número honesto para repetir."
     },
     {
-      tipo: "paragrafo",
-      texto: "No PS4 a resposta é fechada: a PlayStation escreve que o jogo só roda em consoles PlayStation 5. Não há modo de compatibilidade anunciado, nem versão reduzida.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "No Xbox One a resposta é outra, e está no [Xbox Wire de 10 de novembro de 2026](https://news.xbox.com/en-us/2026/11/10/grand-theft-auto-6-comes-to-xbox-cloud-gaming-november-19/). O jogo pode ser transmitido pela nuvem nesse console, com os gráficos do Xbox Series S, a partir da 1h da manhã no horário do Leste dos Estados Unidos no dia 19. Não é o jogo instalado no Xbox One. A compra do jogo é separada, e a disponibilidade da nuvem muda por país e por aparelho. Quem está no Brasil precisa checar a loja da Microsoft da própria conta, em vez de assumir que o anúncio americano vale aqui.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-nativo.webp",
-        alt: "Mesa escura com gabinete iluminado, dois monitores e teclado.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
-      },
-      legenda: "Mesa escura com gabinete iluminado, dois monitores e teclado. Foto de Atahan Demir (Pexels).",
-    },
-    {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Series S não é Series X com outro nome",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Os dois estão no lançamento nativo. O Xbox Wire trata o Series X como a experiência de console mais alta da marca e o Series S como o caminho nativo mais barato. Quando o jogo é só nuvem, inclusive num Series, o gráfico informado é o do Series S. São três experiências, não uma.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O PC ficou de fora do comunicado",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Em 15 de novembro de 2026, uma [reportagem do Just Jared republicada no Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html) conferiu o site oficial e um relatório da Take-Two: as plataformas do dia 19 continuavam sendo PS5 e Xbox Series, sem data de PC, sem pré-venda de PC e sem requisito. A mesma reportagem lembra o intervalo histórico de GTA V e de Red Dead Redemption 2, que chegaram ao computador depois do console. Isso é precedente, não calendário de GTA 6.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Relato não é data",
-      texto: "Há matéria citando fontes anônimas sobre um PC no começo de 2027. A Rockstar não confirmou. Tratar essa janela como plano de compra é decidir em cima de um boato.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O histórico, como essa reportagem resume, é de espera: GTA V saiu em console em setembro de 2013 e no PC em abril de 2015; Red Dead Redemption 2 saiu em console em outubro de 2018 e no PC em novembro de 2019. O intervalo mudou de um jogo para o outro. Não serve para marcar o mês de GTA 6 no computador.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que fazer com o computador enquanto isso",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Se a meta é jogar no dia 19, o aparelho da lista oficial é um console da geração atual, não um upgrade de placa feito no escuro. Se a meta é estar pronto para uma versão de PC que ainda não existe, o caminho é outro e está no guia de [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial): montar para os jogos de agora, com folga, e esperar a ficha.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A [data de lançamento](/blog/gta-6-lancamento-19-novembro-2026) e a [série completa](/blog/gta-6) fecham o contexto. Plataforma é a primeira pergunta. Requisito de PC é uma pergunta que a Rockstar ainda não abriu.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-fecho.webp",
-        alt: "Gatilhos de um controle de PlayStation, em close.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
-      },
-      legenda: "Gatilhos de um controle de PlayStation, em close. Foto de Youssef Samuil (Pexels).",
-    },
-    {
-      tipo: "pros-contras",
-      pros: [
-        "Dá para saber, com fonte, em qual aparelho o jogo existe no dia 19",
-        "PS4 e Xbox One deixam de ser tratados como se fossem a mesma limitação",
-        "O PC sai da lista de compra de lançamento sem virar promessa de que nunca virá",
+      "tipo": "tabela",
+      "titulo": "Onde GTA 6 está anunciado na estreia",
+      "colunas": [
+        "Aparelho",
+        "Na estreia de 19/11/2026",
+        "Onde confirmar"
       ],
-      contras: [
-        "A nuvem do Xbox depende de país, conta e compra à parte",
-        "Um anúncio de PC pode surgir depois desta matéria",
-        "Quem só tem PC não joga no dia 19 com o que foi publicado até agora",
+      "linhas": [
+        [
+          "PlayStation 5 e PS5 Pro",
+          "Sim",
+          "Página da PlayStation e site da Rockstar"
+        ],
+        [
+          "Xbox Series X e Series S",
+          "Sim",
+          "Página oficial da Rockstar"
+        ],
+        [
+          "PS4 e Xbox One",
+          "Não listados",
+          "Fora da página oficial"
+        ],
+        [
+          "PC, Steam ou launcher da Rockstar",
+          "Não anunciado",
+          "Sem página de pré-venda"
+        ]
       ],
+      "fonte": {
+        "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+        "url": "https://www.rockstargames.com/VI",
+        "data": "consulta em 19 de novembro de 2026"
+      },
+      "nota": "A linha do PS5 Pro está na página da PlayStation. As outras seguem a lista da Rockstar."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Antes de trocar de aparelho",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Histórico de PC da Rockstar, rotulado como histórico"
     },
     {
-      tipo: "paragrafo",
-      texto: "Na Balão da Informática Anchieta, Av. Anchieta, 789, Cambuí, Campinas, a equipe não vende console no lugar de uma conversa sobre o PC que você já tem. Se o uso é jogo de computador hoje, o papo é a [montagem](/montagempc) para esses jogos. GTA 6 no dia 19 não entra nessa conta enquanto a versão de PC não existir.",
+      "tipo": "paragrafo",
+      "texto": "GTA V saiu em 17 de setembro de 2013 para PlayStation 3 e Xbox 360. O PC veio em 14 de abril de 2015, cerca de 19 meses depois, com o newswire da Rockstar anunciando a versão para computador. Red Dead Redemption 2 saiu em 26 de outubro de 2018 nos consoles e em 5 de novembro de 2019 no PC, pouco mais de um ano depois. As duas datas de PC estão nos newswires da Rockstar. As de console estão na Wikipedia, usadas aqui só como calendário."
     },
     {
-      tipo: "paragrafo",
-      texto: "Chame no WhatsApp (19) 98751-0267 e diga qual aparelho você tem. A resposta honesta pode ser “esse PC não é o caminho do dia 19”. Escolha o aparelho pela lista oficial, não pelo desejo de que o PC já esteja nela.",
+      "tipo": "paragrafo",
+      "texto": "O intervalo não é uma lei. Ninguém na Rockstar disse que Grand Theft Auto VI vai repetir 13 ou 19 meses. Serve para uma coisa prática: quem espera o PC pode passar um bom tempo no GTA V, no Red Dead e nos outros jogos de mundo aberto que já estão no computador. Quem quer a campanha nova na semana da estreia precisa de um console da lista."
     },
     {
-      tipo: "chamada",
-      titulo: "Seu PC é para os jogos de agora ou para o dia 19?",
-      texto: "Conte o que você joga hoje. Se a meta for GTA 6 no lançamento, a conversa começa pela lista de consoles, não por uma placa sem requisito.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-nativo.webp",
+        "alt": "Mesa com gabinete, dois monitores e teclado, setup de PC à espera de uma versão de GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "O PC fica para quando a Rockstar publicar a versão. Até lá, a mesa serve para os jogos que já existem."
     },
+    {
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como decidir sem comprar no susto"
+    },
+    {
+      "tipo": "lista",
+      "itens": [
+        "Quer a campanha em novembro de 2026: PS5, PS5 Pro ou Xbox Series X|S.",
+        "Já tem um desses consoles: reserve espaço e veja a [pré-carga](/blog/gta-6-pre-carga-e-tamanho).",
+        "Só joga no PC e topa esperar: não compre chave paralela. Acompanhe o newswire.",
+        "Vai montar computador agora: monte para a tela e para os jogos de hoje. O guia é [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial)."
+      ]
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O [lançamento](/blog/gta-6-lancamento-19-novembro-2026) detalha o horário no Brasil. As edições e o valor em dólar estão em [preço do GTA 6](/blog/gta-6-preco-e-edicoes)."
+    },
+    {
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-fecho.webp",
+        "alt": "Gatilhos de um controle de PlayStation em close, aparelho da lista oficial de GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
+      },
+      "legenda": "No PS5, o controle é o jeito anunciado de jogar a campanha na estreia."
+    },
+    {
+      "tipo": "destaque",
+      "tom": "atencao",
+      "titulo": "Chave de PC à venda",
+      "texto": "Se uma loja ou um anúncio oferecer Grand Theft Auto VI para computador antes de a Rockstar anunciar essa versão, não é o produto oficial. A pré-venda publicada é de console."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "games",
+      "titulo": "Console na bancada, PC na mesa ao lado",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas avalia PlayStation e Xbox e monta computador para os jogos que já estão no PC. Av. Anchieta, 789, Cambuí. WhatsApp (19) 98751-0267.",
+      "rotulo": "Falar com a loja",
+      "href": "/assistenciagames",
+      "mensagem": "Olá! Li a matéria das plataformas do GTA 6 e quero orientação de console ou de PC."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O restante da série está em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "GTA 6 roda no PS4 ou no Xbox One?",
-      resposta: "No PS4, não: a PlayStation diz que só os consoles PlayStation 5 rodam o jogo. No Xbox One, o Xbox Wire anuncia transmissão pela nuvem, não uma versão instalada, com gráfico de Series S e compra do jogo à parte.",
+      "pergunta": "GTA 6 vai sair para PC?",
+      "resposta": "A Rockstar não anunciou. Em 19 de novembro de 2026 o jogo estreia em PlayStation 5 e Xbox Series X|S. Não há pré-venda de PC nem requisitos publicados."
     },
     {
-      pergunta: "O PS5 Pro muda alguma coisa?",
-      resposta: "A página da PlayStation diz que no PS5 Pro o jogo usa PSSR e sombra com ray tracing, em tela compatível. Continua sendo a mesma versão de PS5, com um modo de imagem mais alto.",
+      "pergunta": "Roda em PS4 ou Xbox One?",
+      "resposta": "Não estão na lista oficial. A página da Rockstar cita PlayStation 5 e Xbox Series X|S. A PlayStation cita também o PS5 Pro."
     },
     {
-      pergunta: "Vai ter GTA 6 no Steam no lançamento?",
-      resposta: "Até 19 de novembro de 2026 não havia pré-venda de PC em loja nenhuma anunciada pela Rockstar, inclusive Steam. O comunicado da Take-Two cita PlayStation Store, Microsoft Store e Rockstar Games Store para o jogo de console.",
+      "pergunta": "Qual console a Rockstar recomenda?",
+      "resposta": "A página oficial diz que o jogo roda melhor no PlayStation 5. Isso é o texto da Rockstar, não um comparativo independente de desempenho."
     },
     {
-      pergunta: "Posso ir montando o PC com a configuração do PS5?",
-      resposta: "Não há equivalência publicada. O console não informa a peça de PC correspondente, e a Rockstar não publicou requisito de computador. Montar “no olho” é chute.",
+      "pergunta": "GTA V e Red Dead demoraram quanto para chegar ao PC?",
+      "resposta": "GTA V chegou ao PC em 14 de abril de 2015, cerca de 19 meses depois dos consoles. Red Dead Redemption 2 chegou em 5 de novembro de 2019, pouco mais de um ano depois. É histórico, não uma data do GTA 6."
     },
+    {
+      "pergunta": "Vale comprar um PC agora por causa do GTA 6?",
+      "resposta": "Vale se o computador novo melhora os jogos que você já joga e a tela que você já tem. Não vale se a única promessa da compra for rodar GTA 6, porque essa ficha não existe."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    PLAYSTATION,
-    XBOX,
-    YAHOOPC,
-    TAKETWO,
-    PSSUPORTE,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "PlayStation — página de Grand Theft Auto VI",
+      "url": "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
+      "url": "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
+      "data": "15 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — “Grand Theft Auto V Is Now Available for PC”",
+      "url": "https://www.rockstargames.com/newswire/article/25o2411812a31k/grand-theft-auto-v-is-now-available-for-pc",
+      "data": "14 de abril de 2015"
+    },
+    {
+      "nome": "Rockstar Games — “Red Dead Redemption 2 Coming to PC November 5th”",
+      "url": "https://www.rockstargames.com/newswire/article/9k1248838o2974/Red-Dead-Redemption-2-Coming-to-PC-November-5th",
+      "data": "4 de outubro de 2019"
+    },
+    {
+      "nome": "Wikipedia — Grand Theft Auto V (datas de lançamento)",
+      "url": "https://en.wikipedia.org/wiki/Grand_Theft_Auto_V",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Wikipedia — Red Dead Redemption 2 (datas de lançamento)",
+      "url": "https://en.wikipedia.org/wiki/Red_Dead_Redemption_2",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

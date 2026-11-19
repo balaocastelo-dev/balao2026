@@ -1,274 +1,258 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
-
-const ROCKSTARDATA: Fonte = {
-  nome: "Rockstar Games — “Grand Theft Auto VI is Now Set to Launch November 19, 2026”",
-  url: "https://www.rockstargames.com/newswire/article/ak3ak31a49a221/grand-theft-auto-vi-is-now-set-to-launch-november-19-2026",
-  data: "6 de novembro de 2025",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "pc-para-live-de-gta-6",
-  titulo: "PC para fazer live de GTA 6: o que a transmissão pede",
-  resumo: "A live pede folga além do jogo, porque alguém precisa codificar o vídeo. Sem PC de GTA 6, a máquina de hoje é a dos jogos que você já transmite.",
-  categoria: "guias",
-  etiquetas: [
+  "slug": "pc-para-live-de-gta-6",
+  "titulo": "PC para live de GTA 6: o que a transmissão pede a mais",
+  "resumo": "PC para live de GTA 6 joga e codifica ao mesmo tempo. Veja CPU, RAM e NVENC, e teste hoje no GTA V: a versão nova de PC não foi anunciada.",
+  "categoria": "guias",
+  "etiquetas": [
     "GTA 6",
     "Live",
-    "Transmissão",
     "PC gamer",
+    "Streaming"
   ],
-  capa: {
-    src: "/blog/capas/pc-para-live-de-gta-6.webp",
-    alt: "Pessoa de fone e microfone, transmitindo sentada à mesa.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/pc-para-live-de-gta-6.webp",
+    "alt": "Pessoa de fone e microfone transmitindo, um PC para live de GTA 6 no futuro e de GTA V hoje.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-09T18:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-09T18:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "PC para live de GTA 6: o que a transmissão pede",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "PC para live de GTA 6: jogo e transmissão juntos",
+    "descricao": "PC para live de GTA 6 joga e codifica ao mesmo tempo. Veja CPU, RAM e NVENC, e teste hoje no GTA V: a versão nova de PC não foi anunciada.",
+    "palavrasChave": [
       "pc para live de gta 6",
-      "pc para transmitir jogo",
-      "computador para live",
-      "codificar vídeo enquanto joga",
-    ],
+      "pc para transmitir gta",
+      "computador para stream",
+      "live de gta"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Um PC para live de GTA 6 teria de rodar o jogo e, ao mesmo tempo, codificar vídeo para a transmissão. São duas cargas. A segunda não vem de graça dentro da primeira. O problema, hoje, é anterior: até 19 de novembro de 2026 não existe versão de PC do jogo, então não existe o PC dessa live. O que existe é a máquina dos jogos que você já transmite.",
+      "tipo": "paragrafo",
+      "texto": "PC para live de GTA 6 carrega duas tarefas, e só uma delas existe hoje. Jogar um mundo aberto pesa. Codificar a imagem e enviar para a Twitch, o YouTube ou a Kick pesa de novo. A Rockstar não anunciou o GTA 6 para computador, então o treino é nos jogos que você já transmite, GTA V incluído. A máquina que aguenta as duas cargas agora é a que estará menos apertada quando a versão de PC, se sair, chegar."
     },
     {
-      tipo: "paragrafo",
-      texto: "A [página oficial](https://www.rockstargames.com/VI) lista PlayStation 5 e Xbox Series no dia 19 de novembro de 2026. O [Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html) não achou requisito de computador em 15 de novembro. Planejar bitrate, resolução de live ou placa “do GTA” em cima disso é desenhar em cima de uma página em branco. A folga se mede na live que já está no ar.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Separe jogo e codificador. NVENC, na placa NVIDIA, tira a live do processador. A OBS documenta esse caminho.",
+        "32 GB de RAM cabem o jogo, o OBS, o navegador do chat e o Discord. 16 GB enchem.",
+        "Grave cinco minutos em disco antes de abrir a live. Se o arquivo local já falha, a internet nem entrou na história."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**A transmissão codifica vídeo além de rodar o jogo.** As duas tarefas dividem a máquina.",
-        "**Sem versão de PC, não há PC de live de GTA 6.** Há o PC da live que você já faz.",
-        "**O codificador pode ser da placa ou do processador.** O programa dessa escolha é o OBS.",
-        "**32 GB e placa forte são a folga da faixa alta.** Entram quando a captura já faz parte do uso.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "PC para live de GTA 6: as duas cargas"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que a transmissão acrescenta ao jogo",
+      "tipo": "paragrafo",
+      "texto": "A primeira carga é o jogo: placa de vídeo na resolução da sua tela, como em [placa de vídeo para GTA 6](/blog/placa-de-video-para-gta-6), e processador que não esteja no talo só com a cidade cheia. A segunda é o OBS, ou o programa que você usa, transformando o quadro em vídeo. Se as duas caem no mesmo chip, o jogo soluça na hora em que você lê o chat. O guia de NVENC da OBS mostra como deixar a placa codificar. Quem está na AMD usa o codificador da própria placa, com o mesmo princípio: não fazer os dois trabalhos no processador se a GPU pode fazer um deles."
     },
     {
-      tipo: "paragrafo",
-      texto: "Jogar pede que a placa desenhe o quadro a tempo. Transmitir pede que outro recurso leia esse quadro, comprima e envie, ou grave. Se os dois usam o mesmo teto sem folga, um deles perde: o jogo soluça ou o vídeo da live sai picado. A folga da transmissão é exatamente esse segundo trabalho, não um enfeite em cima de uma máquina que já estava no limite.",
+      "tipo": "paragrafo",
+      "texto": "Memória é o terceiro pedaço, e o mais barato de errar. Jogo grande, cena do OBS com câmera e alerta, Chrome do painel e Discord passam de 16 GB com facilidade. A matéria de [memória RAM](/blog/memoria-ram-para-gta-6) explica o salto para 32 GB. Disco cheio também derruba a gravação local, que é o seu teste. O [SSD](/blog/ssd-para-gta-6) precisa de folga, não só de velocidade."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-para-live-de-gta-6-cargas.webp",
-        alt: "Microfone de mesa, notebook e fone num espaço de gravação.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-para-live-de-gta-6-cargas.webp",
+        "alt": "Microfone, notebook e fone num espaço de gravação, canto de um PC para live de GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Microfone de mesa, notebook e fone num espaço de gravação. Foto de Kaboompics (Pexels).",
+      "legenda": "Microfone de mesa, notebook e fone: a live começa pelo áudio, e o PC precisa sobrar para o jogo não cair enquanto você fala."
     },
     {
-      tipo: "tabela",
-      titulo: "Carga de jogar e carga de transmitir",
-      colunas: [
-        "Tarefa",
-        "Quem executa",
-        "Sem folga",
+      "tipo": "tabela",
+      "titulo": "O que a live soma em cima do jogo",
+      "colunas": [
+        "Peça",
+        "Só jogar",
+        "Jogar e transmitir"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Desenhar o jogo",
-          "Placa de vídeo",
-          "O quadro soluça",
+          "Placa",
+          "Desenha o jogo",
+          "Desenha o jogo e, se der, codifica"
         ],
         [
-          "Codificar o vídeo",
-          "Placa, se tiver, ou processador",
-          "A live sai picada",
+          "Processador",
+          "Cidade, trânsito, física",
+          "O mesmo, mais o que a placa não codificar"
         ],
         [
-          "Voz e som do jogo",
-          "Fontes de áudio",
-          "Uma faixa cobre a outra",
+          "RAM",
+          "16 GB com o resto fechado",
+          "32 GB com OBS, chat e Discord"
         ],
         [
-          "Guardar a sessão",
-          "Disco, de preferência SSD",
-          "O HD segura os dois",
-        ],
+          "Disco",
+          "O jogo instalado",
+          "O jogo, mais a gravação local de teste"
+        ]
       ],
+      "nota": "Comparação para os jogos de hoje. Grand Theft Auto VI não tem ficha de PC."
     },
     {
-      tipo: "paragrafo",
-      texto: "Por isso a faixa alta desta série fala em placa forte, 32 GB, SSD rápido e margem para capturar. Ela está no guia de [alto desempenho](/blog/pc-gamer-alto-desempenho-gta-6). Se você só joga em Full HD, com placa dedicada recente, 16 GB e SSD, está na entrada e não deve subir para a alta só porque um dia talvez transmita GTA 6. A live que conta é a que você faz agora.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O teste que evita a live ruim"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Por que a live de hoje não é a de GTA 6",
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Abra o jogo que você já transmite, em GTA V se for o caso, na qualidade que você usa.",
+        "No OBS, arme a cena com jogo, câmera e microfone. O guia rápido da OBS é o ponto de partida, e a matéria de [OBS](/blog/obs-para-live-de-jogo) traduz para a mesa.",
+        "Grave cinco minutos em disco, sem ir ao ar.",
+        "Assista. Se o quadro caiu ou a voz estourou, ajuste antes de chamar plateia.",
+        "Só então teste a subida da internet, na matéria de [internet para live](/blog/internet-para-fazer-live)."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "A live de GTA 6 no PC pediria o jogo instalado num computador. Esse instalador não foi anunciado. Transmitir o console com uma placa de captura é outro arranjo, com outro aparelho, e não transforma o PC em “o PC do jogo”. Este texto fica no computador que joga e codifica ao mesmo tempo. Sem o jogo de PC, o ensaio é com o que você já abre.",
+      "tipo": "paragrafo",
+      "texto": "A faixa de máquina que já nasce com essa folga é a de [alto desempenho](/blog/pc-gamer-alto-desempenho-gta-6). Dá para transmitir numa faixa menor, com o jogo em Full HD e a codificação na placa, desde que o teste local passe."
     },
     {
-      tipo: "paragrafo",
-      texto: "Quando a Rockstar publicar versão e números, dá para perguntar se a folga de hoje ainda cobre o jogo mais a codificação. Antes disso, a pergunta não tem denominador. O guia [sem requisito](/blog/pc-para-gta-6-sem-requisito-oficial) segura essa espera. A série está em [GTA 6](/blog/gta-6). Tratar a live futura como se a ficha já existisse só produz peça comprada no escuro.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Codificar vídeo é uma segunda tarefa",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O programa que organiza cena, fonte e codificador na maior parte das lives de jogo é o OBS Studio. O que configurar nele, sem número inventado de bitrate, está no texto de [OBS para live](/blog/obs-para-live-de-jogo). O arranjo de mesa, luz e retorno fica em [setup de quem transmite](/blog/setup-de-streamer-para-gta-6). Aqui o assunto é a máquina que aguenta as duas cargas.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Codificador da placa ou do processador",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Se a placa de vídeo oferece codificador por hardware, a compressão do vídeo pode sair dela e deixar o processador mais livre para o jogo. Se não oferece, a codificação cai no processador. As duas saídas funcionam. A escolha não é um preset milagroso: é o que o seu hardware expõe. O OBS mostra as opções daquela máquina. Este guia não elege uma marca de codificador como obrigatória.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-para-live-de-gta-6-duas.webp",
-        alt: "Luz colorida dentro de um gabinete montado.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-para-live-de-gta-6-duas.webp",
+        "alt": "Gabinete com luz colorida, máquina usada como PC para live de GTA 6 e dos jogos de hoje.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Luz colorida dentro de um gabinete montado. Foto de Gibson Chan (Pexels).",
+      "legenda": "Luz no gabinete não transmite por você. O que transmite é folga de placa, memória e um teste gravado."
     },
     {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "A folga é além do jogo",
-      texto: "Uma máquina que mal roda o jogo não ganha live por instalar o OBS. A codificação pede margem própria. Sem essa margem, ou o jogo ou o vídeo cede.",
+      "tipo": "pros-contras",
+      "titulo": "A live cabe no PC quando",
+      "pros": [
+        "A gravação local de cinco minutos fica estável.",
+        "O codificador é o da placa, não um x264 no máximo em cima de um chip já cheio.",
+        "Sobram 32 GB e espaço em disco."
+      ],
+      "contras": [
+        "Você descobre o limite com a live aberta e a plateia esperando.",
+        "O jogo está em HD e a gravação também.",
+        "O microfone é o do fone, colado no teclado, e você só percebe no VOD."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Voz, jogo e captura disputam a mesma máquina",
+      "tipo": "paragrafo",
+      "texto": "Áudio e cara da cena estão em [microfone](/blog/microfone-para-live-de-jogo), [webcam](/blog/webcam-para-stream) e [setup](/blog/setup-de-streamer-para-gta-6)."
     },
     {
-      tipo: "paragrafo",
-      texto: "Além do quadro, a live carrega a sua voz, o som do jogo e, se você usa, a câmera. Cada fonte é leve sozinha e pesada juntas quando a memória já está cheia. 16 GB podem bastar para jogar e ficar curtos quando entram voz, navegador do chat e gravação local. 32 GB são a margem da faixa alta justamente para essa pilha, não um número de GTA 6.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O disco entra se você guarda a live no computador, além de enviar. Gravação local escreve o tempo todo. HD mecânico nessa função segura o jogo e a gravação juntos. SSD é o piso das faixas deste blog por isso também. O [upgrade](/blog/upgrade-do-pc-antes-do-gta-6) lembra a ordem: disco e memória antes da placa, se o sintoma for espera e uso escapando para o HD.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Memória e disco para quem grava e joga",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Quem transmite e ainda guarda cópia local precisa de espaço contínuo, não de um disco no limite no dia da live. Apagar a sessão antiga faz parte do uso. Não há um tamanho oficial para “a live de GTA 6”, então não invento gigabytes de gravação. O tamanho é o das suas sessões atuais, vezes o quanto você aceita guardar antes de arquivar fora da máquina.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A placa forte da faixa alta só se justifica se a tela e a codificação já pedem essa margem hoje. Quad HD com folga de memória de vídeo, sem live, continua sendo a [faixa intermediária](/blog/pc-gamer-intermediario-para-gta-6). Subir de faixa porque a transmissão de GTA 6 “vai pedir” é decidir com um jogo que não está no PC. Subir porque a sua live atual já soluça é decidir com evidência.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/pc-para-live-de-gta-6-fecho.webp",
-        alt: "Gabinete preto numa estante branca, no corredor da loja.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/pc-para-live-de-gta-6-fecho.webp",
+        "alt": "Gabinete na estante da Balão da Informática Anchieta, PC para live de GTA 6 conferido no balcão.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Gabinete preto numa estante branca, no corredor da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
+      "legenda": "Na loja, o gabinete da estante é o tipo de torre que a gente abre para ver se a fonte aguenta a placa da live."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "A live fica descrita como segunda carga, então a folga deixa de ser um adjetivo vago",
-        "Sem versão de PC, a máquina se mede nos jogos que você já transmite, não num GTA imaginário",
-        "Codificador da placa ou do processador entra como escolha do hardware que você tem, via OBS",
-      ],
-      contras: [
-        "Não há como saber se a folga de hoje cobre GTA 6 mais a codificação",
-        "16 GB que bastam para jogar podem ficar curtos quando chat, voz e gravação entram juntos",
-        "Este texto não fixa bitrate nem resolução de live: esses números mudam e moram na documentação",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Separar gravação local e transmissão"
     },
     {
-      tipo: "chamada",
-      tema: "pc-gamer",
+      "tipo": "paragrafo",
+      "texto": "O primeiro ensaio não precisa de plateia. Grave dez minutos do GTA V, ou do jogo que você já transmite, com a cena do OBS completa: jogo, microfone e câmera se for usar. Assista o arquivo. Quadro liso e voz sem estouro significam que o PC aguenta. Aí sim conecte a plataforma. Se o arquivo local já falha, mexer na internet não cura. Falta memória, codificador ou disco. Se o arquivo está bom e só a live ao vivo trava, o PC passou e a subida da rede é o próximo capítulo."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Montar para a live que você já faz",
+      "tipo": "paragrafo",
+      "texto": "Deixe um atalho de cena de pausa. Quando você levanta para beber água, a área de trabalho não deve ir ao ar com a pasta de downloads aberta. Uma tela parada com o seu nome resolve. Isso não pede PC mais forte. Pede o hábito, e o hábito cabe na mesma máquina. A faixa alta existe para quem faz isso toda semana com jogo no máximo. A entrada transmite em Full HD se o teste local passar. Os dois combinados com a loja, no WhatsApp, fecham sem adivinhar."
     },
     {
-      tipo: "paragrafo",
-      texto: "Na Balão da Informática Anchieta, na Av. Anchieta, 789, Cambuí, Campinas, a máquina de live se monta em cima do jogo que você já transmite. Diga se o vídeo sai pela placa ou pelo processador e qual é o monitor. A demonstração é com o computador aceso, antes do pagamento. Ninguém chama essa máquina de PC de GTA 6.",
+      "tipo": "lista",
+      "itens": [
+        "Dez minutos gravados e assistidos, antes de abrir a live.",
+        "Cena de pausa pronta, para a área de trabalho não vazar.",
+        "Falha no arquivo local é PC. Falha só ao vivo é rede."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "O WhatsApp (19) 98751-0267 recebe o nome do jogo da sua live e se você também grava cópia local. O orçamento é o do dia, porque o preço muda. A assistência fica no mesmo endereço se a fonte ou o calor forem o limite da codificação. A folga é para a transmissão que existe, não para a que ainda não tem jogo de PC.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Checklist da véspera, sem abrir a live"
     },
     {
-      tipo: "chamada",
-      titulo: "A live de hoje já tem máquina à altura?",
-      texto: "Diga qual jogo você transmite e se o vídeo é pela placa ou pelo processador. A folga é calculada em cima disso.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "paragrafo",
+      "texto": "Atualize o jogo de dia. Feche backup de nuvem. Confira o cabo de rede. Grave cinco minutos com a cena final e assista o começo e o fim. Se a voz entra, o jogo não soluça e a câmera não estoura, pode marcar horário. Se algo falha, conserte nessa gravação. A plateia não é o lugar do ensaio."
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Deixe água, a cena de pausa e o mudo do microfone no lugar. Live longa sem pausa derruba a voz e a vontade. O PC aguenta a técnica. O resto é ritmo, e o ritmo se treina no GTA V ou no jogo que você já narra bem."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "pc-gamer",
+      "titulo": "Quer folga para jogar e gravar?",
+      "texto": "A Balão da Informática Anchieta, loja de informática em Campinas monta a máquina com a live em mente. Av. Anchieta, 789, Cambuí. WhatsApp (19) 98751-0267.",
+      "rotulo": "Montar para transmitir",
+      "href": "/montagempc",
+      "mensagem": "Olá! Li a matéria de PC para live de GTA 6 e quero uma máquina que jogue e grave ao mesmo tempo."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "PC para live de GTA 6 segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Qual PC transmite GTA 6?",
-      resposta: "Nenhum que dê para cravar hoje. Não há versão de PC nem requisito até 19 de novembro de 2026. A live pede folga para codificar vídeo além do jogo. Enquanto o jogo de computador não existe, essa folga é a dos jogos que você já transmite.",
+      "pergunta": "Dá para transmitir GTA 6 no PC?",
+      "resposta": "A versão de PC não foi anunciada. Dá para montar e treinar a live no GTA V e nos jogos que você já tem, com jogo e codificador separados."
     },
     {
-      pergunta: "Só instalar o OBS basta para fazer live?",
-      resposta: "O OBS organiza cena e codificador. Ele não cria folga de máquina. Se o jogo já ocupa o teto, a codificação empurra o quadro ou o vídeo. O que configurar no programa está no guia de OBS, sem bitrate inventado.",
+      "pergunta": "Preciso de 32 GB para live?",
+      "resposta": "Na prática, sim, se o OBS, o chat e o Discord ficam abertos com o jogo. Com 16 GB o disco vira memória e a live soluça."
     },
     {
-      pergunta: "A codificação tem de ser na placa de vídeo?",
-      resposta: "Não. Se a placa oferece codificador por hardware, dá para usar. Se não oferece, o processador codifica. As duas vias são válidas. A certa é a que a sua máquina expõe no OBS, não uma marca escolhida daqui.",
+      "pergunta": "NVENC ajuda?",
+      "resposta": "Ajuda nas placas NVIDIA: a própria OBS documenta o codificador da GPU. A ideia é a mesma nas placas AMD. O processador deixa de fazer os dois trabalhos."
     },
     {
-      pergunta: "16 GB de RAM aguentam live?",
-      resposta: "Aguentam em usos leves e ficam curtos quando jogo, voz, chat e gravação local dividem os 16 GB. A faixa alta reserva 32 GB para essa pilha. Isso não é requisito de GTA 6. É margem para a live que você já faz.",
+      "pergunta": "Como sei se o PC aguenta?",
+      "resposta": "Grave cinco minutos com a cena completa e assista. Se o arquivo local já cai de quadro ou corta a voz, a internet não é o problema."
     },
+    {
+      "pergunta": "Qual faixa de PC comprar?",
+      "resposta": "A de alto desempenho, se a live é rotina. Uma faixa menor transmite em Full HD se o teste local passar e a codificação ficar na placa."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    YAHOOPC,
-    ROCKSTARDATA,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "OBS Studio — guia de NVENC",
+      "url": "https://obsproject.com/kb/nvenc-performance-guide",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "OBS Studio — guia de início rápido",
+      "url": "https://obsproject.com/kb/quick-start-guide",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

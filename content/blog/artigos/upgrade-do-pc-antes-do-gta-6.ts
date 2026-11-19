@@ -1,292 +1,260 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
-
-const PLAYSTATION: Fonte = {
-  nome: "PlayStation — página de Grand Theft Auto VI",
-  url: "https://www.playstation.com/en-us/games/grand-theft-auto-vi/",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const VERGETAMANHO: Fonte = {
-  nome: "The Verge — “GTA VI’s download will need up to 212GB of hard drive space”",
-  url: "https://www.theverge.com/games/1025271/gta-vi-storage-space-rockstar-games",
-  data: "novembro de 2026",
-};
-
-const STEAM: Fonte = {
-  nome: "Steam — Pesquisa de hardware e software",
-  url: "https://store.steampowered.com/hwsurvey/",
-  data: "setembro de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "upgrade-do-pc-antes-do-gta-6",
-  titulo: "Upgrade do PC antes de o GTA 6 chegar ao computador",
-  resumo: "A ordem típica é tirar o HD, completar a RAM se os 8 GB empurram o uso para o disco e só então trocar a placa, se couber.",
-  categoria: "guias",
-  etiquetas: [
+  "slug": "upgrade-do-pc-antes-do-gta-6",
+  "titulo": "Upgrade de PC para GTA 6: o que trocar primeiro",
+  "resumo": "Upgrade de PC para GTA 6 na ordem que se sente: SSD se o jogo está em HD, depois RAM, placa e fonte. O sintoma do seu PC é quem manda.",
+  "categoria": "guias",
+  "etiquetas": [
     "GTA 6",
     "Upgrade",
-    "SSD",
-    "Memória",
+    "PC gamer"
   ],
-  capa: {
-    src: "/blog/capas/upgrade-do-pc-antes-do-gta-6.webp",
-    alt: "Caixas de placa de vídeo enfileiradas no topo da estante branca da loja.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/upgrade-do-pc-antes-do-gta-6.webp",
+    "alt": "Caixas de placa de vídeo na estante da loja, primeiro destino de um upgrade de PC para GTA 6.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-10T18:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-10T18:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Upgrade do PC antes do GTA 6 no computador",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Upgrade de PC para GTA 6: a ordem que vale a pena",
+    "descricao": "Upgrade de PC para GTA 6 na ordem que se sente: SSD se o jogo está em HD, depois RAM, placa e fonte. O sintoma do seu PC é quem manda.",
+    "palavrasChave": [
       "upgrade de pc para gta 6",
-      "trocar hd por ssd",
-      "aumentar memória ram",
-      "upgrade de placa de vídeo",
-    ],
+      "o que trocar no pc",
+      "melhorar pc para gta",
+      "upgrade gamer"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Upgrade antes de GTA 6 no computador não é uma lista de peças do jogo. É a ordem que costuma destravar a máquina que você já tem. Primeiro sai o HD. Se a memória está em 8 GB e o uso escapa para o disco, completa-se a RAM. A placa de vídeo só vem depois, e só se a fonte e o gabinete aguentam.",
+      "tipo": "paragrafo",
+      "texto": "Upgrade de PC para GTA 6 começa pelo sintoma, não por uma lista genérica. A Rockstar não publicou a peça que o jogo vai pedir. O seu computador, esse, já avisa o que dói: demora para carregar, trava quando a rua enche, ou fica sem memória assim que o Discord abre. Cada sintoma tem uma primeira troca."
     },
     {
-      tipo: "paragrafo",
-      texto: "Essa ordem existe porque o sintoma engana. Jogo que trava enquanto o disco range muitas vezes está esperando arquivo, não esperando uma placa nova. Até 19 de novembro de 2026 a [página da Rockstar](https://www.rockstargames.com/VI) não tinha versão de PC, e o [Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html) também não achou requisito. Não há ficha para “já deixar no ponto”.",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "Jogo em HD ou carregamento longo: SSD primeiro.",
+        "Tela cheia de programas e o disco acendendo no meio da partida: memória.",
+        "Quadro baixo com a cidade na tela, e o processador folgado: placa de vídeo, depois de conferir a fonte."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**A compatibilidade vem antes do desejo.** Placa-mãe, fonte e espaço cortam a lista.",
-        "**Tirar o HD é o primeiro alívio típico.** O sistema no SSD muda a espera do dia a dia.",
-        "**8 GB com uso no disco pedem memória.** Completar a RAM ataca a troca para o HD.",
-        "**A placa é o terceiro passo.** Só entra se a fonte e o gabinete comportam.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Upgrade de PC para GTA 6: a ordem"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "A ordem que costuma destravar o uso",
+      "tipo": "paragrafo",
+      "texto": "A ordem que a bancada usa é curta. Se o jogo está num HD, nada mais importa até ele ir para um SSD: você sentiria a placa nova esperando o disco. Se a memória está em 8 GB ou num pente só de 16 GB com tudo aberto, o próximo passo é RAM em canal duplo. Se os dois já estão certos e o contador de quadros cai na cidade, aí sim a placa de vídeo, desde que a fonte aguente. Processador fica por último, salvo quando a plataforma inteira já não aceita as outras peças."
     },
     {
-      tipo: "paragrafo",
-      texto: "A sequência típica cabe em três movimentos, e um filtro antes deles. O filtro é a compatibilidade: soquete e geração da placa-mãe, limite de memória que ela aceita, conectores da fonte e centímetros livres no gabinete. Sem isso, a peça desejada não assenta. Com isso, dá para escolher o passo que o sintoma pede, em vez do passo que o anúncio de um jogo futuro sugere.",
+      "tipo": "paragrafo",
+      "texto": "Trocar as quatro de uma vez é montar um PC novo e chamar de upgrade. Às vezes é o caminho, quando a placa-mãe é antiga demais. Na maioria das máquinas de poucos anos, uma ou duas peças mudam a noite de jogo. A pesquisa de hardware da Steam ajuda a ver o que é comum hoje. O seu Gerenciador de Tarefas diz o que está faltando aí, que é o número que importa."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/upgrade-do-pc-antes-do-gta-6-ordem.webp",
-        alt: "Interior de um PC gamer, com placa de vídeo e cooler.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/upgrade-do-pc-antes-do-gta-6-ordem.webp",
+        "alt": "Interior de um PC gamer com placa de vídeo e cooler, alvo de um upgrade de PC para GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Interior de um PC gamer, com placa de vídeo e cooler. Foto de Andrey Matveev (Pexels).",
+      "legenda": "Por dentro, a placa e o cooler mostram por onde o upgrade começa. O disco, muitas vezes, nem aparece na foto e é o primeiro a trocar."
     },
     {
-      tipo: "tabela",
-      titulo: "Ordem típica quando o PC ainda sofre",
-      colunas: [
-        "Passo",
-        "Quando entra",
-        "O que pode impedir",
+      "tipo": "tabela",
+      "titulo": "Sintoma e primeira troca",
+      "colunas": [
+        "O que você sente",
+        "Troque primeiro",
+        "Não troque ainda"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Sair do HD",
-          "O sistema ainda está no disco mecânico",
-          "Baia ocupada ou disco sem troca",
+          "Demora minutos para abrir o jogo",
+          "SSD",
+          "Placa de vídeo"
         ],
         [
-          "Completar a RAM",
-          "8 GB e o uso já vai para o disco",
-          "Limite da placa-mãe",
+          "Textura chega atrasada, borrosa",
+          "SSD, se o jogo está em HD",
+          "Mais RGB"
         ],
         [
-          "Trocar a placa",
-          "Disco e memória já não são o gargalo",
-          "Fonte, conector e espaço",
+          "Disco em 100% com Discord e jogo",
+          "Memória, para 32 GB em dois pentes",
+          "Processador de topo"
         ],
         [
-          "Não trocar peça",
-          "O sintoma é falha, não falta de folga",
-          "A conversa vira manutenção",
+          "Poucos quadros, GPU em 99%",
+          "Placa, se a fonte permitir",
+          "Só a memória"
         ],
+        [
+          "Rua cheia engasga, GPU folgada",
+          "Processador ou plataforma",
+          "Outra placa igual"
+        ]
       ],
+      "nota": "Diagnóstico de jogos atuais. Não é ordem oficial para Grand Theft Auto VI."
     },
     {
-      tipo: "paragrafo",
-      texto: "O [upgrade de SSD](/upgrade-ssd) é o caminho quando o sistema ainda mora num HD. A [faixa intermediária](/blog/pc-gamer-intermediario-para-gta-6) só passa a fazer sentido depois que o disco e a memória deixam de ser o gargalo, e se a sua tela é Quad HD. Trocar a placa com o Windows num HD deixa o disco lento no lugar.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Fonte, o item que segura as outras trocas"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Sair do HD antes de culpar a placa",
+      "tipo": "paragrafo",
+      "texto": "Placa nova com fonte velha é a combinação que desliga o PC na hora em que a cidade fica bonita. Antes de fechar a GPU, a loja lê a potência real da fonte e os conectores. Se não há o cabo, ou a margem é nenhuma, a fonte entra no mesmo pedido. É menos glamouroso do que a caixa da placa e evita a volta no dia seguinte."
     },
     {
-      tipo: "paragrafo",
-      texto: "O HD mecânico ainda aparece em computadores que a pessoa chama de gamer porque um dia receberam uma placa. O sistema operacional, o jogo e a memória virtual disputam o mesmo disco lento. A troca pelo SSD não aumenta a memória de vídeo. Diminui a espera para abrir o mapa, para carregar a área e para o computador voltar de uma travada.",
+      "tipo": "paragrafo",
+      "texto": "Gabinete entra na mesma conversa quando a placa não cabe no comprimento ou quando não há de onde o ar entrar. Medir o espaço com uma trena, no balcão, é mais barato do que descobrir em casa que a tampa não fecha. O guia da placa está em [placa de vídeo para GTA 6](/blog/placa-de-video-para-gta-6). O do disco, em [SSD](/blog/ssd-para-gta-6)."
     },
     {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Uso no disco parece placa fraca",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Quando a RAM acaba, o sistema empurra o excedente para o disco. Em 8 GB isso acontece cedo se você joga com navegador, voz e captura abertos. O sintoma é soluço e disco em atividade constante. Parece placa fraca. Muitas vezes é memória curta escrevendo num HD. Completar a RAM, com o sistema já no SSD, ataca as duas pontas.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/upgrade-do-pc-antes-do-gta-6-linha.webp",
-        alt: "Módulo de memória visto de cima, com os chips aparentes.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/upgrade-do-pc-antes-do-gta-6-linha.webp",
+        "alt": "Módulo de memória em close, etapa de upgrade de PC para GTA 6 quando a RAM é o gargalo.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Módulo de memória visto de cima, com os chips aparentes. Foto de William Warby (Pexels).",
+      "legenda": "Memória vista de cima: dois pentes iguais, no par de slots certo, antes de pensar em chip novo."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Completar a memória quando o disco sofre",
+      "tipo": "pros-contras",
+      "titulo": "Upgrade cirúrgico",
+      "pros": [
+        "Uma peça resolve o sintoma que você descreveu.",
+        "A plataforma ainda aceita SSD, RAM ou uma GPU atual.",
+        "Você continua na mesma tela, então o alvo é claro."
+      ],
+      "contras": [
+        "Trocar processador numa placa-mãe que não aceita nada mais novo.",
+        "Comprar placa de 4K para monitor Full HD.",
+        "Fazer tudo “por causa do GTA 6” sem usar a máquina nos jogos de hoje."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "O passo da memória não é automático. Entra quando você está em 8 GB e o uso já vai para o disco. A placa-mãe diz até onde dá para ir e se o pente novo combina com o que já está instalado. Dois pentes iguais costumam ser o caminho limpo. Um pente de velocidade diferente pode ligar e não entregar o que o rótulo sugere.",
+      "tipo": "lista",
+      "ordenada": true,
+      "itens": [
+        "Anote a resolução do monitor.",
+        "Abra o jogo que mais pesa e veja se a placa ou o processador está no talo.",
+        "Diga se o jogo está em SSD ou em HD.",
+        "Mande foto da etiqueta da fonte. A equipe cruza com a placa que cabe."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "16 GB de RAM é o piso das faixas deste guia, da entrada ao meio. 32 GB pertence à faixa alta, quando há captura ou muita coisa aberta junto do jogo. Sair de 8 GB para 16 GB, no computador que troca para o disco, muda o uso de hoje. Não cria requisito de GTA 6. Cria folga para o que você já abre.",
+      "tipo": "paragrafo",
+      "texto": "Se nada da plataforma se salva, as faixas novas estão no [entrada](/blog/pc-gamer-entrada-para-gta-6), no [intermediário](/blog/pc-gamer-intermediario-para-gta-6) e no [alto desempenho](/blog/pc-gamer-alto-desempenho-gta-6)."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "A placa só se a fonte e o gabinete aguentam",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "A placa de vídeo é o passo mais fácil de errar na pressa. Ela precisa caber no comprimento, usar um conector que a fonte tenha e deixar ar circular. Se a fonte está no limite, a placa nova liga o jogo e desliga a máquina. Se o gabinete encosta na tampa, o calor fica e a folga some. Por isso a placa não abre a fila.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Na hora de escolher a memória da placa, o parque da Steam em setembro de 2026 está em [16 GB e 8 GB](/blog/steam-setembro-2026-vram-16gb), com 27,21% e 26,71%. A diferença prática entre essas duas quantidades, numa mesma família, está na [RTX 5060 Ti](/blog/rtx-5060-ti-8gb-ou-16gb). Use os dois textos para o monitor que você tem. Não use como ficha de um jogo sem versão de PC.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "212 GB não é cota do seu SSD",
-      texto: "A PlayStation fala em pelo menos 212 GB para o jogo de console. A The Verge fala em até 212 GB, conforme o aparelho. Isso não mede a versão de PC, que não existe. O seu disco se mede pelos jogos que você instala hoje.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O que o GTA 6 ainda não decide",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O console chega em 19 de novembro de 2026. O computador não tem data nessa página. O espaço de 212 GB citado pela [PlayStation](https://www.playstation.com/en-us/games/grand-theft-auto-vi/) e pela [The Verge](https://www.theverge.com/games/1025271/gta-vi-storage-space-rockstar-games) é tamanho de console. Comprar SSD “de 212 GB para o GTA” mistura as plataformas. Deixe folga para os jogos atuais e espere o número do PC, se ele vier.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O texto de [PC para GTA 6 sem requisito](/blog/pc-para-gta-6-sem-requisito-oficial) junta o que já dá para decidir. Se o computador também falha fora do jogo, a conversa pode ser de [manutenção](/manutencao), não de peça nova: poeira, sistema no limite ou disco que já avisa erro. Upgrade não é o remédio de todo sintoma.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/upgrade-do-pc-antes-do-gta-6-fecho.webp",
-        alt: "Bancada branca sob a parede de acessórios, com monitor e caixas.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/upgrade-do-pc-antes-do-gta-6-fecho.webp",
+        "alt": "Bancada da Balão da Informática Anchieta, onde se faz o upgrade de PC para GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Bancada branca sob a parede de acessórios, com monitor e caixas. Foto da loja, na Av. Anchieta, 789, Cambuí.",
+      "legenda": "A bancada da loja é onde a peça nova é provada, não só vendida na caixa."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "A ordem tira o HD do caminho antes de gastar a troca na placa errada",
-        "8 GB com uso no disco ganham um passo próprio, em vez de serem tratados como placa fraca",
-        "Fonte, gabinete e placa-mãe cortam a lista antes do desejo, inclusive o desejo ligado a GTA 6",
-      ],
-      contras: [
-        "Um PC muito antigo pode esbarrar na placa-mãe e não aceitar o passo que você queria",
-        "Completar a RAM não acelera um jogo que está limitado pela placa, se a memória já não estoura",
-        "Nada desta ordem garante GTA 6, porque o requisito de computador não foi publicado",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "O que fotografar e mandar antes de sair de casa"
     },
     {
-      tipo: "chamada",
-      tema: "upgrade",
+      "tipo": "paragrafo",
+      "texto": "Cinco fotos evitam a ida em vão. A tela do Gerenciador de Tarefas com o jogo aberto. A aba de memória, para ver gigabytes e se está em canal duplo na velocidade certa. O gerenciador de discos, para ver se o jogo está em SSD ou em HD. A etiqueta da fonte, com a potência. E, se der, o modelo da placa-mãe na informação do sistema. Com esse pacote a equipe diz a primeira troca pelo WhatsApp. Sem ele, o palpite é “traz o gabinete”, o que também resolve, só que você carrega a torre à toa quando era só um pente."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Levar o modelo para a conversa",
+      "tipo": "paragrafo",
+      "texto": "Anote o que você não quer trocar. Tem gente que gosta do gabinete e só quer a placa. Tem gente que quer silêncio e aceita trocar o cooler. O orçamento muda. Dizer “pode trocar o que for preciso, menos o gabinete” é uma instrução. Dizer “deixa ele novo” sem teto vira uma montagem inteira com outro nome. Os dois caminhos existem. O sintoma, lá no começo da matéria, escolhe qual dos dois é o seu."
     },
     {
-      tipo: "paragrafo",
-      texto: "Na Balão da Informática Anchieta, na Av. Anchieta, 789, Cambuí, em Campinas, leve o modelo da placa-mãe ou uma foto da etiqueta, a quantidade de RAM e se ainda existe HD. A equipe confere o que assenta. Você vê a máquina ligada antes de pagar quando a conversa termina em computador montado. A assistência fica no mesmo endereço.",
+      "tipo": "lista",
+      "itens": [
+        "Fotos: desempenho, memória, disco, fonte e placa-mãe.",
+        "Diga o que deve ficar.",
+        "Se a plataforma for antiga demais, a montagem nova é mais limpa do que cinco upgrades."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "O WhatsApp (19) 98751-0267 recebe esses dados. O orçamento é o do dia em que você pergunta, porque o preço muda. Não há peça “do GTA 6” para separar no pedido. Há o próximo passo que a sua máquina aguenta, começando pelo disco se o HD ainda é o sistema.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Depois da troca, o teste de uma hora"
     },
     {
-      tipo: "chamada",
-      titulo: "Qual peça vem primeiro no seu computador?",
-      texto: "Mande o modelo da placa-mãe, quanto de memória há hoje e se ainda existe HD. A ordem sai dessa compatibilidade.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "paragrafo",
+      "texto": "Não julgue o upgrade no menu. Jogue uma hora do título que doía, com os programas que você deixa abertos. Se o sintoma sumiu, a peça certa entrou. Se mudou de sintoma, por exemplo o disco parou de sofrer e a placa passou a ficar no talo, a próxima troca está dada, e você não precisa adivinhar. Anote e volte quando fizer sentido, não no mesmo dia por ansiedade."
     },
+    {
+      "tipo": "paragrafo",
+      "texto": "Guarde a peça antiga por uma semana. Memória e SSD retirados ainda salvam um arquivo esquecido. Placa antiga pode ficar de reserva se a nova der defeito na garantia. Jogar fora no estacionamento é pressa. A nota da peça nova fica com você, e a assistência do mesmo endereço conhece o que foi instalado."
+    },
+    {
+      "tipo": "chamada",
+      "tema": "upgrade",
+      "titulo": "Manda o sintoma, não uma lista pronta",
+      "texto": "WhatsApp (19) 98751-0267, com foto da fonte e o modelo da placa-mãe. A Balão da Informática Anchieta, loja de informática em Campinas diz a primeira troca. Av. Anchieta, 789, Cambuí, Campinas. Telefone (19) 3255-1661.",
+      "rotulo": "Pedir o diagnóstico",
+      "href": "/manutencao",
+      "mensagem": "Olá! Li a matéria de upgrade de PC para GTA 6 e quero saber o que trocar primeiro no meu computador."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "Upgrade de PC para GTA 6 segue, com o restante da série, em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Devo trocar a placa de vídeo por causa de GTA 6?",
-      resposta: "Não por causa do jogo. Até 19 de novembro de 2026 não havia requisito de PC. A placa só entra depois de tirar o HD, se ele ainda é o sistema, e de completar a RAM se você está em 8 GB e o uso vai para o disco. Fonte e gabinete precisam aguentar.",
+      "pergunta": "O que trocar primeiro no PC?",
+      "resposta": "Se o jogo está em HD, o SSD. Se a memória estoura com os programas abertos, a RAM. Se a placa está em 99% e o resto folga, a GPU, depois de ver a fonte."
     },
     {
-      pergunta: "8 GB de RAM impedem um upgrade de placa?",
-      resposta: "Não impedem no papel, mas atrapalham na prática se o sistema já empurra o uso para o disco. Completar a memória ataca esse soluço. Trocar só a placa deixa o disco lento fazendo o trabalho da RAM.",
+      "pergunta": "Upgrade deixa o PC pronto para GTA 6?",
+      "resposta": "Deixa melhor para os jogos de hoje. A Rockstar não publicou a ficha de PC, então ninguém crava a peça do GTA 6."
     },
     {
-      pergunta: "O SSD precisa ter 212 GB livres para o GTA?",
-      resposta: "212 GB é número de console: pelo menos 212 GB na PlayStation e até 212 GB conforme o aparelho, na The Verge. Não é o tamanho da versão de PC, que não existe. Dimensione o SSD pelos jogos que você instala hoje, com folga.",
+      "pergunta": "Vale trocar só a placa de vídeo?",
+      "resposta": "Vale quando o processador ainda aguenta e a fonte tem conector e potência. Sem isso, a placa nova não entrega o que a caixa promete."
     },
     {
-      pergunta: "Como sei se a placa nova cabe?",
-      resposta: "Pelo comprimento livre no gabinete, pela energia e pelo conector da fonte, e pelo espaço que sobra para o ar circular. A placa-mãe também limita processador e memória. Sem esses dados, a escolha é chute.",
+      "pergunta": "8 GB de RAM ainda dá?",
+      "resposta": "Para jogo atual com qualquer coisa aberta ao lado, não. O piso prático é 16 GB em dois pentes, e 32 GB se você transmite ou deixa o navegador aberto."
     },
     {
-      pergunta: "Vale formatar em vez de trocar peça?",
-      resposta: "Se o disco apresenta erro ou o sistema encheu de coisa que você não usa, a conversa pode ser manutenção, não peça nova. Formatar não aumenta VRAM nem transforma 8 GB em 16 GB. O sintoma é que escolhe o caminho.",
-    },
+      "pergunta": "Quando é melhor montar outro PC?",
+      "resposta": "Quando a placa-mãe não aceita SSD decente, nem memória atual, nem uma GPU que caiba. Aí o upgrade vira troca de quase tudo, e a montagem nova sai mais limpa."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    YAHOOPC,
-    PLAYSTATION,
-    VERGETAMANHO,
-    STEAM,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Steam — pesquisa de hardware e software",
+      "url": "https://store.steampowered.com/hwsurvey/",
+      "data": "consulta em 19 de novembro de 2026"
+    }
+  ]
 };
 
 export default artigo;

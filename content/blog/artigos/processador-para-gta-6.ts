@@ -1,284 +1,251 @@
-import type { Artigo, Fonte } from "@/lib/blog/tipos";
-
-const ROCKSTARVI: Fonte = {
-  nome: "Rockstar Games — página oficial de Grand Theft Auto VI",
-  url: "https://www.rockstargames.com/VI",
-  data: "consulta em 19 de novembro de 2026",
-};
-
-const YAHOOPC: Fonte = {
-  nome: "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
-  url: "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
-  data: "15 de novembro de 2026",
-};
-
-const TAKETWO: Fonte = {
-  nome: "Take-Two Interactive — comunicado de pré-venda de Grand Theft Auto VI",
-  url: "https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/",
-  data: "24 de junho de 2026",
-};
+import type { Artigo } from "@/lib/blog/tipos";
 
 const artigo: Artigo = {
-  slug: "processador-para-gta-6",
-  titulo: "Processador para GTA 6: o que observar na montagem",
-  resumo: "Mundo aberto costuma usar vários núcleos, mas GTA 6 não tem requisito de PC. Observe gargalo, placa-mãe e cooler da máquina que você já tem.",
-  categoria: "hardware",
-  etiquetas: [
+  "slug": "processador-para-gta-6",
+  "titulo": "Processador para GTA 6: o que pesa em mundo aberto",
+  "resumo": "O processador para GTA 6 não tem modelo oficial. Em mundo aberto, ele cuida de trânsito, pedestre e do que roda por trás do jogo, como Discord e captura.",
+  "categoria": "hardware",
+  "etiquetas": [
     "GTA 6",
     "Processador",
-    "Montagem",
+    "AMD",
+    "Intel"
   ],
-  capa: {
-    src: "/blog/capas/processador-para-gta-6.webp",
-    alt: "Interior de PC gamer com water cooler e memórias.",
-    largura: 1536,
-    altura: 1024,
-    pronta: false,
+  "capa": {
+    "src": "/blog/capas/processador-para-gta-6.webp",
+    "alt": "Processador na mão, a peça que segura o trânsito de um mundo aberto como GTA 6.",
+    "largura": 1536,
+    "altura": 1024,
+    "pronta": false
   },
-  publicadoEm: "2026-11-13T15:00:00.000Z",
-  autor: {
-    nome: "Equipe Balão da Informática",
-    url: "/sobre-nos",
+  "publicadoEm": "2026-11-13T15:00:00.000Z",
+  "atualizadoEm": "2026-11-19T12:00:00.000Z",
+  "autor": {
+    "nome": "Balão da Informática Anchieta",
+    "cargo": "Loja de informática em Campinas",
+    "url": "/sobre-nos"
   },
-  origem: "autoral",
-  seo: {
-    titulo: "Processador para GTA 6: o que observar",
-    palavrasChave: [
+  "origem": "autoral",
+  "seo": {
+    "titulo": "Processador para GTA 6: núcleos, cache e plataforma",
+    "descricao": "O processador para GTA 6 não tem modelo oficial. Em mundo aberto, ele cuida de trânsito, pedestre e do que roda por trás do jogo, como Discord e captura.",
+    "palavrasChave": [
       "processador para gta 6",
-      "cpu para gta 6",
-      "gargalo de processador",
-      "processador para mundo aberto",
-    ],
+      "cpu gta 6",
+      "ryzen ou intel gta 6",
+      "núcleos para mundo aberto"
+    ]
   },
-  blocos: [
+  "blocos": [
     {
-      tipo: "paragrafo",
-      texto: "Processador para GTA 6 é uma busca que já chega com um modelo na ponta da língua. O modelo não tem onde se apoiar. Na data de corte, 19 de novembro de 2026, não havia requisito de processador porque não havia versão de PC anunciada. A [página da Rockstar](https://www.rockstargames.com/VI) lista console. Um chip “certo para o jogo” seria invenção.",
+      "tipo": "paragrafo",
+      "texto": "O processador para GTA 6 ainda não tem um modelo escrito pela Rockstar. Versão de PC não foi anunciada. O que dá para decidir agora é o que um mundo aberto pede do CPU nos jogos que já estão no computador: cidade cheia, carro, pedestre, física e, se você transmite, o programa de captura aberto ao lado."
     },
     {
-      tipo: "paragrafo",
-      texto: "O que dá para observar é o computador que você já tem. Mundo aberto costuma espalhar trabalho em vários núcleos, porque simula cidade, trânsito e física ao mesmo tempo. Isso é um hábito de gênero, não uma ficha. Sem número oficial, o critério vira prático: o processador atual limita os jogos que você abre, e a placa-mãe aceita a troca?",
+      "tipo": "resumo",
+      "titulo": "Resposta rápida",
+      "itens": [
+        "A placa desenha o quadro. O processador sustenta o mundo: trânsito, NPC e as tarefas de fundo.",
+        "Para jogar e deixar Discord, navegador ou OBS abertos, um chip de seis núcleos já ficou curto em máquina que a pessoa pretende manter.",
+        "AMD e Intel servem. A plataforma (placa-mãe e memória) pesa tanto quanto o nome do processador."
+      ]
     },
     {
-      tipo: "resumo",
-      itens: [
-        "**Não há processador de GTA 6.** Até 19 de novembro de 2026 a Rockstar não publicou versão de PC nem requisito.",
-        "**Vários núcleos são hábito de mundo aberto.** Não são uma contagem oficial deste jogo.",
-        "**O sinal útil é o gargalo de hoje.** Se os seus jogos já esbarram no chip, a conversa começa.",
-        "**Placa-mãe e cooler entram na mesma decisão.** Trocar só o processador às vezes não cabe.",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Processador para GTA 6: onde ele aparece no jogo"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Vários núcleos não são uma ficha",
+      "tipo": "paragrafo",
+      "texto": "Em cidade grande, a GPU pode estar folgada e o jogo mesmo assim engasgar quando você entra numa avenida cheia. Esse soluço, nos mundos abertos atuais, costuma ser CPU: muita coisa para decidir ao mesmo tempo, além do desenho. GTA V no PC ganhou um controle de densidade de carros e pedestres justamente porque isso pesa. O recurso é de 2015, no newswire da versão de computador, e não descreve o GTA 6. Mostra que a Rockstar já tratou multidão como ajuste de PC, não só como efeito visual."
     },
     {
-      tipo: "paragrafo",
-      texto: "Cidade aberta, muitos personagens e física ao mesmo tempo pedem um processador que saiba dividir tarefa. Por isso um chip de um núcleo só ficou para trás nos jogos atuais, e por isso um PC de jogo montado agora já sai com vários núcleos. Dizer isso não diz quantos núcleos GTA 6 vai usar. A Rockstar não publicou esse número.",
+      "tipo": "paragrafo",
+      "texto": "Se você só joga, em tela cheia, sem nada aberto, um processador mediano de geração recente aguenta a maioria dos jogos atuais em Full HD, desde que a placa acompanhe. Se você joga com o Discord na orelha, um navegador com guia de mapa e o OBS gravando, o mesmo chip divide atenção. A matéria de [PC para live](/blog/pc-para-live-de-gta-6) separa essas duas cargas."
     },
     {
-      tipo: "paragrafo",
-      texto: "A tentação é transformar o hábito em cota: “mundo aberto pede oito núcleos, então este modelo é o do jogo”. A primeira metade é uma tendência de gênero. A segunda é um chute com nome de produto. Enquanto não houver ficha, qualquer contagem específica de núcleos atribuída a GTA 6 está na coluna errada. A [checagem do Yahoo](https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html), em 15 de novembro de 2026, não achou essa ficha.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/processador-para-gta-6-troca.webp",
-        alt: "Processador Ryzen encaixado na placa-mãe.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/processador-para-gta-6-troca.webp",
+        "alt": "Mãos montando um PC, etapa em que o processador para jogos de mundo aberto como GTA 6 entra na placa-mãe.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Processador Ryzen encaixado na placa-mãe. Foto de Atahan Demir (Pexels).",
+      "legenda": "Trocar só o processador sem olhar a placa-mãe é o erro clássico. O soquete tem de ser o mesmo."
     },
     {
-      tipo: "paragrafo",
-      texto: "O [comunicado da Take-Two](https://taketwointeractivesoftwareinc.gcs-web.com/news-releases/news-release-details/rockstar-games-announces-pre-orders-grand-theft-auto-vi/) confirma o lado de cá do problema: a pré-venda de junho de 2026 fala de PlayStation 5 e Xbox Series. Não fala de soquete, de núcleos nem de frequência. Quem preenche esses campos está escrevendo a ficha no lugar da empresa.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "O gargalo aparece nos jogos que você já abre",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O teste caseiro, sem bancada e sem número inventado, é simples. Abra um jogo que você já joga e veja onde a máquina espera. Se a placa de vídeo está folgada e o processador está no teto o tempo todo, o limite da sessão é o chip. Se a placa é que está no teto, trocar o processador não muda o quadro que chega no monitor.",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Esse olhar vale para os jogos de hoje. Não vale para prever GTA 6. Um mundo aberto futuro pode puxar mais o chip, ou pode puxar mais a placa, e a resposta oficial ainda não existe. Usar o gargalo atual para decidir a sua máquina é honesto. Usar o gargalo atual para assinar um requisito é outra frase, e essa a gente não escreve.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 3,
-      texto: "Soquete velho puxa a plataforma",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "Processador novo quase sempre pede placa-mãe da mesma geração de soquete. Se a sua placa-mãe já está no fim da linha, a troca deixa de ser uma peça e vira plataforma: chip, placa-mãe e, às vezes, memória. É uma decisão de montagem, descrita na categoria de [processadores](/categoria/hardware-processadores), e continua sem relação com uma ficha de GTA 6.",
-    },
-    {
-      tipo: "destaque",
-      tom: "atencao",
-      titulo: "Não existe o modelo certo",
-      texto: "Indicar um processador como o de GTA 6 exige um requisito que, até 19 de novembro de 2026, a Rockstar não publicou. O chip se escolhe pelo limite dos seus jogos e pelo que a placa-mãe aceita.",
-    },
-    {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Placa-mãe e cooler decidem se a troca cabe",
-    },
-    {
-      tipo: "paragrafo",
-      texto: "O cooler que segurava o chip antigo pode não segurar o novo, e pode não caber no gabinete quando a memória tem dissipador alto. Essa checagem é física: altura, fluxo de ar e o suporte do soquete. Ela acontece na [montagem](/montagempc), com a máquina aberta, e não numa lista de “processador para GTA 6” copiada de vídeo.",
-    },
-    {
-      tipo: "tabela",
-      titulo: "Sinais do PC atual e o que não dá para concluir",
-      colunas: [
-        "Sinal no seu PC",
-        "Leitura honesta",
-        "O que não concluir",
+      "tipo": "tabela",
+      "titulo": "O que pedir ao processador, conforme o uso de hoje",
+      "colunas": [
+        "Seu uso",
+        "O que observar",
+        "O que não comprar no escuro"
       ],
-      linhas: [
+      "linhas": [
         [
-          "Jogos atuais no teto do chip",
-          "Faz sentido olhar processador",
-          "Que GTA 6 exige aquele modelo",
+          "Jogar em Full HD, sem transmitir",
+          "Chip recente de 6 núcleos, com folga de placa de vídeo",
+          "Um CPU de topo com placa de entrada: a tela não usa"
         ],
         [
-          "Placa de vídeo no teto",
-          "Trocar o chip muda pouco",
-          "Que o processador está “pronto” para o jogo",
+          "Quad HD ou cidade no máximo",
+          "6 núcleos fortes ou 8, e memória em dois pentes",
+          "Processador antigo de 4 núcleos “porque o jogo é GPU”"
         ],
         [
-          "Soquete no fim da linha",
-          "A troca puxa a plataforma",
-          "Que existe cota oficial de núcleos",
-        ],
-        [
-          "Cooler no limite",
-          "O chip novo pode não caber",
-          "Que basta comprar o processador",
-        ],
+          "Jogar e gravar ou transmitir",
+          "8 núcleos ajudam a separar jogo e codificador",
+          "O mesmo chip velho com OBS aberto em qualidade alta"
+        ]
       ],
-      colunaDestaque: 1,
-      fonte: ROCKSTARVI,
-      nota: "A página da Rockstar, consultada em 19 de novembro de 2026, não lista processador de PC. A leitura é do seu uso atual.",
+      "nota": "Orientação para jogos atuais e para live. Não é a ficha de Grand Theft Auto VI."
     },
     {
-      tipo: "paragrafo",
-      texto: "A fonte entra na mesma visita. Uma plataforma nova puxa mais da tomada do que o chip sozinho sugere, sobretudo se a placa de vídeo também for trocada. A matéria de [PC sem requisito](/blog/pc-para-gta-6-sem-requisito-oficial) lembra a ordem: tela e jogos de hoje primeiro. O processador não fura essa fila por causa de um nome de jogo.",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Plataforma: o processador não mora sozinho"
     },
     {
-      tipo: "chamada",
-      tema: "montagem",
+      "tipo": "paragrafo",
+      "texto": "Um Ryzen novo pede placa-mãe AM5 e memória DDR5. Um Intel recente pede o soquete da geração dele. Comprar o processador “porque estava em promoção” e descobrir que a placa-mãe não aceita é a reforma que estoura o orçamento. Na loja, a pergunta útil é: você vai trocar só o chip ou aceita trocar o conjunto. Muita máquina de 2018 ou 2019 chega no teto da plataforma. Nesse caso, o [upgrade](/blog/upgrade-do-pc-antes-do-gta-6) começa pela placa-mãe, não por um adesivo."
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Nome de modelo não é requisito",
+      "tipo": "paragrafo",
+      "texto": "Cache maior ajuda em jogo que fica o tempo todo buscando o que tem na próxima esquina. É um diferencial real entre dois chips da mesma linha. Não é, sozinho, motivo para ignorar a placa de vídeo. Se o monitor é 4K, o dinheiro extra quase sempre rende mais na GPU. Se o monitor é Full HD e o jogo engasga com a rua cheia, aí sim o processador é o suspeito."
     },
     {
-      tipo: "paragrafo",
-      texto: "Citamos de propósito nenhum processador como escolha de GTA 6. Citar seria fabricar a ficha. O que existe no mercado é uma faixa larga de chips com vários núcleos, adequada aos jogos atuais, e uma faixa antiga que já limita esses mesmos jogos. Você se localiza pelo gargalo, não por um ranking com o nome do jogo no título.",
-    },
-    {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/processador-para-gta-6-limites.webp",
-        alt: "Processador Intel instalado na placa-mãe.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/processador-para-gta-6-limites.webp",
+        "alt": "Cooler sobre o processador, peça que segura a temperatura em sessões longas de mundo aberto e de GTA 6 quando houver PC.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Processador Intel instalado na placa-mãe. Foto de Jonathan Borba (Pexels).",
+      "legenda": "Cooler e pasta entram no mesmo pacote. Processador quente derruba o clock no meio da cidade."
     },
     {
-      tipo: "paragrafo",
-      texto: "Se a placa de vídeo é a próxima compra, ela também conversa com o processador: uma placa muito acima do chip deixa o chip no teto, e um chip muito acima da placa não desenha quadro que a placa não entrega. A matéria de [placa de vídeo](/blog/placa-de-video-para-gta-6) fica do outro lado dessa conta. As duas se encontram no monitor, não num requisito.",
+      "tipo": "pros-contras",
+      "titulo": "Sinais de que vale trocar o processador",
+      "pros": [
+        "A rua enche e a fluidez cai, com a placa de vídeo folgada no medidor.",
+        "Você quer transmitir e o jogo já usa o chip quase inteiro.",
+        "A plataforma atual não aceita mais memória nem um chip novo."
+      ],
+      "contras": [
+        "Trocar de CPU e manter um único pente de memória, lento.",
+        "Comprar o topo de linha para um monitor Full HD de 60 Hz.",
+        "Prometer que o chip “vai rodar GTA 6 no ultra”. Essa frase não tem fonte."
+      ]
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Sinais de que o processador atual segue",
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como a loja confere sem desmontar à toa"
     },
     {
-      tipo: "paragrafo",
-      texto: "O processador atual segue quando os jogos que você abre não o deixam no teto, a temperatura fica sob controle com o cooler que você tem e a placa-mãe ainda recebe a memória que você usa. Nesse quadro, trocar “porque GTA 6 vem aí” antecipa uma exigência não publicada. A sessão desta semana não melhora.",
+      "tipo": "lista",
+      "itens": [
+        "Modelo da placa-mãe ou uma foto da especificação do sistema.",
+        "Quantos pentes de memória, e de quantos gigabytes. Canal simples segura o processador.",
+        "Se a máquina esquenta a ponto de baixar o clock. Às vezes o ganho é limpeza, não chip novo. A bancada de [manutenção](/manutencao) vê isso.",
+        "A resolução do monitor, de novo. Ela muda a prioridade entre CPU e GPU."
+      ]
     },
     {
-      tipo: "paragrafo",
-      texto: "O processador pede conversa quando o teto já aparece nos seus jogos, quando o soquete não aceita mais nada acima, ou quando o cooler vive no limite. São três portas de entrada, todas observáveis. Nenhuma delas se chama requisito de GTA 6. A página de [plataformas](/blog/gta-6-plataformas-ps5-xbox-e-pc) separa o que o dia 19 de fato inclui, e processador de PC não está na lista.",
+      "tipo": "paragrafo",
+      "texto": "A memória em si está em [memória RAM para GTA 6](/blog/memoria-ram-para-gta-6). A placa, em [placa de vídeo para GTA 6](/blog/placa-de-video-para-gta-6)."
     },
     {
-      tipo: "imagem",
-      imagem: {
-        src: "/blog/figuras/processador-para-gta-6-fecho.webp",
-        alt: "Placa-mãe com processador e SSD instalados.",
-        largura: 1600,
-        altura: 900,
-        pronta: false,
+      "tipo": "imagem",
+      "imagem": {
+        "src": "/blog/figuras/processador-para-gta-6-fecho.webp",
+        "alt": "Pasta térmica ao lado do processador, cuidado de montagem num PC preparado para jogos pesados como GTA 6.",
+        "largura": 1600,
+        "altura": 900,
+        "pronta": false
       },
-      legenda: "Placa-mãe com processador e SSD instalados. Foto de Jonathan Borba (Pexels).",
+      "legenda": "Pasta térmica nova faz parte da troca. Chip quente não entrega o clock da caixa."
     },
     {
-      tipo: "pros-contras",
-      pros: [
-        "A decisão usa o gargalo dos jogos que você já abre",
-        "Placa-mãe, cooler e fonte entram antes do nome do chip",
-        "Nenhum modelo é vendido aqui como o processador de GTA 6",
-      ],
-      contras: [
-        "Sem ficha, não dá para saber quantos núcleos o jogo vai usar",
-        "Troca de soquete puxa placa-mãe e pode puxar a memória",
-        "Um anúncio futuro de PC pode pedir outra leitura, e só então",
-      ],
+      "tipo": "titulo",
+      "nivel": 2,
+      "texto": "Como ver se o chip é o gargalo, no GTA V"
     },
     {
-      tipo: "titulo",
-      nivel: 2,
-      texto: "Antes de trocar o processador",
+      "tipo": "paragrafo",
+      "texto": "Abra o GTA V, que já está no PC desde 2015, entre numa avenida cheia e deixe o Gerenciador de Tarefas visível no segundo plano, ou use o contador da própria placa. Se a GPU fica baixa e o processador encosta no topo enquanto a câmera gira no trânsito, o chip é o limite daquela cena. Se a GPU fica no topo e o processador sobra, trocar o chip não aumenta quadro: a placa é que desenha. Esse teste usa um jogo que existe. Ele não prevê o GTA 6. Evita a troca errada hoje."
     },
     {
-      tipo: "paragrafo",
-      texto: "Se a troca estiver na mesa, a Balão da Informática Anchieta, na Av. Anchieta, 789, no Cambuí, em Campinas, olha soquete, cooler e fonte juntos. O recado pode ir pelo WhatsApp (19) 98751-0267 com o modelo da placa-mãe. Sem esse modelo, qualquer chip indicado é palpite.",
+      "tipo": "paragrafo",
+      "texto": "Olhe também a temperatura. Um processador em 95 graus baixa o clock sozinho e parece “fraco” sendo apenas mal refrigerado. Limpeza, pasta e um cooler que caiba no gabinete devolvem o desempenho que a caixa anunciou, sem troca de plataforma. Se a limpeza não muda a temperatura, aí sim a conversa é cooler novo ou chip novo, com a placa-mãe no meio da conta."
     },
     {
-      tipo: "paragrafo",
-      texto: "A equipe não aponta um processador como o de GTA 6, porque essa frase não tem fonte até 19 de novembro de 2026. A decisão é mexer no chip só se a sua máquina atual mostra limite, nunca porque um modelo foi apresentado como o certo para o jogo.",
+      "tipo": "lista",
+      "itens": [
+        "Teste numa rua cheia, não no menu.",
+        "Compare o uso da GPU e o do processador ao mesmo tempo.",
+        "Se estiver muito quente, limpe antes de condenar o chip."
+      ]
     },
     {
-      tipo: "chamada",
-      titulo: "O processador atual limita os seus jogos?",
-      texto: "Diga o modelo da placa-mãe e um jogo em que a máquina espera. A resposta diz se a troca cabe, sem inventar requisito de GTA 6.",
-      rotulo: "Pedir orçamento no WhatsApp",
+      "tipo": "paragrafo",
+      "texto": "Se o chip novo exigir placa-mãe nova, a memória entra na mesma conta, DDR5 na plataforma atual. Peça os preços separados. Quando o conjunto chega perto de uma máquina de entrada inteira, compare as duas folhas. Revitalizar uma plataforma de 2018 peça por peça, às vezes, sai mais caro do que uma torre com tudo novo e testado junto."
     },
+    {
+      "tipo": "chamada",
+      "tema": "montagem",
+      "titulo": "Não sabe se o processador cabe na sua placa?",
+      "texto": "Manda o modelo no WhatsApp (19) 98751-0267. A Balão da Informática Anchieta, loja de informática em Campinas confere o soquete antes da compra. Loja na Av. Anchieta, 789, Cambuí, Campinas.",
+      "rotulo": "Pedir a conferência",
+      "href": "/montagempc",
+      "mensagem": "Olá! Li a matéria de processador para GTA 6 e quero saber se o chip cabe na minha placa-mãe."
+    },
+    {
+      "tipo": "paragrafo",
+      "texto": "O conjunto das matérias está em [GTA 6 no blog](/blog/gta-6)."
+    }
   ],
-  perguntas: [
+  "perguntas": [
     {
-      pergunta: "Qual processador é o certo para GTA 6?",
-      resposta: "Nenhum foi publicado. Até 19 de novembro de 2026 não havia versão de PC nem requisito. Indicar um modelo como o do jogo seria escrever a ficha no lugar da Rockstar. O critério disponível é o limite do seu PC atual.",
+      "pergunta": "Qual processador roda GTA 6?",
+      "resposta": "Não há modelo oficial. A Rockstar não anunciou a versão de PC. Dá para escolher o chip pelo que os mundos abertos atuais e a sua live já exigem."
     },
     {
-      pergunta: "Mundo aberto precisa de muitos núcleos?",
-      resposta: "Jogos de mundo aberto costumam dividir trabalho entre vários núcleos, e um PC de jogo montado hoje já sai assim. Isso é hábito de gênero. Não é uma contagem oficial de núcleos de GTA 6, que a Rockstar não divulgou.",
+      "pergunta": "Seis núcleos bastam?",
+      "resposta": "Para jogar em Full HD, sem transmitir, um chip recente de seis núcleos aguenta a maior parte dos jogos atuais. Para jogar e capturar ao mesmo tempo, oito núcleos deixam mais espaço."
     },
     {
-      pergunta: "Troco só o processador ou a plataforma inteira?",
-      resposta: "Depende do soquete. Se a placa-mãe aceita um chip acima do seu, a troca pode ser só o processador e o cooler. Se o soquete acabou, entram placa-mãe e, em muitos casos, memória nova. É decisão de montagem, não de ficha de jogo.",
+      "pergunta": "AMD ou Intel?",
+      "resposta": "Os dois servem. O limite real é a placa-mãe que você já tem e a memória em dois pentes. Trocar de marca só por torcida, sem trocar a plataforma, não funciona."
     },
     {
-      pergunta: "Como sei se o meu processador está no limite?",
-      resposta: "Abra um jogo que você já joga. Se o chip fica no teto e a placa de vídeo sobra, o limite da sessão é o processador. Se a placa é que está no teto, trocar o chip não muda o que o monitor mostra. O olhar é sobre os jogos de hoje.",
+      "pergunta": "O processador esquenta e o jogo cai de fluidez?",
+      "resposta": "Pode ser cooler sujo ou pasta ressecada, não chip fraco. Uma limpeza na bancada custa menos do que um processador novo e devolve clock."
     },
+    {
+      "pergunta": "Vale o processador mais caro da loja?",
+      "resposta": "Vale se você joga em tela alta e ainda transmite, e se a placa de vídeo acompanha. Em Full HD, o dinheiro extra quase sempre rende mais na GPU ou no monitor."
+    }
   ],
-  fontes: [
-    ROCKSTARVI,
-    YAHOOPC,
-    TAKETWO,
-  ],
+  "fontes": [
+    {
+      "nome": "Rockstar Games — página oficial de Grand Theft Auto VI",
+      "url": "https://www.rockstargames.com/VI",
+      "data": "consulta em 19 de novembro de 2026"
+    },
+    {
+      "nome": "Yahoo / Just Jared — “GTA 6 PC Release Date: Is Grand Theft Auto VI Coming to PC?”",
+      "url": "https://tech.yahoo.com/gaming/articles/gta-6-pc-release-date-150338948.html",
+      "data": "15 de novembro de 2026"
+    },
+    {
+      "nome": "Rockstar Games — “Grand Theft Auto V Is Now Available for PC”",
+      "url": "https://www.rockstargames.com/newswire/article/25o2411812a31k/grand-theft-auto-v-is-now-available-for-pc",
+      "data": "14 de abril de 2015"
+    }
+  ]
 };
 
 export default artigo;
