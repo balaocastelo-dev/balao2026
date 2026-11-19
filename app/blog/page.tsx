@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import JsonLd, { generateOrganizationSchema } from "@/components/JsonLd";
 import IndiceDeArtigos from "@/components/blog/IndiceDeArtigos";
 import ListaDeArtigos from "@/components/blog/ListaDeArtigos";
@@ -43,9 +44,17 @@ export default async function PaginaDoBlog() {
       <div className="mx-auto w-full max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-4 py-9 sm:py-12 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
           <h1 className="b-titulo text-[2.5rem] text-white sm:text-[3.5rem] lg:text-[4.25rem]">Blog da Balão</h1>
-          <p className="b-serifa max-w-[30rem] text-[1.0625rem] leading-[1.6] text-[var(--b-tinta-2)] sm:text-[1.1875rem] lg:pb-2">
-            Guias, análises e dicas de conserto da loja que monta e arruma computador em Campinas há mais de 25 anos.
-          </p>
+          <div className="max-w-[30rem] lg:pb-2">
+            <p className="b-serifa text-[1.0625rem] leading-[1.6] text-[var(--b-tinta-2)] sm:text-[1.1875rem]">
+              Guias, análises e dicas de conserto da loja que monta e arruma computador em Campinas há mais de 25 anos.
+            </p>
+            <Link
+              href="/blog/gta-6"
+              className="mt-3 inline-block text-[0.9375rem] font-bold text-white underline decoration-[var(--b-vermelho)] decoration-2 underline-offset-4"
+            >
+              Série GTA 6: notícias, PC e live
+            </Link>
+          </div>
         </header>
 
         <Vitrine artigos={destaques} />

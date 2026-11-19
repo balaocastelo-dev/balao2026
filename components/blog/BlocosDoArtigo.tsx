@@ -361,7 +361,11 @@ export default function BlocosDoArtigo({ artigo }: { artigo: Artigo }) {
       case "imagem":
         return (
           <figure key={i} className="b-bloco">
-            <div className="b-capa relative aspect-[16/9] rounded-[14px] ring-1 ring-inset ring-white/10">
+            <div
+              className={`b-capa relative aspect-[16/9] rounded-[14px] ring-1 ring-inset ring-white/10 ${
+                bloco.imagem.pronta ? "b-capa-pronta" : ""
+              }`}
+            >
               <Image src={bloco.imagem.src} alt={bloco.imagem.alt} fill sizes="(min-width: 1024px) 704px, 100vw" />
             </div>
             {bloco.legenda ? <figcaption className="mt-2.5 text-[0.8125rem] text-[var(--b-tinta-3)]">{bloco.legenda}</figcaption> : null}

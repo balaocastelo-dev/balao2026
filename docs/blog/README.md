@@ -101,6 +101,14 @@ site). Depois:
 **Artigo reprovado na régua não aparece no site**, mesmo que seja enviado. O
 pior que acontece com um texto pela metade é ele não entrar.
 
+### Série GTA 6
+
+Trinta matérias em `content/blog/artigos/`, com a etiqueta `GTA 6` e a página
+`/blog/gta-6`. O texto segue a régua (fonte citada, sem preço de peça, sem
+requisito de PC que a Rockstar não publicou). Capas e figuras são fotografias
+reais em WebP: da loja, ou do Pexels com licença livre. A origem de cada
+arquivo está em [serie-gta6-imagens.md](serie-gta6-imagens.md).
+
 Para um artigo abrir a vitrine do topo, ponha `destaque: 10` (número maior
 aparece primeiro). Sem nenhum marcado, a vitrine mostra os quatro mais recentes.
 
