@@ -49,10 +49,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/gta-6-plataformas-ps5-xbox-e-pc.webp",
-    alt: "Capa com o selo de quatro casos e o título sobre PS5, Xbox Series e a ausência de anúncio de PC",
+    alt: "PlayStation 5 e controle DualSense numa prateleira.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-17T15:00:00.000Z",
   autor: {
@@ -100,12 +100,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-aparelhos.webp",
-        alt: "Cartões comparando PS5, Xbox Series, Xbox One via nuvem e PC sem anúncio oficial",
+        alt: "Console Xbox e controle, em fundo escuro.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Nuvem não é a versão de console rodando no aparelho. PC sem data não é versão atrasada confirmada.",
+      legenda: "Console Xbox e controle, em fundo escuro. Foto de Martin Martz (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -128,12 +128,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-nativo.webp",
-        alt: "Colunas separando jogo instalado no console e jogo transmitido pela nuvem",
+        alt: "Mesa escura com gabinete iluminado, dois monitores e teclado.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Quem tem Xbox One não instala o jogo: transmite. A diferença importa na hora de escolher o aparelho.",
+      legenda: "Mesa escura com gabinete iluminado, dois monitores e teclado. Foto de Atahan Demir (Pexels).",
     },
     {
       tipo: "titulo",
@@ -180,12 +180,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-fecho.webp",
-        alt: "Quatro caminhos de aparelho no dia 19: PS5 nativo, Xbox Series nativo, Xbox One só na nuvem e PC sem anúncio",
+        alt: "Gatilhos de um controle de PlayStation, em close.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "PS4 fica de fora. A nuvem do Xbox One não é o jogo instalado, e o PC não está na lista.",
+      legenda: "Gatilhos de um controle de PlayStation, em close. Foto de Youssef Samuil (Pexels).",
     },
     {
       tipo: "pros-contras",

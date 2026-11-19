@@ -36,10 +36,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/gta-rp-e-o-que-o-gta-6-nao-e.webp",
-    alt: "Capa separando o GTA RP de hoje, feito em GTA V pela comunidade, do GTA 6 que não anunciou esse modo",
+    alt: "Pessoa de fone jogando no sofá, à noite.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-07T18:00:00.000Z",
   autor: {
@@ -91,12 +91,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-rp-e-o-que-o-gta-6-nao-e-existe.webp",
-        alt: "Colunas separam o GTA RP que existe hoje em GTA V e o que GTA 6 não anunciou até novembro de 2026",
+        alt: "Console e controle brancos sobre uma superfície reflexiva.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "FiveM aparece como nome da comunidade de GTA V. Não é um modo oficial de GTA 6.",
+      legenda: "Console e controle brancos sobre uma superfície reflexiva. Foto de Imthiyaz Syed (Pexels).",
     },
     {
       tipo: "titulo",
@@ -162,12 +162,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-rp-e-o-que-o-gta-6-nao-e-maquina.webp",
-        alt: "Camadas do que o PC precisa para a cena de GTA RP: rodar GTA V, sobrar voz e não esperar ficha de GTA 6",
+        alt: "Pessoa de headset numa mesa de jogo com neon.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Se o GTA V sozinho ocupa o processador inteiro, a voz da live não tem para onde ir.",
+      legenda: "Pessoa de headset numa mesa de jogo com neon. Foto de Matheus Bertelli (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -213,12 +213,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-rp-e-o-que-o-gta-6-nao-e-fecho.webp",
-        alt: "Quatro limites do GTA RP: é cena de GTA V, não é modo de GTA 6, o PC precisa rodar o GTA V e não há tutorial de servidor aqui",
+        alt: "Balão inflável branco e vermelho na calçada da loja.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "GTA 6, na PlayStation, é campanha solo. RP de hoje não migra para esse jogo por esta página.",
+      legenda: "Balão inflável branco e vermelho na calçada da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

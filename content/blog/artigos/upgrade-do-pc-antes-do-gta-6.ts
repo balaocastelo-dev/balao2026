@@ -43,10 +43,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/upgrade-do-pc-antes-do-gta-6.webp",
-    alt: "Capa com a ordem do upgrade em três passos e o aviso de que GTA 6 ainda não tem requisito de PC",
+    alt: "Caixas de placa de vídeo enfileiradas no topo da estante branca da loja.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-10T18:00:00.000Z",
   autor: {
@@ -94,12 +94,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/upgrade-do-pc-antes-do-gta-6-ordem.webp",
-        alt: "Fluxo com quatro decisões do upgrade: compatibilidade, sair do HD, completar a RAM e só então a placa",
+        alt: "Interior de um PC gamer, com placa de vídeo e cooler.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A placa é o último bloco. Fonte e gabinete podem impedir esse passo.",
+      legenda: "Interior de um PC gamer, com placa de vídeo e cooler. Foto de Andrey Matveev (Pexels).",
     },
     {
       tipo: "tabela",
@@ -158,12 +158,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/upgrade-do-pc-antes-do-gta-6-linha.webp",
-        alt: "Linha do tempo do upgrade: primeiro o SSD no lugar do HD, depois a RAM e por último a placa de vídeo",
+        alt: "Módulo de memória visto de cima, com os chips aparentes.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "HD primeiro, memória se o uso vai para o disco, placa só com fonte e espaço.",
+      legenda: "Módulo de memória visto de cima, com os chips aparentes. Foto de William Warby (Pexels).",
     },
     {
       tipo: "titulo",
@@ -214,12 +214,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/upgrade-do-pc-antes-do-gta-6-fecho.webp",
-        alt: "Quatro travas do upgrade: compatibilidade, sair do HD, completar RAM e placa por último",
+        alt: "Bancada branca sob a parede de acessórios, com monitor e caixas.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A placa só entra depois que fonte, gabinete e o disco já foram olhados.",
+      legenda: "Bancada branca sob a parede de acessórios, com monitor e caixas. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

@@ -36,10 +36,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/gta-6-lucia-e-jason.webp",
-    alt: "Capa com os nomes Lucia e Jason e a separação entre o texto oficial de GTA 6 e o sobrenome publicado na imprensa",
+    alt: "Hotéis e palmeiras de Miami Beach no fim da tarde.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-15T15:00:00.000Z",
   autor: {
@@ -87,12 +87,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-lucia-e-jason-dupla.webp",
-        alt: "Cartões com os nomes oficiais de Jason e Lucia, os sobrenomes da The Verge e o limite do que não foi escrito",
+        alt: "Pessoa de headset e controle, jogando com luz verde.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Jason e Lucia são o texto oficial. Duval e Caminos pedem a matéria da The Verge ao lado.",
+      legenda: "Pessoa de headset e controle, jogando com luz verde. Foto de Ian van der Linde (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -111,12 +111,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-lucia-e-jason-origem.webp",
-        alt: "Colunas separam o que o texto oficial diz de Jason e Lucia e o que só a The Verge publicou",
+        alt: "Avenida do centro de Miami à noite, com rastros de luz.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A coluna da imprensa não vira frase da Rockstar. As duas podem ser citadas, cada uma com o seu dono.",
+      legenda: "Avenida do centro de Miami à noite, com rastros de luz. Foto de Marcelo Gonzalez (Pexels).",
     },
     {
       tipo: "titulo",
@@ -208,12 +208,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-lucia-e-jason-fecho.webp",
-        alt: "Três camadas sobre Lucia e Jason: nomes oficiais, sobrenomes da imprensa e o que ninguém deve completar",
+        alt: "Miami Beach no crepúsculo, com palmeiras e a rua acesa.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "O site da Rockstar usa os primeiros nomes. Os sobrenomes estão na cobertura da The Verge.",
+      legenda: "Miami Beach no crepúsculo, com palmeiras e a rua acesa. Foto de Jojo Tesini (Pexels).",
     },
     {
       tipo: "pros-contras",

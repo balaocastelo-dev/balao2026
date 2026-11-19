@@ -36,10 +36,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/setup-de-streamer-para-gta-6.webp",
-    alt: "Capa do setup de streamer com as zonas de mesa, captura e folga, sem requisito oficial de GTA 6",
+    alt: "Pessoa de headset olhando para o monitor, no escuro.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-09T12:00:00.000Z",
   autor: {
@@ -91,12 +91,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/setup-de-streamer-para-gta-6-zonas.webp",
-        alt: "Diagrama da mesa de live com quatro zonas: tela do jogo, microfone, câmera e folga de máquina",
+        alt: "Microfone no pedestal, ligado a um notebook.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A folga não fica em cima da mesa: é o que sobra no computador quando o jogo e a captura rodam juntos.",
+      legenda: "Microfone no pedestal, ligado a um notebook. Foto de George Milton (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -198,12 +198,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/setup-de-streamer-para-gta-6-ordem.webp",
-        alt: "Fluxo com quatro passos do canto de live: jogo estável, cena com voz, áudio claro e câmera por último",
+        alt: "Teclado, mouse e controles numa mesa clara.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Se a voz falha, o passo seguinte não é um fundo novo. É o microfone e a folga da máquina.",
+      legenda: "Teclado, mouse e controles numa mesa clara. Foto de Minh Phuc (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -217,12 +217,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/setup-de-streamer-para-gta-6-fecho.webp",
-        alt: "Quatro zonas da mesa de live: tela do jogo, microfone, câmera e folga da máquina, sem requisito de GTA 6",
+        alt: "Notebook, monitor e webcam numa mesa clara.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A câmera é a última zona. Áudio ruim derruba a live antes de um overlay bonito.",
+      legenda: "Notebook, monitor e webcam numa mesa clara. Foto de Ella Wei (Pexels).",
     },
     {
       tipo: "pros-contras",

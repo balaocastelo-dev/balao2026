@@ -24,10 +24,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/webcam-para-stream.webp",
-    alt: "Capa sobre webcam de stream com o rosto iluminado e o piso comum de 1080p, sem marca obrigatória",
+    alt: "Monitor com uma câmera pequena ao lado e fone na mesa.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-08T15:00:00.000Z",
   autor: {
@@ -92,12 +92,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/webcam-para-stream-passos-rosto.webp",
-        alt: "Fluxo da webcam: luz na cara, câmera na altura do rosto, piso de 1080p e fonte dentro da cena",
+        alt: "Pessoa de headset sentada numa mesa de jogo, à noite.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Se a cara está no escuro, subir a resolução não cria luz. A cena só recebe a câmera depois disso.",
+      legenda: "Pessoa de headset sentada numa mesa de jogo, à noite. Foto de Yan Krukau (Pexels).",
     },
     {
       tipo: "titulo",
@@ -162,12 +162,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/webcam-para-stream-olhar.webp",
-        alt: "Colunas separam o que olhar numa webcam de rosto e o que não decide a compra da câmera",
+        alt: "Teclado e monitor do caixa, no balcão vermelho da loja.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A coluna da esquerda você confere na sua mesa. A da direita não escolhe a câmera por você.",
+      legenda: "Teclado e monitor do caixa, no balcão vermelho da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "paragrafo",
@@ -200,12 +200,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/webcam-para-stream-fecho.webp",
-        alt: "Quatro cuidados da webcam: luz na cara, altura do rosto, 1080p como piso comum e a câmera dentro da cena",
+        alt: "Teto escuro da loja com as luminárias cruzadas em X.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "1080p é o piso comum de uma câmera de rosto. Megapixel a mais não corrige um rosto no escuro.",
+      legenda: "Teto escuro da loja com as luminárias cruzadas em X. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

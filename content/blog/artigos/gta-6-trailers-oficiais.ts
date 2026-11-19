@@ -30,10 +30,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/gta-6-trailers-oficiais.webp",
-    alt: "Capa escura com cinco datas e o título sobre os vídeos oficiais de GTA 6 na página de mídia",
+    alt: "Mesa de jogo com monitor e luz colorida no gabinete.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-16T15:00:00.000Z",
   autor: {
@@ -119,12 +119,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-trailers-oficiais-videos.webp",
-        alt: "Linha do tempo com os cinco vídeos oficiais de GTA 6, de dezembro de 2023 a novembro de 2026",
+        alt: "Mouse e teclado mecânico com luz azul.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A ordem é a das datas. Um repost sem data não substitui um vídeo desta lista.",
+      legenda: "Mouse e teclado mecânico com luz azul. Foto de Atahan Demir (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -157,12 +157,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-trailers-oficiais-limites.webp",
-        alt: "Duas colunas separam o que a página de mídia confirma e o que um trailer de GTA 6 não anuncia",
+        alt: "Horizonte de Miami com palmeiras na frente da água.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Captura in-game vale para o Extended Look, porque a PlayStation escreveu isso. Não vale para os outros por tabela.",
+      legenda: "Horizonte de Miami com palmeiras na frente da água. Foto de Nina Hill (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -199,12 +199,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-trailers-oficiais-fecho.webp",
-        alt: "Quatro tipos de vídeo oficial de GTA 6: trailer, olhar estendido, trailer de lançamento e aviso de pré-carga",
+        alt: "Prédios de Miami, palmeiras e o mar sob céu nublado.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A página de mídia data os vídeos. Só o Extended Look tem, na PlayStation, a frase de captura in-game.",
+      legenda: "Prédios de Miami, palmeiras e o mar sob céu nublado. Foto de Arian Fernandez (Pexels).",
     },
     {
       tipo: "pros-contras",

@@ -72,10 +72,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/gta-6-perguntas-frequentes.webp",
-    alt: "Capa de perguntas frequentes de GTA 6 dividindo o que já foi anunciado e o que segue sem comunicado",
+    alt: "Pessoa de fone jogando no computador, em casa.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-14T15:00:00.000Z",
   autor: {
@@ -127,12 +127,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-perguntas-frequentes-aberto.webp",
-        alt: "Duas colunas com o que já foi anunciado de GTA 6 e o que ainda não tem comunicado oficial",
+        alt: "Parede de acessórios em saquinhos, atrás das mesas de atendimento.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A coluna em aberto não é palpite. É pergunta que essas páginas ainda não responderam.",
+      legenda: "Parede de acessórios em saquinhos, atrás das mesas de atendimento. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "paragrafo",
@@ -172,12 +172,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-perguntas-frequentes-rota.webp",
-        alt: "Fluxo com quatro passos para achar a matéria de data, preço, pré-carga e nomes de GTA 6",
+        alt: "Praia de Siesta Key, na Flórida, vista de drone.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A tabela desta página resume. O link leva ao texto que cita a página oficial.",
+      legenda: "Praia de Siesta Key, na Flórida, vista de drone. Foto de Amit Shubinsky (Pexels).",
     },
     {
       tipo: "titulo",
@@ -259,12 +259,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-perguntas-frequentes-fecho.webp",
-        alt: "Quatro respostas curtas de GTA 6: data de console, PC sem anúncio, preço em dólares e campanha solo",
+        alt: "Controle branco de PlayStation 5 sobre fundo vermelho.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Cada cartão aponta para um fato publicado. O que não está aqui continua sem comunicado.",
+      legenda: "Controle branco de PlayStation 5 sobre fundo vermelho. Foto de Pascal (Pexels).",
     },
     {
       tipo: "pros-contras",

@@ -31,10 +31,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/obs-para-live-de-jogo.webp",
-    alt: "Capa do OBS Studio com cena, fonte e codificador em três blocos, sem número de bitrate",
+    alt: "Notebook, microfone e câmera numa mesa de gravação.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-09T15:00:00.000Z",
   autor: {
@@ -95,12 +95,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/obs-para-live-de-jogo-cena.webp",
-        alt: "Fluxo do OBS antes da live: montar a cena, escolher a fonte, apontar o codificador e gravar um teste",
+        alt: "Celular na mão, com microfone e fone na mesa de gravação.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "O teste gravado mostra a falha com a transmissão ainda fechada.",
+      legenda: "Celular na mão, com microfone e fone na mesa de gravação. Foto de Jakub Zerdzicki (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -161,12 +161,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/obs-para-live-de-jogo-codifica.webp",
-        alt: "Duas colunas comparam codificador por hardware na placa e codificador pelo processador no OBS",
+        alt: "Mãos no teclado e no mouse, com luz colorida na mesa.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Hardware quando a placa tem. Processador quando não tem. Os dois são caminhos reais.",
+      legenda: "Mãos no teclado e no mouse, com luz colorida na mesa. Foto de Alena Darmel (Pexels).",
     },
     {
       tipo: "destaque",
@@ -204,12 +204,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/obs-para-live-de-jogo-fecho.webp",
-        alt: "Quatro peças do OBS antes da live: cena, fonte, codificador e um teste gravado, sem número de bitrate",
+        alt: "Monitores sobre as mesas do corredor da loja.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "O número de bitrate muda. O OBS publica a recomendação atual. Esta figura não inventa um valor.",
+      legenda: "Monitores sobre as mesas do corredor da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

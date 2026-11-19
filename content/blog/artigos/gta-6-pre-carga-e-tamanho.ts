@@ -54,10 +54,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/gta-6-pre-carga-e-tamanho.webp",
-    alt: "Capa sobre a pré-carga de GTA 6, o espaço em gigabytes no console e a caixa física sem disco",
+    alt: "SSD Samsung sobre uma superfície escura.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-14T12:00:00.000Z",
   autor: {
@@ -105,12 +105,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-pre-carga-e-tamanho-calendario.webp",
-        alt: "Linha do tempo da pré-carga de GTA 6, do comunicado de junho à data de 10 de novembro de 2026",
+        alt: "SSD M.2 no formato de palito, sobre fundo claro.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A data que vale é a das páginas de novembro. A de junho explica por que ainda se lê 12 de novembro.",
+      legenda: "SSD M.2 no formato de palito, sobre fundo claro. Foto de Andrey Matveev (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -138,12 +138,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-pre-carga-e-tamanho-espaco.webp",
-        alt: "Camadas separam o mínimo de 212 GB no PS5, o limite da The Verge e a caixa de GTA 6 sem disco",
+        alt: "Discos rígidos empilhados, do tipo mecânico.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "As duas linhas usam 212 e não dizem a mesma coisa. A caixa sem disco não apaga nenhuma delas.",
+      legenda: "Discos rígidos empilhados, do tipo mecânico. Foto de Marta Branco (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -222,12 +222,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-pre-carga-e-tamanho-fecho.webp",
-        alt: "Quatro cuidados da pré-carga de GTA 6: data de 10 de novembro, espaço no console, caixa sem disco e não copiar o número para o PC",
+        alt: "Hub com portas USB, HDMI e rede, sobre fundo branco.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A pré-carga que ficou de pé é 10 de novembro. 212 GB é número de console, dito de dois jeitos por fontes diferentes.",
+      legenda: "Hub com portas USB, HDMI e rede, sobre fundo branco. Foto de Aleksander Dumała (Pexels).",
     },
     {
       tipo: "pros-contras",

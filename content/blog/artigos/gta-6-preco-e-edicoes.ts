@@ -30,10 +30,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/gta-6-preco-e-edicoes.webp",
-    alt: "Capa com as duas edições de GTA 6 e a indicação de que o preço anunciado está em dólares",
+    alt: "Console branco com o controle na frente.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-15T12:00:00.000Z",
   autor: {
@@ -81,12 +81,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-preco-e-edicoes-precos.webp",
-        alt: "Barras com o preço anunciado da Standard e da Ultimate de GTA 6, ambas em dólares",
+        alt: "PlayStation 5 em pé, com o controle ao lado, numa mesa.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "As barras comparam os preços publicados em dólares. Não há coluna em reais porque o comunicado não traz essa coluna.",
+      legenda: "PlayStation 5 em pé, com o controle ao lado, numa mesa. Foto de Pascal (Pexels).",
     },
     {
       tipo: "tabela",
@@ -161,12 +161,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-preco-e-edicoes-incluso.webp",
-        alt: "Colunas separam o que o comunicado de pré-venda de GTA 6 publica e o que ele não informa",
+        alt: "Console Xbox branco e controle, em close.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Pacote e mês de GTA+ estão ligados à compra, não a uma lista completa do que a Ultimate acrescenta.",
+      legenda: "Console Xbox branco e controle, em close. Foto de Nathan J Hilton (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -193,12 +193,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-preco-e-edicoes-fecho.webp",
-        alt: "Quatro passos do preço de GTA 6: dólares no comunicado, reais fora dele, conferir a loja e não copiar anúncio velho",
+        alt: "Praia da Flórida vista de cima, com água azul.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Standard e Ultimate saíram em dólares no comunicado da Take-Two. O valor em reais não está nesse texto.",
+      legenda: "Praia da Flórida vista de cima, com água azul. Foto de Chris The Island (Pexels).",
     },
     {
       tipo: "pros-contras",

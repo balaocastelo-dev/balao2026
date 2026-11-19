@@ -36,10 +36,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/pc-gamer-entrada-para-gta-6.webp",
-    alt: "Capa de PC de entrada em Full HD com placa dedicada, memória e SSD, sem o rótulo de PC de GTA 6",
+    alt: "Gabinete com luz e monitor numa mesa de jogo.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-11T18:00:00.000Z",
   autor: {
@@ -91,12 +91,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-entrada-para-gta-6-faixa.webp",
-        alt: "Desenho de bancada com quatro peças da faixa de entrada: placa de vídeo dedicada, 16 GB de memória, SSD e tela Full HD",
+        alt: "Monitor, teclado e mouse numa mesa escura.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Placa dedicada, 16 GB, SSD e tela Full HD definem a faixa. O nome do jogo não entra no rótulo.",
+      legenda: "Monitor, teclado e mouse numa mesa escura. Foto de Chelsey Horne (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -194,12 +194,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-entrada-para-gta-6-pedido.webp",
-        alt: "Fluxo do pedido de orçamento: listar os jogos de hoje, dizer se a tela é Full HD, pedir placa dedicada com 16 GB e SSD, e não chamar de PC de GTA 6",
+        alt: "iMac sobre o balcão curvo, com teclado e mouse ao lado.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Jogos, tela e as três peças da faixa. O nome PC de GTA 6 fica de fora do pedido.",
+      legenda: "iMac sobre o balcão curvo, com teclado e mouse ao lado. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "paragrafo",
@@ -222,12 +222,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-entrada-para-gta-6-fecho.webp",
-        alt: "Quatro peças da faixa de entrada: placa dedicada, 16 GB de RAM, SSD e tela Full HD, sem o rótulo de PC de GTA 6",
+        alt: "Balcão do caixa, com o computador do PDV, teclado e o iMac ao lado.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Entrada é o PC que joga em Full HD o que você já joga. O orçamento é do dia, no WhatsApp.",
+      legenda: "Balcão do caixa, com o computador do PDV, teclado e o iMac ao lado. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

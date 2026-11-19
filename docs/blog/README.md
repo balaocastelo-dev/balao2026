@@ -105,10 +105,9 @@ pior que acontece com um texto pela metade é ele não entrar.
 
 Trinta matérias em `content/blog/artigos/`, com a etiqueta `GTA 6` e a página
 `/blog/gta-6`. O texto segue a régua (fonte citada, sem preço de peça, sem
-requisito de PC que a Rockstar não publicou). Capas e figuras são ilustrações
-originais em WebP; a origem de cada arquivo está em
-[serie-gta6-imagens.md](serie-gta6-imagens.md). Para regerar a série:
-`node scripts/serie-gta6/emitir.mjs`.
+requisito de PC que a Rockstar não publicou). Capas e figuras são fotografias
+reais em WebP: da loja, ou do Pexels com licença livre. A origem de cada
+arquivo está em [serie-gta6-imagens.md](serie-gta6-imagens.md).
 
 Para um artigo abrir a vitrine do topo, ponha `destaque: 10` (número maior
 aparece primeiro). Sem nenhum marcado, a vitrine mostra os quatro mais recentes.

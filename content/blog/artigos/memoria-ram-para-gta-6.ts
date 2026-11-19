@@ -23,10 +23,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/memoria-ram-para-gta-6.webp",
-    alt: "Capa com 16 GB como piso de uso atual e 32 GB como folga de multitarefa, sem requisito de GTA 6",
+    alt: "Processador e módulos de memória lado a lado.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-13T12:00:00.000Z",
   autor: {
@@ -78,12 +78,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/memoria-ram-para-gta-6-usos.webp",
-        alt: "Duas colunas comparando 16 GB como piso de jogo hoje e 32 GB como folga com programas abertos ao lado",
+        alt: "Módulos de memória DDR5 com iluminação, sobre fundo amarelo.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Dezesseis cobrem o jogo com pouco ao lado. Trinta e dois entram quando a sessão não fecha as outras janelas.",
+      legenda: "Módulos de memória DDR5 com iluminação, sobre fundo amarelo. Foto de Andrey Matveev (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -111,12 +111,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/memoria-ram-para-gta-6-pilha.webp",
-        alt: "Camadas do que ocupa a memória durante o jogo: o próprio jogo, o navegador, o Discord e a captura",
+        alt: "Computador montado sobre uma mesa preparada para jogar.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "O jogo sozinho e a sessão com janelas abertas não pedem a mesma quantidade de memória.",
+      legenda: "Computador montado sobre uma mesa preparada para jogar. Foto de Pramod Tiwari (Pexels).",
     },
     {
       tipo: "destaque",
@@ -205,12 +205,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/memoria-ram-para-gta-6-fecho.webp",
-        alt: "Quatro leituras da RAM: contar programas abertos, 16 GB como piso de hoje, 32 GB se houver captura e nenhum dos dois como ficha de GTA 6",
+        alt: "Memórias instaladas ao lado do processador num servidor.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "16 GB é o piso comum de um PC de jogo hoje. 32 GB é folga de quem deixa mais coisa aberta.",
+      legenda: "Memórias instaladas ao lado do processador num servidor. Foto de Domaintechnik Ledl.net (Pexels).",
     },
     {
       tipo: "pros-contras",

@@ -30,10 +30,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/placa-de-video-para-gta-6.webp",
-    alt: "Capa sobre escolha de placa de vídeo pela tela atual, com o selo de 8 ou 16 GB de memória de vídeo",
+    alt: "Placa de vídeo NVIDIA em close, com o dissipador à mostra.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-13T18:00:00.000Z",
   autor: {
@@ -85,12 +85,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/placa-de-video-para-gta-6-cenario.webp",
-        alt: "Quatro cartões de cenário de placa: Full HD, Quad HD, 8 GB de VRAM e 16 GB de VRAM, sem ficha de GTA 6",
+        alt: "Caixas de placa de vídeo nas prateleiras do meio, na parede vermelha.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A tela e o ajuste de hoje mudam a placa. Nenhum cartão preenche uma ficha que a Rockstar não publicou.",
+      legenda: "Caixas de placa de vídeo nas prateleiras do meio, na parede vermelha. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "paragrafo",
@@ -109,12 +109,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/placa-de-video-para-gta-6-vram.webp",
-        alt: "Barras da pesquisa Steam de setembro de 2026 com 27,21 por cento em 16 GB e 26,71 por cento em 8 GB de VRAM",
+        alt: "Placa GeForce instalada dentro do computador.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "16 GB e 8 GB estão quase empatados. O gráfico descreve PCs que já jogam, não o que GTA 6 exige.",
+      legenda: "Placa GeForce instalada dentro do computador. Foto de Matheus Bertelli (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -216,12 +216,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/placa-de-video-para-gta-6-fecho.webp",
-        alt: "Quatro passos da placa de vídeo sem ficha de GTA 6: resolução, memória nos jogos atuais, fonte e nada de modelo obrigatório",
+        alt: "Close de uma placa GeForce RTX, com os coolers.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A lição de 8 e 16 GB vale para jogos que já existem. Não é a lista de GTA 6.",
+      legenda: "Close de uma placa GeForce RTX, com os coolers. Foto de Matheus Bertelli (Pexels).",
     },
     {
       tipo: "pros-contras",

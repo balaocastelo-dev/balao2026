@@ -43,10 +43,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/pc-gamer-gta-6-campinas.webp",
-    alt: "Capa sobre PC gamer em Campinas com a data de console e o aviso de que não há promessa de rodar GTA 6",
+    alt: "Fachada vermelha da Balão da Informática Anchieta, com o letreiro preto e o logotipo do balão.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-18T18:00:00.000Z",
   autor: {
@@ -139,12 +139,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-gta-6-campinas-cidade.webp",
-        alt: "Cartões do que já dá para decidir em Campinas e do que continua esperando a Rockstar sobre GTA 6 no PC",
+        alt: "Fundo do corredor, com a parede vermelha e a escada da loja.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Jogos de hoje e monitor fecham a máquina. GTA 6 no computador continua em aberto.",
+      legenda: "Fundo do corredor, com a parede vermelha e a escada da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "paragrafo",
@@ -172,12 +172,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-gta-6-campinas-espera.webp",
-        alt: "Duas colunas separam o que um morador de Campinas já pode definir no PC e o que depende de um anúncio da Rockstar",
+        alt: "Totem de autoatendimento e estante branca, ao lado da vitrine de entrada.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Montar na cidade não promete que o computador rode GTA 6.",
+      legenda: "Totem de autoatendimento e estante branca, ao lado da vitrine de entrada. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "destaque",
@@ -215,12 +215,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-gta-6-campinas-fecho.webp",
-        alt: "Quatro passos em Campinas: dizer os jogos, ir à Anchieta 789, ver a máquina ligada e pedir orçamento sem promessa de GTA 6",
+        alt: "Balcão curvo vermelho e branco, com um iMac e caixas de computador.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A loja mostra o computador ligado. Ela não promete que essa máquina roda um jogo sem versão de PC.",
+      legenda: "Balcão curvo vermelho e branco, com um iMac e caixas de computador. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

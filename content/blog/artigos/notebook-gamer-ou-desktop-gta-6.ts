@@ -31,10 +31,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/notebook-gamer-ou-desktop-gta-6.webp",
-    alt: "Capa comparando notebook gamer e desktop, com o selo de que a placa do notebook em geral não se troca",
+    alt: "Teclado de notebook e mouse sem fio, em close.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-10T15:00:00.000Z",
   autor: {
@@ -113,12 +113,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/notebook-gamer-ou-desktop-gta-6-formatos.webp",
-        alt: "Duas colunas comparam o que o notebook gamer costuma permitir trocar e o que o desktop troca com mais folga",
+        alt: "Teclado com luz roxa no balcão da frente do corredor.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Abrir a tampa responde o modelo. Não responde GTA 6, que não tem requisito de PC.",
+      legenda: "Teclado com luz roxa no balcão da frente do corredor. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "paragrafo",
@@ -159,12 +159,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/notebook-gamer-ou-desktop-gta-6-escolha.webp",
-        alt: "Quatro cartões sobre levar o notebook, deixar o desktop na mesa, olhar a tampa e não tratar isso como ficha de GTA 6",
+        alt: "Estantes brancas do corredor, com caixas e monitores.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Portabilidade e upgrade puxam para lados diferentes. Os dois esperam a mesma ficha, que não saiu.",
+      legenda: "Estantes brancas do corredor, com caixas e monitores. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "destaque",
@@ -202,12 +202,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/notebook-gamer-ou-desktop-gta-6-fecho.webp",
-        alt: "Quatro passos para escolher notebook ou desktop: se você carrega, se a tampa abre, se a placa é soldada e se troca peça com frequência",
+        alt: "Corredor da loja, com o balcão branco, estantes e as luminárias em X no teto.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A placa de notebook em geral não se troca. RAM e SSD dependem do modelo, por isso a tampa se abre na loja.",
+      legenda: "Corredor da loja, com o balcão branco, estantes e as luminárias em X no teto. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

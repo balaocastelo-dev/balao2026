@@ -42,10 +42,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/gta-6-lancamento-19-novembro-2026.webp",
-    alt: "Capa escura com a data 19 nov 2026 em destaque e o título sobre o lançamento de GTA 6",
+    alt: "Controle de PlayStation 5 apoiado no console.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-18T16:00:00.000Z",
   autor: {
@@ -105,12 +105,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-lancamento-19-novembro-2026-datas.webp",
-        alt: "Linha do tempo com a janela de 2025, a data de maio de 2026 e o lançamento em 19 de novembro de 2026",
+        alt: "Orla de Miami Beach, com prédios e água, de dia.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A data que vale é a última. As anteriores explicam por que a busca ainda mostra maio de 2026.",
+      legenda: "Orla de Miami Beach, com prédios e água, de dia. Foto de Abhishek Navlakha (Pexels).",
     },
     {
       tipo: "titulo",
@@ -149,12 +149,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-lancamento-19-novembro-2026-confirmado.webp",
-        alt: "Duas colunas: o que já foi anunciado para o lançamento de GTA 6 e o que ainda não tem comunicado oficial",
+        alt: "Controle de Xbox em close, carregando.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Separar o que tem fonte do que é espera evita comprar peça por um requisito que não existe.",
+      legenda: "Controle de Xbox em close, carregando. Foto de Ruben Boekeloo (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -181,12 +181,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-lancamento-19-novembro-2026-fecho.webp",
-        alt: "Quatro passos para ler a data de GTA 6: comunicado mais novo, console, ignorar maio e não copiar requisito de PC",
+        alt: "Pessoa segurando um controle, com a mesa de jogo ao lado.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A data de console que ficou de pé é 19 de novembro de 2026. Maio foi uma promessa substituída.",
+      legenda: "Pessoa segurando um controle, com a mesa de jogo ao lado. Foto de Ron Lach (Pexels).",
     },
     {
       tipo: "pros-contras",

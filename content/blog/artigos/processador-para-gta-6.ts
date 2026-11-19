@@ -30,10 +30,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/processador-para-gta-6.webp",
-    alt: "Capa sobre processador decidido por gargalo, placa-mãe e cooler, sem um modelo apontado como o de GTA 6",
+    alt: "Interior de PC gamer com water cooler e memórias.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-13T15:00:00.000Z",
   autor: {
@@ -85,12 +85,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/processador-para-gta-6-troca.webp",
-        alt: "Fluxo em quatro passos: limite nos jogos atuais, soquete da placa-mãe, cooler e gabinete, e só então a troca do processador",
+        alt: "Processador Ryzen encaixado na placa-mãe.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "O nome do chip vem por último. Antes entram o limite de hoje, o soquete e o espaço do cooler.",
+      legenda: "Processador Ryzen encaixado na placa-mãe. Foto de Atahan Demir (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -188,12 +188,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/processador-para-gta-6-limites.webp",
-        alt: "Quatro camadas da decisão de processador: chip, placa-mãe, cooler e fonte, cada uma com o que ela trava",
+        alt: "Processador Intel instalado na placa-mãe.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Soquete, cooler e fonte decidem se o chip novo cabe na máquina que você já tem.",
+      legenda: "Processador Intel instalado na placa-mãe. Foto de Jonathan Borba (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -216,12 +216,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/processador-para-gta-6-fecho.webp",
-        alt: "Quatro limites do processador: soquete da placa-mãe, cooler, gabinete e o gargalo dos jogos que você já roda",
+        alt: "Placa-mãe com processador e SSD instalados.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Não há um processador de GTA 6. A troca depende do que a placa-mãe e o cooler já suportam.",
+      legenda: "Placa-mãe com processador e SSD instalados. Foto de Jonathan Borba (Pexels).",
     },
     {
       tipo: "pros-contras",

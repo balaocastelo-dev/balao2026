@@ -42,10 +42,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/ssd-para-gta-6.webp",
-    alt: "Capa com 212 GB marcado como número de console e o hábito de SSD com folga no PC",
+    alt: "SSD NVMe Lexar encaixado numa placa.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-12T18:00:00.000Z",
   autor: {
@@ -97,12 +97,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/ssd-para-gta-6-gigas.webp",
-        alt: "Duas colunas separando o espaço publicado para o console e o hábito de disco num PC sem ficha de GTA 6",
+        alt: "HD externo com cabo USB, em close.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "212 GB descreve o aparelho de console. No computador, a decisão útil é SSD com espaço sobrando.",
+      legenda: "HD externo com cabo USB, em close. Foto de Nothing Ahead (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -196,12 +196,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/ssd-para-gta-6-disco.webp",
-        alt: "Fluxo em quatro passos para sair do HD, escolher SSD com sobra, deixar faixa livre e não copiar os 212 GB",
+        alt: "HD portátil com o cabo ao lado.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A ordem é trocar o tipo de disco e sobrar espaço. O número do console não entra na conta.",
+      legenda: "HD portátil com o cabo ao lado. Foto de Aleksander Dumała (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -224,12 +224,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/ssd-para-gta-6-fecho.webp",
-        alt: "Quatro cuidados de disco: sair do HD, deixar faixa livre, não copiar os 212 GB do console e pedir o SSD do uso atual",
+        alt: "Interior de um gabinete com ventoinhas e luz colorida.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "212 GB é espaço de PlayStation 5, não a capacidade que um PC de GTA 6 teria de ter.",
+      legenda: "Interior de um gabinete com ventoinhas e luz colorida. Foto de Timur Kozmenko (Pexels).",
     },
     {
       tipo: "pros-contras",

@@ -31,10 +31,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/montagem-pc-gamer-campinas.webp",
-    alt: "Capa da montagem de PC gamer em Campinas com quatro dados do uso atual e sem lista oficial de GTA 6",
+    alt: "Porta de vidro da loja e a bandeira vermelha de notebooks, na Av. Anchieta.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-10T12:00:00.000Z",
   autor: {
@@ -95,12 +95,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/montagem-pc-gamer-campinas-passos-montagem.webp",
-        alt: "Fluxo da montagem: dizer a tela, listar os jogos, checar compatibilidade e ver a máquina ligada",
+        alt: "Mesas brancas de atendimento com monitores, na loja do Cambuí.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Sem tela e sem jogos, a lista de peças não tem de onde sair.",
+      legenda: "Mesas brancas de atendimento com monitores, na loja do Cambuí. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "tabela",
@@ -159,12 +159,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/montagem-pc-gamer-campinas-bancada.webp",
-        alt: "Bancada de montagem com monitor, lista de jogos, fonte e gabinete como limites da escolha da placa",
+        alt: "Mesa branca e mostruário de placas, no canto do atendimento, sem pessoas no quadro.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A placa não abre a conversa. A tela e o espaço físico abrem.",
+      legenda: "Mesa branca e mostruário de placas, no canto do atendimento, sem pessoas no quadro. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "destaque",
@@ -202,12 +202,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/montagem-pc-gamer-campinas-fecho.webp",
-        alt: "Quatro dados da montagem em Campinas: tela, lista de jogos, fonte com gabinete e a máquina ligada antes de pagar",
+        alt: "Escada branca e parede vermelha com o quadro da Balão da Informática.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A montagem em Campinas parte do uso atual. GTA 6 não entra como lista de peças.",
+      legenda: "Escada branca e parede vermelha com o quadro da Balão da Informática. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

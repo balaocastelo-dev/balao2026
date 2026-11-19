@@ -24,10 +24,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/perifericos-para-gta-6.webp",
-    alt: "Capa com mouse, teclado e headset como peças de sessão, sem marca obrigatória e sem fazer o jogo rodar",
+    alt: "Teclado mecânico e mouse sobre um mousepad.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-12T12:00:00.000Z",
   autor: {
@@ -79,12 +79,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/perifericos-para-gta-6-pecas.webp",
-        alt: "Quatro cartões de periférico: mouse com sensor decente, teclado para horas, headset para sala barulhenta e o que não faz o jogo rodar",
+        alt: "Headset branco, mouse e teclado numa mesa de jogo.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Sensor, tecla e fone mudam como você joga. Nenhum deles publica uma versão de PC que não existe.",
+      legenda: "Headset branco, mouse e teclado numa mesa de jogo. Foto de Matheus Bertelli (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -182,12 +182,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/perifericos-para-gta-6-ordem.webp",
-        alt: "Fluxo em quatro passos: acertar a máquina, apontar o incômodo, trocar só essa peça e ignorar marca obrigatória",
+        alt: "Fone sobre um teclado iluminado, com mouse ao lado.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Primeiro o computador que roda os jogos de hoje. Depois, só a peça que hoje atrapalha a sessão.",
+      legenda: "Fone sobre um teclado iluminado, com mouse ao lado. Foto de Simone Cisale (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -210,12 +210,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/perifericos-para-gta-6-fecho.webp",
-        alt: "Quatro camadas de periférico: mouse, teclado, headset e o que não faz o jogo rodar",
+        alt: "Teclado, mouse e headset claros, numa mesa de feira.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Sem marca obrigatória. O incômodo da sessão diz qual peça trocar primeiro.",
+      legenda: "Teclado, mouse e headset claros, numa mesa de feira. Foto de Matheus Bertelli (Pexels).",
     },
     {
       tipo: "pros-contras",

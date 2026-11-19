@@ -24,10 +24,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/microfone-para-live-de-jogo.webp",
-    alt: "Capa sobre microfone de live mostrando que a distância da boca pesa mais do que a marca",
+    alt: "Microfone e fone num setup de gravação.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-08T18:00:00.000Z",
   autor: {
@@ -84,12 +84,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/microfone-para-live-de-jogo-tipos.webp",
-        alt: "Duas colunas comparam microfone dinâmico, que ignora mais a sala, e condensador, que pega mais detalhe e mais ruído",
+        alt: "Microfone e câmera apontados para a mesma mesa.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "O dinâmico costuma deixar o quarto mais de fora. O condensador traz detalhe e também o ruído que estiver por perto.",
+      legenda: "Microfone e câmera apontados para a mesma mesa. Foto de Abdellah Benziane (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -149,12 +149,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/microfone-para-live-de-jogo-ordem-voz.webp",
-        alt: "Barras em ordem de atenção da voz na live: perto da boca, tipo do microfone, a sala e a marca",
+        alt: "Headset e teclado iluminado na frente de dois monitores.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A barra maior é o que você ajusta primeiro. A marca fica por último porque não apaga distância nem sala.",
+      legenda: "Headset e teclado iluminado na frente de dois monitores. Foto de Matheus Bertelli (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -200,12 +200,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/microfone-para-live-de-jogo-fecho.webp",
-        alt: "Quatro decisões do microfone: distância da boca, ruído da sala, dinâmico ou condensador, e a marca por último",
+        alt: "Fone, teclado mecânico e acessórios sobre o mousepad.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Dinâmico ignora mais a sala. Condensador pega mais detalhe e mais barulho. A posição pesa nos dois.",
+      legenda: "Fone, teclado mecânico e acessórios sobre o mousepad. Foto de Pew Nguyen (Pexels).",
     },
     {
       tipo: "pros-contras",

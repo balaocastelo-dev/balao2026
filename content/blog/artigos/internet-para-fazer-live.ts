@@ -18,10 +18,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/internet-para-fazer-live.webp",
-    alt: "Capa sobre internet de live destacando o envio e a estabilidade, sem um número de mega inventado",
+    alt: "Cabo de rede Ethernet enrolado, com o conector RJ-45.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-08T12:00:00.000Z",
   autor: {
@@ -73,12 +73,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/internet-para-fazer-live-caminhos.webp",
-        alt: "Camadas da rede de live: download do plano, envio da transmissão, estabilidade e horário do teste",
+        alt: "Roteador ao lado de um monitor, numa mesa de casa.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A live sobe pelo envio. O download do plano não descreve esse caminho.",
+      legenda: "Roteador ao lado de um monitor, numa mesa de casa. Foto de Jaycee300s (Pexels).",
     },
     {
       tipo: "titulo",
@@ -111,12 +111,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/internet-para-fazer-live-teste.webp",
-        alt: "Fluxo do teste de internet para live: medir na hora, olhar o envio, repetir noutro dia e anotar oscilação",
+        alt: "Roteador Wi-Fi com antenas e cabo, sobre uma mesa de madeira.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Repetir no mesmo horário, com jogo e captura abertos, mostra se o envio segura a live de verdade.",
+      legenda: "Roteador Wi-Fi com antenas e cabo, sobre uma mesa de madeira. Foto de Pascal (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -194,12 +194,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/internet-para-fazer-live-fecho.webp",
-        alt: "Quatro testes de internet para live: envio, estabilidade, horário da transmissão e chamada ao provedor se oscilar",
+        alt: "Close de uma pessoa de headset, jogando no escuro.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Download alto não descreve o envio. Não há um número de mega nesta figura.",
+      legenda: "Close de uma pessoa de headset, jogando no escuro. Foto de Yan Krukau (Pexels).",
     },
     {
       tipo: "pros-contras",

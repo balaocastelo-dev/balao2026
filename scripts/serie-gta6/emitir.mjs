@@ -228,6 +228,9 @@ function manifesto(materias) {
   writeFileSync(join(raiz, "docs/blog/serie-gta6-imagens.md"), linhas.join("\n"));
 }
 
+console.error("A série GTA 6 usa fotografias reais. Este gerador de ilustrações foi desligado para não apagar as fotos. Use aplicar-fotos.mjs.");
+process.exit(1);
+
 mkdirSync(pastaCapas, { recursive: true });
 mkdirSync(pastaFiguras, { recursive: true });
 

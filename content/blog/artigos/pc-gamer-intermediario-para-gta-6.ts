@@ -37,10 +37,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/pc-gamer-intermediario-para-gta-6.webp",
-    alt: "Capa com o título da faixa intermediária e o selo Quad HD, sem lista de peças de GTA 6",
+    alt: "Gabinete branco aberto, com as ventoinhas à mostra.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-11T15:00:00.000Z",
   autor: {
@@ -92,12 +92,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-intermediario-para-gta-6-faixas.webp",
-        alt: "Três colunas com a faixa de entrada, a intermediária e a alta, nenhuma marcada como ficha de GTA 6",
+        alt: "Displays da vitrine de entrada, com telas mostrando computadores.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A intermediária sobe de tela e de folga de VRAM. A alta acrescenta captura e 32 GB.",
+      legenda: "Displays da vitrine de entrada, com telas mostrando computadores. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "titulo",
@@ -158,12 +158,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-intermediario-para-gta-6-vram.webp",
-        alt: "Barras quase iguais da pesquisa da Steam de setembro de 2026, com 16 GB e 8 GB de VRAM",
+        alt: "Placa de vídeo e processadores dispostos sobre a mesa.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "16 GB e 8 GB estão próximos. Nenhum dos dois percentuais é requisito de jogo.",
+      legenda: "Placa de vídeo e processadores dispostos sobre a mesa. Foto de Andrey Matveev (Pexels).",
     },
     {
       tipo: "titulo",
@@ -214,12 +214,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-intermediario-para-gta-6-fecho.webp",
-        alt: "Quatro decisões da faixa intermediária: tela Quad HD, folga de VRAM, não saltar para a alta sem uso e não chamar de config de GTA 6",
+        alt: "Prateleiras brancas com caixas de placa de vídeo, na parede vermelha da loja.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A faixa sobe com a tela. Sem Quad HD, a entrada não fica errada só porque existe uma acima.",
+      legenda: "Prateleiras brancas com caixas de placa de vídeo, na parede vermelha da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

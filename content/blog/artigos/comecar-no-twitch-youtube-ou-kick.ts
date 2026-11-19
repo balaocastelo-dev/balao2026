@@ -25,10 +25,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/comecar-no-twitch-youtube-ou-kick.webp",
-    alt: "Capa sobre começar a transmitir no Twitch, no YouTube ou no Kick, sem eleger uma plataforma vencedora",
+    alt: "Pessoa de óculos e cabelo colorido numa mesa de jogo com neon.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-07T15:00:00.000Z",
   autor: {
@@ -80,12 +80,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/comecar-no-twitch-youtube-ou-kick-plataformas.webp",
-        alt: "Três cartões com uma diferença do Twitch, do YouTube e do Kick, sem eleger plataforma",
+        alt: "Pessoa jogando num PC com luz vermelha e azul.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Cada cartão é uma frase de diferença. Nenhum deles diz que você será encontrado.",
+      legenda: "Pessoa jogando num PC com luz vermelha e azul. Foto de UMUT (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -145,12 +145,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/comecar-no-twitch-youtube-ou-kick-comeco.webp",
-        alt: "Fluxo para começar a live: categoria do jogo, título honesto, horário repetido e áudio antes do enfeite",
+        alt: "Homem jogando no escuro, com o monitor iluminando o rosto.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Categoria errada e título inflado não se consertam com borda colorida. O áudio vem antes do desenho.",
+      legenda: "Homem jogando no escuro, com o monitor iluminando o rosto. Foto de Orhan Pergel (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -209,12 +209,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/comecar-no-twitch-youtube-ou-kick-fecho.webp",
-        alt: "Quatro passos para começar no Twitch, YouTube ou Kick: categoria, título honesto, horário repetido e áudio antes do enfeite",
+        alt: "Jovem jogando num espaço com luz colorida.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Nenhuma plataforma é eleita aqui. O que as três pedem no começo é o mesmo: categoria, título, horário e voz.",
+      legenda: "Jovem jogando num espaço com luz colorida. Foto de Andres Garcia (Pexels).",
     },
     {
       tipo: "pros-contras",

@@ -37,10 +37,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/pc-gamer-alto-desempenho-gta-6.webp",
-    alt: "Capa da faixa alta com selo de 32 GB e o aviso de que não há ficha oficial de GTA 6",
+    alt: "Gabinete aberto sobre uma mesa, pronto para montagem.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-11T12:00:00.000Z",
   autor: {
@@ -123,12 +123,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-alto-desempenho-gta-6-camadas-alta.webp",
-        alt: "Camadas da faixa alta: placa forte, 32 GB de memória, SSD rápido e folga para capturar vídeo",
+        alt: "Gabinete branco aberto no balcão, com a lateral de acrílico.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Cada faixa de cima só faz sentido se a de baixo já couber no seu uso.",
+      legenda: "Gabinete branco aberto no balcão, com a lateral de acrílico. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "titulo",
@@ -165,12 +165,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-alto-desempenho-gta-6-mesa.webp",
-        alt: "Arranjo com placa forte, 32 GB, SSD rápido e um espaço reservado para capturar vídeo",
+        alt: "Mesa com gabinete, monitor curvo e caixas de som.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A captura senta ao lado do jogo. Ela não substitui o requisito que não existe.",
+      legenda: "Mesa com gabinete, monitor curvo e caixas de som. Foto de Minh Phuc (Pexels).",
     },
     {
       tipo: "destaque",
@@ -208,12 +208,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-gamer-alto-desempenho-gta-6-fecho.webp",
-        alt: "Quatro peças da faixa alta: placa forte, 32 GB, SSD rápido e folga para capturar, ainda sem ficha de GTA 6",
+        alt: "Gabinete branco com ventoinhas coloridas, sobre o balcão da loja.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A faixa alta cabe em quem já joga pesado e ainda captura. Continua não sendo requisito de GTA 6.",
+      legenda: "Gabinete branco com ventoinhas coloridas, sobre o balcão da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

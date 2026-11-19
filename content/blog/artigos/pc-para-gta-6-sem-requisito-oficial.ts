@@ -36,10 +36,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/pc-para-gta-6-sem-requisito-oficial.webp",
-    alt: "Capa com a frase de compra sem ficha oficial e o selo de corte em 19 de novembro de 2026",
+    alt: "Estação de jogo no escuro, com gabinete e periféricos iluminados.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-18T14:00:00.000Z",
   autor: {
@@ -91,12 +91,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-precedente.webp",
-        alt: "Linha do tempo com GTA V em 2013 e 2015 e Red Dead Redemption 2 em 2018 e 2019, do console ao PC",
+        alt: "Computador, notebook e teclado sobre uma mesa de jogo.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Os dois jogos chegaram ao PC depois do console, com esperas diferentes. Isso é precedente, não mês marcado.",
+      legenda: "Computador, notebook e teclado sobre uma mesa de jogo. Foto de Pramod Tiwari (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -211,23 +211,23 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-decisao.webp",
-        alt: "Duas colunas separando o que dá para decidir no PC de hoje e o que seria chute sobre GTA 6",
+        alt: "Monitor, gabinete com luz e headset numa mesa de demonstração.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Jogos, tela, memória e disco dá para observar. Requisito, data de PC e tamanho de console não.",
+      legenda: "Monitor, gabinete com luz e headset numa mesa de demonstração. Foto de Matheus Bertelli (Pexels).",
     },
     {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-fecho.webp",
-        alt: "Quatro passos para montar sem ficha de GTA 6: jogos de hoje, monitor atual, folga de peça e espera do anúncio",
+        alt: "Placa de vídeo dentro de um gabinete escuro, com luz colorida.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Sem requisito oficial, a compra descreve o uso de agora. GTA 6 no PC entra quando a Rockstar publicar.",
+      legenda: "Placa de vídeo dentro de um gabinete escuro, com luz colorida. Foto de Andrey Matveev (Pexels).",
     },
     {
       tipo: "pros-contras",

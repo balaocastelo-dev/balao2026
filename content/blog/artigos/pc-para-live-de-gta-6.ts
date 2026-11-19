@@ -31,10 +31,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/pc-para-live-de-gta-6.webp",
-    alt: "Capa sobre PC para live com duas cargas, o jogo e a codificação de vídeo, sem requisito de GTA 6",
+    alt: "Pessoa de fone e microfone, transmitindo sentada à mesa.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-09T18:00:00.000Z",
   autor: {
@@ -82,12 +82,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-para-live-de-gta-6-cargas.webp",
-        alt: "Camadas da live: o jogo, o codificador de vídeo, o áudio e a folga de memória e disco",
+        alt: "Microfone de mesa, notebook e fone num espaço de gravação.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Se uma camada falta, a transmissão cai mesmo com o jogo ainda aberto.",
+      legenda: "Microfone de mesa, notebook e fone num espaço de gravação. Foto de Kaboompics (Pexels).",
     },
     {
       tipo: "tabela",
@@ -159,12 +159,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-para-live-de-gta-6-duas.webp",
-        alt: "Duas colunas separam a carga de só jogar e a carga extra de transmitir ou gravar ao mesmo tempo",
+        alt: "Luz colorida dentro de um gabinete montado.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "GTA 6 no PC não está em nenhuma coluna, porque essa versão não foi anunciada.",
+      legenda: "Luz colorida dentro de um gabinete montado. Foto de Gibson Chan (Pexels).",
     },
     {
       tipo: "destaque",
@@ -202,12 +202,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/pc-para-live-de-gta-6-fecho.webp",
-        alt: "Quatro cargas de um PC de live: jogo estável, codificador, áudio e só então um jogo de PC que ainda não existe",
+        alt: "Gabinete preto numa estante branca, no corredor da loja.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Transmitir ocupa codificador, voz e disco além do jogo. GTA 6 no PC ainda não tem ficha para dimensionar isso.",
+      legenda: "Gabinete preto numa estante branca, no corredor da loja. Foto da loja, na Av. Anchieta, 789, Cambuí.",
     },
     {
       tipo: "pros-contras",

@@ -30,10 +30,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/monitor-para-gta-6.webp",
-    alt: "Capa comparando Full HD e Quad HD, com a tela como peça que define a placa de vídeo",
+    alt: "Notebook e monitor lado a lado numa mesa.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-12T15:00:00.000Z",
   autor: {
@@ -94,12 +94,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/monitor-para-gta-6-telas.webp",
-        alt: "Barras da Steam de setembro de 2026 com Full HD em 47,91 por cento e 1440p em 27,04 por cento",
+        alt: "Monitor e notebook abertos na mesma mesa.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Full HD é a tela mais comum. 1440p vem depois. Nenhuma das duas é requisito de GTA 6.",
+      legenda: "Monitor e notebook abertos na mesma mesa. Foto de Pexels (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -184,12 +184,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/monitor-para-gta-6-taxa.webp",
-        alt: "Três colunas comparando Full HD, Quad HD e taxa alta como decisões de tela para os jogos de hoje",
+        alt: "Monitor curvo, teclado e fone sobre a mesa.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Full HD pede menos placa, Quad HD pede mais, e taxa alta pesa no competitivo, não em todo mundo aberto.",
+      legenda: "Monitor curvo, teclado e fone sobre a mesa. Foto de Minh Phuc (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -212,12 +212,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/monitor-para-gta-6-fecho.webp",
-        alt: "Quatro passos do monitor: escolher a resolução, decidir a taxa, casar a placa e não comprar tela por um jogo sem PC",
+        alt: "Monitor, teclado e equipamento de áudio numa mesa com luz baixa.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Full HD ainda é a tela mais comum na Steam de setembro de 2026. Quad HD pede mais da placa nos jogos de agora.",
+      legenda: "Monitor, teclado e equipamento de áudio numa mesa com luz baixa. Foto de Amar Preciado (Pexels).",
     },
     {
       tipo: "pros-contras",

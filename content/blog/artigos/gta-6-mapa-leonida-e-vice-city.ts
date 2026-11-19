@@ -31,10 +31,10 @@ const artigo: Artigo = {
   ],
   capa: {
     src: "/blog/capas/gta-6-mapa-leonida-e-vice-city.webp",
-    alt: "Capa com o nome Leonida e o aviso de que os lugares citados de GTA 6 não formam um mapa completo",
+    alt: "Palmeira na beira do mar em Miami Beach.",
     largura: 1536,
     altura: 1024,
-    pronta: true,
+    pronta: false,
   },
   publicadoEm: "2026-11-16T12:00:00.000Z",
   autor: {
@@ -135,12 +135,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-mapa-leonida-e-vice-city-nomes.webp",
-        alt: "Cartões com Leonida na sinopse, Vice City no pacote e os nomes da descrição da Ultimate de GTA 6",
+        alt: "Ocean Drive à noite, com letreiros coloridos.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Cada cartão é uma fonte diferente. Juntar os quatro num atlas é um passo que nenhuma delas deu.",
+      legenda: "Ocean Drive à noite, com letreiros coloridos. Foto de Luis Erives (Pexels).",
     },
     {
       tipo: "titulo",
@@ -160,12 +160,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-mapa-leonida-e-vice-city-leitura.webp",
-        alt: "Duas colunas separam os nomes que já foram publicados sobre o lugar de GTA 6 e o que não é um mapa",
+        alt: "Rua cheia à noite em Miami Beach, com neon.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "A coluna da esquerda é nome publicado. A da direita é pergunta que essas páginas não respondem.",
+      legenda: "Rua cheia à noite em Miami Beach, com neon. Foto de Luis Erives (Pexels).",
     },
     {
       tipo: "paragrafo",
@@ -194,12 +194,12 @@ const artigo: Artigo = {
       tipo: "imagem",
       imagem: {
         src: "/blog/figuras/gta-6-mapa-leonida-e-vice-city-fecho.webp",
-        alt: "Quatro leituras do mapa de GTA 6: sinopse oficial, nome na edição, não é atlas e sem escala inventada",
+        alt: "Hotéis iluminados na beira da rua, à noite, em Miami.",
         largura: 1600,
         altura: 900,
-        pronta: true,
+        pronta: false,
       },
-      legenda: "Leonida e Vice City estão na sinopse. Nomes da Ultimate Edition não fecham um mapa.",
+      legenda: "Hotéis iluminados na beira da rua, à noite, em Miami. Foto de Luis Erives (Pexels).",
     },
     {
       tipo: "pros-contras",
