@@ -210,6 +210,17 @@ const artigo: Artigo = {
       texto: "Se o GTA V já roda e a voz já cabe, você não precisa de outra máquina só porque GTA 6 teve data de console. Data de console não é data de PC. Se o jogo não deixa espaço para você falar, o próximo passo é essa folga, em termos gerais, e não um tutorial de servidor. Mod e burla continuam fora desta página.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/gta-rp-e-o-que-o-gta-6-nao-e-fecho.webp",
+        alt: "Quatro limites do GTA RP: é cena de GTA V, não é modo de GTA 6, o PC precisa rodar o GTA V e não há tutorial de servidor aqui",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "GTA 6, na PlayStation, é campanha solo. RP de hoje não migra para esse jogo por esta página.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "Fica claro que o RP de hoje é cena de GTA V, com FiveM na comunidade",

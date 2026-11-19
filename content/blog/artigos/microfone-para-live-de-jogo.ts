@@ -197,6 +197,17 @@ const artigo: Artigo = {
       texto: "Quem está começando no [Twitch, YouTube ou Kick](/blog/comecar-no-twitch-youtube-ou-kick) precisa de áudio inteligível antes de overlay. Essa exigência não muda com a plataforma. Um título honesto com voz opaca continua difícil de acompanhar. Acerte a gravação de um minuto, no horário em que você joga, e só então abra a transmissão. A plataforma não devolve a frase que o microfone não captou.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/microfone-para-live-de-jogo-fecho.webp",
+        alt: "Quatro decisões do microfone: distância da boca, ruído da sala, dinâmico ou condensador, e a marca por último",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Dinâmico ignora mais a sala. Condensador pega mais detalhe e mais barulho. A posição pesa nos dois.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A distância da boca é um ajuste que você faz sem trocar de aparelho",

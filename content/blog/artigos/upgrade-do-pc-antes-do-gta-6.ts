@@ -211,6 +211,17 @@ const artigo: Artigo = {
       texto: "O texto de [PC para GTA 6 sem requisito](/blog/pc-para-gta-6-sem-requisito-oficial) junta o que já dá para decidir. Se o computador também falha fora do jogo, a conversa pode ser de [manutenção](/manutencao), não de peça nova: poeira, sistema no limite ou disco que já avisa erro. Upgrade não é o remédio de todo sintoma.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/upgrade-do-pc-antes-do-gta-6-fecho.webp",
+        alt: "Quatro travas do upgrade: compatibilidade, sair do HD, completar RAM e placa por último",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A placa só entra depois que fonte, gabinete e o disco já foram olhados.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A ordem tira o HD do caminho antes de gastar a troca na placa errada",

@@ -178,6 +178,17 @@ const artigo: Artigo = {
       texto: "A série inteira está em [GTA 6 no blog](/blog/gta-6). A data de console responde quando o jogo chega na sala. Não responde qual fonte, qual placa ou qual quantidade de memória comprar.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/gta-6-lancamento-19-novembro-2026-fecho.webp",
+        alt: "Quatro passos para ler a data de GTA 6: comunicado mais novo, console, ignorar maio e não copiar requisito de PC",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A data de console que ficou de pé é 19 de novembro de 2026. Maio foi uma promessa substituída.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A data de console tem dono: o comunicado da Rockstar, não um fórum",

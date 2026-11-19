@@ -219,6 +219,17 @@ const artigo: Artigo = {
       texto: "O preço da edição, em dólares, está noutra matéria, a de [preço](/blog/gta-6-preco-e-edicoes). Os vídeos, inclusive o Pre-Load Now, estão em [trailers](/blog/gta-6-trailers-oficiais). Dúvidas vizinhas estão nas [perguntas frequentes](/blog/gta-6-perguntas-frequentes). A série junta os temas em [GTA 6 no blog](/blog/gta-6). Espaço de pré-carga responde o console. Não responde a máquina que você vai montar.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/gta-6-pre-carga-e-tamanho-fecho.webp",
+        alt: "Quatro cuidados da pré-carga de GTA 6: data de 10 de novembro, espaço no console, caixa sem disco e não copiar o número para o PC",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A pré-carga que ficou de pé é 10 de novembro. 212 GB é número de console, dito de dois jeitos por fontes diferentes.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A data de 10 de novembro fica no lugar da cita de 12 de novembro, com a página mais nova",

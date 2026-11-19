@@ -214,6 +214,17 @@ const artigo: Artigo = {
       texto: "Se a prova falha na voz, não é a luz de fundo que resolve. Se falha porque o computador não aguenta jogo e captura, não é um fundo virtual. Você anota qual dos dois aconteceu e leva essa frase para quem for olhar a máquina. A [montagem](/montagempc) começa por esse uso. Um jogo sem versão de PC não vira a primeira linha do pedido.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/setup-de-streamer-para-gta-6-fecho.webp",
+        alt: "Quatro zonas da mesa de live: tela do jogo, microfone, câmera e folga da máquina, sem requisito de GTA 6",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A câmera é a última zona. Áudio ruim derruba a live antes de um overlay bonito.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A mesa, a captura e a folga viram três decisões separadas, cada uma com um sinal claro",

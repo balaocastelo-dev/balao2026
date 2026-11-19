@@ -202,6 +202,17 @@ const artigo: Artigo = {
       texto: "PC de mesa e notebook também não compartilham um requisito de GTA 6, porque esse requisito não foi escrito para nenhum dos dois. Se a dúvida é só espaço em disco, ela está na matéria de [SSD](/blog/ssd-para-gta-6), e os 212 GB de lá são número de console. Memória e disco são faltas diferentes: uma aperta no meio do jogo, a outra na hora de instalar.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/memoria-ram-para-gta-6-fecho.webp",
+        alt: "Quatro leituras da RAM: contar programas abertos, 16 GB como piso de hoje, 32 GB se houver captura e nenhum dos dois como ficha de GTA 6",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "16 GB é o piso comum de um PC de jogo hoje. 32 GB é folga de quem deixa mais coisa aberta.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "16 GB ficam no lugar certo: piso do PC de jogo de hoje",

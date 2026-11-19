@@ -219,6 +219,17 @@ const artigo: Artigo = {
       texto: "Se alguma dessas conferências falha, a faixa não foi entregue, mesmo que a caixa diga gamer. O guia geral, com o mesmo corte de data, está em [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial). A leitura local, para quem vai montar em Campinas, continua em [PC gamer e GTA 6](/blog/pc-gamer-gta-6-campinas), sem transformar a cidade num requisito.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/pc-gamer-entrada-para-gta-6-fecho.webp",
+        alt: "Quatro peças da faixa de entrada: placa dedicada, 16 GB de RAM, SSD e tela Full HD, sem o rótulo de PC de GTA 6",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Entrada é o PC que joga em Full HD o que você já joga. O orçamento é do dia, no WhatsApp.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A faixa fica definida por uso: Full HD nos jogos de agora",

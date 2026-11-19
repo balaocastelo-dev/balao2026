@@ -206,6 +206,17 @@ const artigo: Artigo = {
       texto: "Não troque de computador para corrigir categoria errada, título inflado ou envio que oscila. Essas falhas sobrevivem à peça nova. A conversa de máquina começa quando o jogo e a captura não cabem juntos. A série em [GTA 6 no blog](/blog/gta-6) separa anúncio de requisito. Até haver versão de PC, a conta transmite o jogo que já roda.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/comecar-no-twitch-youtube-ou-kick-fecho.webp",
+        alt: "Quatro passos para começar no Twitch, YouTube ou Kick: categoria, título honesto, horário repetido e áudio antes do enfeite",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Nenhuma plataforma é eleita aqui. O que as três pedem no começo é o mesmo: categoria, título, horário e voz.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "Twitch, YouTube e Kick ficam descritos por uma diferença cada, sem ranking",

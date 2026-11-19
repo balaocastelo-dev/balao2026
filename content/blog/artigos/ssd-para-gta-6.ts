@@ -221,6 +221,17 @@ const artigo: Artigo = {
       texto: "Na hora de trocar, o formato também importa. Notebook fino e PC de mesa não usam a mesma peça, e um SSD de gaveta não entra num encaixe soldado. O [upgrade de SSD](/upgrade-ssd) começa pelo modelo da máquina. A memória, que é outra falta, está em [RAM para GTA 6](/blog/memoria-ram-para-gta-6), com o mesmo aviso: piso de hoje não é ficha do jogo.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/ssd-para-gta-6-fecho.webp",
+        alt: "Quatro cuidados de disco: sair do HD, deixar faixa livre, não copiar os 212 GB do console e pedir o SSD do uso atual",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "212 GB é espaço de PlayStation 5, não a capacidade que um PC de GTA 6 teria de ter.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "212 GB ficam com a fonte e com o aparelho certo, o console",

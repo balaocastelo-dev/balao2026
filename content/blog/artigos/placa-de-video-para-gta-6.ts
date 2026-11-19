@@ -213,6 +213,17 @@ const artigo: Artigo = {
       texto: "A placa pede troca quando o limite já está nos jogos de hoje: Quad HD com ajuste que você quer e uma placa que só segura Full HD, ou 8 GB esgotados nas texturas que você já usa. A referência de PC inteiro, sem transformar isso em requisito, está em [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial). A decisão continua sendo a sessão desta semana.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/placa-de-video-para-gta-6-fecho.webp",
+        alt: "Quatro passos da placa de vídeo sem ficha de GTA 6: resolução, memória nos jogos atuais, fonte e nada de modelo obrigatório",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A lição de 8 e 16 GB vale para jogos que já existem. Não é a lista de GTA 6.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A placa fica amarrada à tela e aos jogos que você já abre",

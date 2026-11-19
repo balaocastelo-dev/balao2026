@@ -201,6 +201,17 @@ const artigo: Artigo = {
       texto: "Não fixa, por fim, que o OBS deixa qualquer computador pronto para GTA 6. Sem versão de PC, não há jogo para capturar. A [máquina da live](/blog/pc-para-live-de-gta-6) se dimensiona pelos jogos que você já transmite, com folga além do jogo para a codificação. O OBS entra em cima dessa folga. Não cria a folga.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/obs-para-live-de-jogo-fecho.webp",
+        alt: "Quatro peças do OBS antes da live: cena, fonte, codificador e um teste gravado, sem número de bitrate",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "O número de bitrate muda. O OBS publica a recomendação atual. Esta figura não inventa um valor.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "Cena, fonte e codificador ficam separados, então você sabe o que montar antes de procurar número",

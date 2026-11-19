@@ -190,6 +190,17 @@ const artigo: Artigo = {
       texto: "O comunicado de junho citava pré-carga em 12 de novembro. Em novembro de 2026, a PlayStation e a Rockstar falam em 10 de novembro. Data e espaço estão na matéria de [pré-carga](/blog/gta-6-pre-carga-e-tamanho). Preço e arquivo são decisões diferentes, uma em dólares e a outra em gigabytes. Nenhuma está em reais. A série segue em [GTA 6 no blog](/blog/gta-6).",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/gta-6-preco-e-edicoes-fecho.webp",
+        alt: "Quatro passos do preço de GTA 6: dólares no comunicado, reais fora dele, conferir a loja e não copiar anúncio velho",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Standard e Ultimate saíram em dólares no comunicado da Take-Two. O valor em reais não está nesse texto.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "Os dois preços têm dono e moeda: o comunicado da Take-Two, em dólares",

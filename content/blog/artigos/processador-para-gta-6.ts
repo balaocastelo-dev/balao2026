@@ -213,6 +213,17 @@ const artigo: Artigo = {
       texto: "O processador pede conversa quando o teto já aparece nos seus jogos, quando o soquete não aceita mais nada acima, ou quando o cooler vive no limite. São três portas de entrada, todas observáveis. Nenhuma delas se chama requisito de GTA 6. A página de [plataformas](/blog/gta-6-plataformas-ps5-xbox-e-pc) separa o que o dia 19 de fato inclui, e processador de PC não está na lista.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/processador-para-gta-6-fecho.webp",
+        alt: "Quatro limites do processador: soquete da placa-mãe, cooler, gabinete e o gargalo dos jogos que você já roda",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Não há um processador de GTA 6. A troca depende do que a placa-mãe e o cooler já suportam.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A decisão usa o gargalo dos jogos que você já abre",

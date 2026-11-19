@@ -191,6 +191,17 @@ const artigo: Artigo = {
       texto: "Enviar a mesma imagem para mais de um destino ao mesmo tempo pede mais da subida. No começo, um destino só já mostra se a linha aguenta. GTA 6 de PC não entra com um requisito de rede, porque essa versão não tinha ficha publicada. A internet que você prova é a da live de hoje. O jogo sem versão de computador não fornece um número para copiar.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/internet-para-fazer-live-fecho.webp",
+        alt: "Quatro testes de internet para live: envio, estabilidade, horário da transmissão e chamada ao provedor se oscilar",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Download alto não descreve o envio. Não há um número de mega nesta figura.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "Você separa download de envio e deixa de ler o número do caminho contrário",

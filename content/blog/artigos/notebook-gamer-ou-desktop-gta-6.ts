@@ -199,6 +199,17 @@ const artigo: Artigo = {
       texto: "Se o orçamento não fecha num aparelho novo, o [seminovo](/seminovos) existe como caminho, com o mesmo cuidado: no notebook, a placa que está dentro é a placa que fica. No desktop seminovo, ainda cabe perguntar fonte, espaço e memória. Nenhum dos dois formatos recebe um selo de GTA 6 por ser seminovo ou por ser novo.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/notebook-gamer-ou-desktop-gta-6-fecho.webp",
+        alt: "Quatro passos para escolher notebook ou desktop: se você carrega, se a tampa abre, se a placa é soldada e se troca peça com frequência",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A placa de notebook em geral não se troca. RAM e SSD dependem do modelo, por isso a tampa se abre na loja.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "O notebook leva o jogo com você, e essa vantagem fica explícita em vez de virar promessa de upgrade",

@@ -196,6 +196,17 @@ const artigo: Artigo = {
       texto: "Se a pergunta é quem são as pessoas da sinopse, o caminho é o texto oficial, não uma narração de cena. A [página do jogo](https://www.rockstargames.com/VI) e a [página de mídia](https://www.rockstargames.com/VI/launch-trailer) servem a coisas diferentes: uma apresenta o jogo, a outra reúne os vídeos. A série inteira está em [GTA 6 no blog](/blog/gta-6). Trailer responde qual vídeo existe. Não responde mapa, edição nem peça.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/gta-6-trailers-oficiais-fecho.webp",
+        alt: "Quatro tipos de vídeo oficial de GTA 6: trailer, olhar estendido, trailer de lançamento e aviso de pré-carga",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A página de mídia data os vídeos. Só o Extended Look tem, na PlayStation, a frase de captura in-game.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "Cada vídeo fica com a data da página de mídia, e o repost deixa de competir com ela",

@@ -197,6 +197,17 @@ const artigo: Artigo = {
       texto: "GTA 6 não publicou câmera de referência para PC, e o computador do jogo seguia sem anúncio nessa checagem de novembro de 2026. Comprar webcam para esse jogo é decidir com um uso que a Rockstar não descreveu. Compre para o rosto da live de agora, na luz da sua mesa. A câmera continua sendo câmera de rosto, não peça de requisito.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/webcam-para-stream-fecho.webp",
+        alt: "Quatro cuidados da webcam: luz na cara, altura do rosto, 1080p como piso comum e a câmera dentro da cena",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "1080p é o piso comum de uma câmera de rosto. Megapixel a mais não corrige um rosto no escuro.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "1080p funciona como piso do rosto, e você não precisa caçar o maior número",

@@ -212,6 +212,17 @@ const artigo: Artigo = {
       texto: "Disco com folga evita instalar o próximo jogo em cima do limite. Essa folga é sua, contada em cima da biblioteca atual. Não é os 212 GB do console reaproveitados como meta. Quando, e se, o PC tiver tamanho oficial, você soma. Não antecipa.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/pc-gamer-gta-6-campinas-fecho.webp",
+        alt: "Quatro passos em Campinas: dizer os jogos, ir à Anchieta 789, ver a máquina ligada e pedir orçamento sem promessa de GTA 6",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A loja mostra o computador ligado. Ela não promete que essa máquina roda um jogo sem versão de PC.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A busca local se separa da ficha do jogo, então Campinas deixa de parecer um requisito paralelo",

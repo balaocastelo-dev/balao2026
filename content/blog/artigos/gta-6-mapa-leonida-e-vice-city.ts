@@ -191,6 +191,17 @@ const artigo: Artigo = {
       texto: "Os [trailers oficiais](/blog/gta-6-trailers-oficiais) também não servem, neste texto, como fonte de geografia. A página de mídia dá nome e data de vídeo, não uma legenda de cada plano. Quem quer o que foi mostrado com fonte fica com Leonida, com a frase do lugar ensolarado, com o pacote e com os sete nomes. A série está em [GTA 6 no blog](/blog/gta-6).",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/gta-6-mapa-leonida-e-vice-city-fecho.webp",
+        alt: "Quatro leituras do mapa de GTA 6: sinopse oficial, nome na edição, não é atlas e sem escala inventada",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Leonida e Vice City estão na sinopse. Nomes da Ultimate Edition não fecham um mapa.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "Cada nome fica com a página que o publicou, e a sinopse não é obrigada a funcionar como atlas",

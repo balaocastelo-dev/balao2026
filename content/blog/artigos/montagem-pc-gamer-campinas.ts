@@ -199,6 +199,17 @@ const artigo: Artigo = {
       texto: "Quem espera o jogo de console no dia 19 não precisa de montagem para essa data. Precisa do console da lista oficial. Quem espera uma versão de PC que ainda não tem calendário pode montar agora só se o uso atual já justifica. Esperar sentado também é uma decisão válida. Montar por ansiedade não encurta o anúncio da Rockstar.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/montagem-pc-gamer-campinas-fecho.webp",
+        alt: "Quatro dados da montagem em Campinas: tela, lista de jogos, fonte com gabinete e a máquina ligada antes de pagar",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A montagem em Campinas parte do uso atual. GTA 6 não entra como lista de peças.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A lista nasce do monitor e dos jogos que você citou, então dá para explicar cada peça",

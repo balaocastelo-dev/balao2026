@@ -60,8 +60,12 @@ function validar(materia) {
   const seo = materia.seoTitulo || materia.titulo;
   if (seo.length > 60) erros.push(`seo.titulo ${seo.length}`);
   if (materia.resumo.length < 110 || materia.resumo.length > 165) erros.push(`resumo ${materia.resumo.length}`);
-  if ((materia.imagens || []).length < 3 || materia.imagens.length > 4) erros.push(`${materia.imagens?.length || 0} imagens`);
-  if (!materia.imagens?.some((img) => img.papel === "capa")) erros.push("sem capa");
+  const capas = (materia.imagens || []).filter((img) => img.papel === "capa");
+  const corpos = (materia.imagens || []).filter((img) => img.papel === "corpo");
+  const figuras = (materia.blocos || []).filter((bloco) => bloco.tipo === "imagem");
+  if (capas.length !== 1 || corpos.length !== 3 || figuras.length !== 3) {
+    erros.push(`${capas.length} capa(s), ${corpos.length} no corpo, ${figuras.length} figura(s) no texto; o combinado é 1 capa e 3 no corpo`);
+  }
   const alts = new Set();
   for (const img of materia.imagens || []) {
     if (!img.alt || img.alt.trim().length < 12) erros.push(`alt curto em ${img.id}`);

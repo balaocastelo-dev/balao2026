@@ -219,6 +219,17 @@ const artigo: Artigo = {
       legenda: "Jogos, tela, memória e disco dá para observar. Requisito, data de PC e tamanho de console não.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/pc-para-gta-6-sem-requisito-oficial-fecho.webp",
+        alt: "Quatro passos para montar sem ficha de GTA 6: jogos de hoje, monitor atual, folga de peça e espera do anúncio",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Sem requisito oficial, a compra descreve o uso de agora. GTA 6 no PC entra quando a Rockstar publicar.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A data de console fica fora da lista de peças do computador",

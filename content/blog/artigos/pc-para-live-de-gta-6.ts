@@ -199,6 +199,17 @@ const artigo: Artigo = {
       texto: "A placa forte da faixa alta só se justifica se a tela e a codificação já pedem essa margem hoje. Quad HD com folga de memória de vídeo, sem live, continua sendo a [faixa intermediária](/blog/pc-gamer-intermediario-para-gta-6). Subir de faixa porque a transmissão de GTA 6 “vai pedir” é decidir com um jogo que não está no PC. Subir porque a sua live atual já soluça é decidir com evidência.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/pc-para-live-de-gta-6-fecho.webp",
+        alt: "Quatro cargas de um PC de live: jogo estável, codificador, áudio e só então um jogo de PC que ainda não existe",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Transmitir ocupa codificador, voz e disco além do jogo. GTA 6 no PC ainda não tem ficha para dimensionar isso.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A live fica descrita como segunda carga, então a folga deixa de ser um adjetivo vago",

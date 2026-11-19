@@ -209,6 +209,17 @@ const artigo: Artigo = {
       texto: "Painel, taxa e resolução se escolhem juntos porque a placa vê os três. Um Full HD de taxa alta pede menos placa do que um Quad HD de taxa alta. Quem quer os dois sobe de faixa de placa nos jogos de agora, não num requisito futuro. A série de [GTA 6](/blog/gta-6) separa o que já foi anunciado, e resolução de PC não está nesse anúncio.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/monitor-para-gta-6-fecho.webp",
+        alt: "Quatro passos do monitor: escolher a resolução, decidir a taxa, casar a placa e não comprar tela por um jogo sem PC",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Full HD ainda é a tela mais comum na Steam de setembro de 2026. Quad HD pede mais da placa nos jogos de agora.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A tela é escolhida pelo uso de hoje e trava a placa com clareza",

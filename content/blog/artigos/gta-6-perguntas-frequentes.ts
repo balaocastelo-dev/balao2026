@@ -256,6 +256,17 @@ const artigo: Artigo = {
       texto: "A série inteira, com o que já foi publicado e o que continua em aberto, está em [GTA 6 no blog](/blog/gta-6). Dúvida de peça, enquanto não houver requisito de PC, não se resolve nesta tabela. O guia de [PC para GTA 6](/blog/pc-para-gta-6-sem-requisito-oficial) explica o que dá para decidir sem essa ficha. Esta página não acrescenta número que a Rockstar não tenha escrito.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/gta-6-perguntas-frequentes-fecho.webp",
+        alt: "Quatro respostas curtas de GTA 6: data de console, PC sem anúncio, preço em dólares e campanha solo",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Cada cartão aponta para um fato publicado. O que não está aqui continua sem comunicado.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "Cada tema aponta para a matéria que carrega a fonte, em vez de repetir o comunicado inteiro",

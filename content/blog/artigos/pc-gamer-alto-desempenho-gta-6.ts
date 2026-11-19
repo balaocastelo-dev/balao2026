@@ -205,6 +205,17 @@ const artigo: Artigo = {
       texto: "Também não há quadro por segundo para prometer. Qualquer número de fluidez atribuído a GTA 6 no PC seria invenção, porque o jogo de computador não foi anunciado e não foi medido. A faixa alta descreve folga de peça e de tarefa. Não descreve um resultado de teste que ninguém publicou para esse jogo.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/pc-gamer-alto-desempenho-gta-6-fecho.webp",
+        alt: "Quatro peças da faixa alta: placa forte, 32 GB, SSD rápido e folga para capturar, ainda sem ficha de GTA 6",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A faixa alta cabe em quem já joga pesado e ainda captura. Continua não sendo requisito de GTA 6.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A folga fica nomeada: placa forte, 32 GB, SSD rápido e margem para capturar, cada item com uma função",

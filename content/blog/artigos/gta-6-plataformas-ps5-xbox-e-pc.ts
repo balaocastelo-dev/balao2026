@@ -177,6 +177,17 @@ const artigo: Artigo = {
       texto: "A [data de lançamento](/blog/gta-6-lancamento-19-novembro-2026) e a [série completa](/blog/gta-6) fecham o contexto. Plataforma é a primeira pergunta. Requisito de PC é uma pergunta que a Rockstar ainda não abriu.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/gta-6-plataformas-ps5-xbox-e-pc-fecho.webp",
+        alt: "Quatro caminhos de aparelho no dia 19: PS5 nativo, Xbox Series nativo, Xbox One só na nuvem e PC sem anúncio",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "PS4 fica de fora. A nuvem do Xbox One não é o jogo instalado, e o PC não está na lista.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "Dá para saber, com fonte, em qual aparelho o jogo existe no dia 19",

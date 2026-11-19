@@ -205,6 +205,17 @@ const artigo: Artigo = {
       texto: "O que sobra de concreto é pouco, e é o que dá para repetir: dois nomes oficiais, dois sobrenomes numa reportagem, um golpe que dá errado, um estado e uma campanha solo. A série junta o resto em [GTA 6 no blog](/blog/gta-6). Personagem anunciado não publica versão de PC, não publica requisito e não escolhe peça de computador.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/gta-6-lucia-e-jason-fecho.webp",
+        alt: "Três camadas sobre Lucia e Jason: nomes oficiais, sobrenomes da imprensa e o que ninguém deve completar",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "O site da Rockstar usa os primeiros nomes. Os sobrenomes estão na cobertura da The Verge.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "Jason e Lucia ficam como os nomes do texto oficial, fáceis de checar na página da Rockstar",

@@ -211,6 +211,17 @@ const artigo: Artigo = {
       texto: "A alta entra quando você quer placa forte, 32 GB, SSD rápido e margem para capturar vídeo enquanto joga. Isso é outro uso. Comprar a alta com monitor Full HD e sem captura desloca a máquina para uma folga que a sua rotina não pede. O critério é a tela e a tarefa, não o receio de um jogo que ainda não tem versão de PC.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/pc-gamer-intermediario-para-gta-6-fecho.webp",
+        alt: "Quatro decisões da faixa intermediária: tela Quad HD, folga de VRAM, não saltar para a alta sem uso e não chamar de config de GTA 6",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "A faixa sobe com a tela. Sem Quad HD, a entrada não fica errada só porque existe uma acima.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "A faixa do meio fica presa à tela Quad HD e à folga de VRAM, dois pontos que você consegue apontar",

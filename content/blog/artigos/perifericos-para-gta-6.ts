@@ -207,6 +207,17 @@ const artigo: Artigo = {
       texto: "Alto-falante pequeno em quarto barulhento é o caso clássico do headset, no notebook e no desktop. A [manutenção](/manutencao) entra só quando a tecla falha ou o conector do fone não responde: aí é defeito, não upgrade. Defeito não se resolve com uma marca “de GTA 6”. Resolve com o conserto da peça que quebrou. O jogo, sem versão de PC, continua fora dessa ordem de serviço.",
     },
     {
+      tipo: "imagem",
+      imagem: {
+        src: "/blog/figuras/perifericos-para-gta-6-fecho.webp",
+        alt: "Quatro camadas de periférico: mouse, teclado, headset e o que não faz o jogo rodar",
+        largura: 1600,
+        altura: 900,
+        pronta: true,
+      },
+      legenda: "Sem marca obrigatória. O incômodo da sessão diz qual peça trocar primeiro.",
+    },
+    {
       tipo: "pros-contras",
       pros: [
         "O gasto fica na peça que hoje incomoda, não num kit com nome de jogo",
