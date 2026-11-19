@@ -289,41 +289,6 @@ main {
   animation-play-state: paused;
 }
 
-/* Destaque GTA 6: o avião e o jet ski só andam com transform/opacity.
-   A trilha é um container para a distância ser a largura da cena, não da tela. */
-.gta-trilha {
-  container-type: inline-size;
-}
-
-@keyframes gta-cruza {
-  from { transform: translate3d(-120%, 0, 0); }
-  to { transform: translate3d(100cqi, 0, 0); }
-}
-
-@keyframes gta-cruza-volta {
-  from { transform: translate3d(100cqi, 0, 0); }
-  to { transform: translate3d(-120%, 0, 0); }
-}
-
-@keyframes gta-espuma {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.95; }
-}
-
-.gta-jet {
-  animation: gta-cruza 28s linear infinite;
-  will-change: transform;
-}
-
-.gta-aviao {
-  animation: gta-cruza-volta 22s linear infinite;
-  will-change: transform;
-}
-
-.gta-espuma {
-  animation: gta-espuma 1.6s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .balao-cta-pulse {
     animation: none;
@@ -332,21 +297,6 @@ main {
   .brand-carousel-track,
   .animate-marquee {
     animation: none;
-  }
-
-  .gta-jet,
-  .gta-aviao,
-  .gta-espuma {
-    animation: none;
-    will-change: auto;
-  }
-
-  .gta-jet {
-    transform: translate3d(8cqi, 0, 0);
-  }
-
-  .gta-aviao {
-    transform: translate3d(46cqi, 0, 0);
   }
 }
 @media print {
