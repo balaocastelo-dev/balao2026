@@ -22,8 +22,9 @@ import {
  * Sem preço e sem parcelamento: o botão abre o WhatsApp da loja. A página do
  * Acer Aspire Go 15 continua no ar; só saiu da vitrine da home.
  *
- * O fundo é arte original (pôr do sol, palmeiras, neon, oceano turquesa),
- * gravada em public/images/pc-gamer-gta6/. O gabinete RGB fica por cima.
+ * O fundo é arte original (pôr do sol, palmeiras, neon, oceano turquesa).
+ * O gabinete é a foto da loja, com o fundo branco recortado, em
+ * public/images/pc-gamer-gta6/. A placa da foto é a Radeon RX 7600 XT.
  */
 
 const display = Barlow_Condensed({
@@ -39,7 +40,7 @@ const MIDIA = "/images/pc-gamer-gta6";
 
 const especificacoes = [
   { icon: Cpu, texto: "AMD Ryzen 7 5700X" },
-  { icon: Gpu, texto: "RTX 4060 Ti 8GB" },
+  { icon: Gpu, texto: "Radeon RX 7600 XT 16GB" },
   { icon: MemoryStick, texto: "32GB DDR4" },
   { icon: HardDrive, texto: "SSD NVMe 1TB" },
   { icon: Zap, texto: "Fonte 650W 80 Plus" },
@@ -73,14 +74,18 @@ export default function HomePcGamerGta6Destaque() {
           className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/15 via-black/35 to-black/80 lg:bg-gradient-to-r lg:from-black/80 lg:via-black/45 lg:to-black/10"
         />
 
-        <div className="relative z-10 grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-          <div className="relative min-h-[270px] sm:min-h-[360px] lg:order-last lg:min-h-[540px]">
+        <div className="relative z-10 grid lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+          <div className="relative min-h-[340px] sm:min-h-[460px] lg:order-last lg:min-h-[620px]">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1/2 top-[52%] h-[72%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,61,139,0.62)_0%,rgba(123,44,191,0.42)_46%,transparent_72%)] blur-2xl"
+            />
             <Image
-              src={`${MIDIA}/pc-gamer-rgb.webp`}
-              alt="PC gamer com gabinete RGB, montado pela Balão da Informática, pronto para GTA 6"
+              src={`${MIDIA}/gabinete.webp`}
+              alt="PC gamer com gabinete de vidro e três fans RGB, montado pela Balão da Informática, pronto para GTA 6"
               fill
-              sizes="(max-width: 1023px) 100vw, 48vw"
-              className="object-contain object-bottom p-4 drop-shadow-[0_28px_36px_rgba(0,0,0,0.7)] sm:p-6 lg:object-center lg:p-8"
+              sizes="(max-width: 1023px) 100vw, 55vw"
+              className="object-contain object-bottom p-1 drop-shadow-[0_26px_30px_rgba(0,0,0,0.55)] sm:p-2 lg:object-center lg:p-3"
             />
             <div
               className={`${display.className} absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-[#2EE6D6]/80 bg-black/70 px-3 py-1.5 text-sm font-bold uppercase italic tracking-[0.14em] text-[#2EE6D6] shadow-[0_0_18px_rgba(46,230,214,0.35)] backdrop-blur-sm sm:right-6 sm:top-6 sm:text-base`}
