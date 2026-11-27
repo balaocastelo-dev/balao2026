@@ -255,7 +255,7 @@ export const android: PaginaDeCaptacao = {
   tituloDasPerguntas: "Perguntas frequentes",
   temas: ["android", "celular", "assistencia", "iphone", "apple"],
   termosDoBlog: ["android", "samsung", "motorola", "xiaomi", "celular", "tela", "bateria"],
-  relacionadas: ["iphone", "reparoapple", "telaiphone", "manutencao"],
+  relacionadas: ["iphone", "reparoapple", "macbook", "manutencao"],
   final: {
     titulo: "Mande a marca, o modelo e se quer motoboy",
     texto:

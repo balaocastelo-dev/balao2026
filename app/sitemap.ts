@@ -66,7 +66,6 @@ async function paginas(): Promise<MetadataRoute.Sitemap> {
     '/iphone',
     '/android',
     '/acer-aspire-go-15',
-    '/telaiphone',
     '/toner',
     '/livros',
     '/vitrine',

@@ -25,7 +25,7 @@ export const pcgamer: PaginaDeCaptacao = {
   },
   hero: {
     contexto: "PC gamer pronto no Cambuí, em Campinas",
-    titulo: "O PC gamer certo para o seu monitor e os seus jogos",
+    titulo: "PC Gamer em Campinas, certo para o seu monitor e os seus jogos",
     texto:
       "As máquinas estão separadas pela placa de vídeo, que é o que decide a resolução e o FPS. Escolha a fileira do seu jogo, tire a dúvida no WhatsApp e veja o PC ligado na loja antes de pagar.",
     imagem: {

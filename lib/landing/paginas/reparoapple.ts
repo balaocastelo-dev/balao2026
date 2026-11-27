@@ -1,7 +1,7 @@
 import type { PaginaDeCaptacao } from "../tipos";
 
 // Hub dos serviços Apple. As páginas por aparelho são /macbook, /imac e
-// /iphone (tela e bateria de iPhone continuam em /telaiphone). iPad, Mac mini
+// /iphone (tela e bateria de iPhone também ficam em /iphone; /telaiphone responde 301). iPad, Mac mini
 // e Apple Watch seguem em /wendell/apple. Celular Android tem página própria.
 // Assistência especializada e independente, sem logo da marca. Prazo só com
 // "em média" e "conforme o defeito e a peça".
@@ -89,7 +89,7 @@ export const reparoapple: PaginaDeCaptacao = {
       texto: "Cada página trata de um aparelho. O que vale para todos está nesta.",
       itens: [
         { titulo: "iPhone", texto: "Tela, bateria, carga, câmera e líquido.", href: "/iphone", imagem: "/images/landing/v3/iphone/telaiphone.webp", alt: "Técnico de luvas avaliando um iPhone com a tela trincada na bancada de reparo" },
-        { titulo: "Tela e bateria de iPhone", texto: "Trinca, toque e saúde da bateria, em detalhe.", href: "/telaiphone", imagem: "/images/landing/v3/reparoapple/iphone-card.webp", alt: "Celular com câmera tripla em suporte de bancada ao lado de pinça e chaves de precisão" },
+        { titulo: "Tela e bateria de iPhone", texto: "Trinca, toque e saúde da bateria, na página de conserto de iPhone.", href: "/iphone", imagem: "/images/landing/v3/reparoapple/iphone-card.webp", alt: "Celular com câmera tripla em suporte de bancada ao lado de pinça e chaves de precisão" },
         { titulo: "MacBook", texto: "Air e Pro: tela, bateria, teclado e o que não liga.", href: "/macbook", imagem: "/images/landing/v3/macbook/macbook-hero.webp", alt: "Técnico de luvas trabalhando na placa de um MacBook aberto na bancada" },
         { titulo: "iMac", texto: "Mac de mesa: tela, fonte e lentidão.", href: "/imac", imagem: "/images/landing/v3/imac/imac-hero.webp", alt: "Computador tudo-em-um azul sobre a mesa durante avaliação técnica, com chave de precisão na mão do técnico" },
         { titulo: "iPad", texto: "Vidro, bateria e conector.", href: "/wendell/apple/ipad", imagem: "/images/landing/v3/reparoapple/ipad-card.webp", alt: "Tablet prateado sobre manta de reparo com chave de precisão ao lado" },

@@ -133,6 +133,10 @@ const nextConfig: NextConfig = {
       { source: "/whitelabel", destination: "/overclock", statusCode: 301 },
       // O endereço antigo da página de toner era /tonner. 301 permanente para /toner.
       { source: "/tonner", destination: "/toner", statusCode: 301 },
+      // Troca de tela e bateria de iPhone passou para /iphone. O endereço
+      // antigo continua valendo. É um caminho exato: não pega /sistema nem
+      // nenhum outro prefixo.
+      { source: "/telaiphone", destination: "/iphone", statusCode: 301 },
       // /Pcgamer e /TONER não entram aqui: o redirect do Next ignora maiúscula
       // e faria /pcgamer cair em loop. A troca de caixa fica no proxy.ts.
       // MacBook, iMac e iPhone ganharam slug curto. O endereço antigo, sob

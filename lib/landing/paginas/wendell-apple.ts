@@ -4,7 +4,7 @@ import type { PaginaDeCaptacao } from "../tipos";
 // aparelho. Quem chega aqui ainda não escolheu o assunto; a página mostra as
 // seis linhas, ensina a achar o modelo exato e leva à subpágina certa. O
 // serviço geral (defeitos, diagnóstico, consertar ou trocar) fica em
-// /reparoapple, e tela e bateria de iPhone em /telaiphone. Sem os depoimentos
+// /reparoapple. Tela e bateria de iPhone ficam em /iphone (/telaiphone responde 301). Sem os depoimentos
 // da página antiga (inventados) e sem "até 1h", "garantia de até 1 ano",
 // "True Tone", "motoboy leva e traz", "12x" e "técnicos certificados".
 export const wendellApple: PaginaDeCaptacao = {
@@ -149,7 +149,7 @@ export const wendellApple: PaginaDeCaptacao = {
       paragrafos: [
         "Quem tem um aparelho Apple quase sempre tem mais de um: o iPhone conversa com o Mac, o Apple Watch depende do iPhone, as fotos estão no iCloud. Um defeito num deles mexe com os outros, e a decisão entre consertar e trocar passa por isso. Por isso, na Balão, venda e assistência ficam no mesmo endereço, e a mesma equipe que testa o seu aparelho mostra as opções novas quando o conserto não compensa.",
         "Na prática, o especialista Apple cuida de três coisas. A primeira é o diagnóstico: descobrir se o defeito é peça trocável ou placa antes de falar em preço. A segunda é a escolha da peça: para tela e bateria pode haver mais de uma opção para o mesmo modelo, e o técnico explica a diferença no orçamento. A terceira é a conta honesta: quando o aparelho já não recebe atualização do sistema ou o conserto chega perto do preço de um novo, você ouve isso antes de gastar.",
-        "Se o seu caso é tela ou bateria de iPhone, a página de troca de tela e bateria explica os sintomas e a saúde da bateria em detalhe. Para qualquer outro defeito, a página de assistência Apple mostra como o diagnóstico funciona e os cuidados antes de trazer o aparelho.",
+        "Se o seu caso é tela ou bateria de iPhone, a página de conserto de iPhone explica os sintomas e a saúde da bateria em detalhe. Para qualquer outro defeito, a página de assistência Apple mostra como o diagnóstico funciona e os cuidados antes de trazer o aparelho.",
       ],
       imagem: { src: "/images/apple/hub-hero-real.png", alt: "Balcão de atendimento da Balão da Informática com a marca da loja na parede" },
       lado: "esquerda",
@@ -161,7 +161,7 @@ export const wendellApple: PaginaDeCaptacao = {
         {
           titulo: "Troca de tela e bateria de iPhone",
           texto: "Sintomas, saúde da bateria e orçamento pelo modelo.",
-          href: "/telaiphone",
+          href: "/iphone",
         },
         {
           titulo: "Assistência Apple: diagnóstico e conserto",

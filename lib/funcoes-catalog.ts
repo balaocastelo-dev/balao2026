@@ -266,7 +266,7 @@ export const FUNCOES_CATALOG: FuncaoCategory[] = [
         image: IMAGES.servico,
       },
       {
-        href: "/telaiphone",
+        href: "/iphone",
         title: "Tela iPhone",
         description: "Pagina de reparo voltada para troca ou conserto de tela de iPhone.",
         image: IMAGES.apple,

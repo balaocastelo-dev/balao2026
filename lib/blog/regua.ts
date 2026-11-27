@@ -108,7 +108,6 @@ export const PAGINAS_DA_LOJA = [
   "/imac",
   "/iphone",
   "/android",
-  "/telaiphone",
   "/ia-local",
   "/premium",
   "/acer-aspire-go-15",

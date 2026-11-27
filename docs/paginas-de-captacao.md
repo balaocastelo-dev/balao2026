@@ -6,7 +6,7 @@ pessoa a chamar no WhatsApp. Cada página é única.
 
 ## Serviços Apple e Android (04/11/2026)
 
-O hub continua em `/reparoapple` (não abriu URL nova). MacBook, iMac e iPhone saíram de `/wendell/apple/...` para slugs curtos, com 301: `/macbook`, `/imac`, `/iphone`. Celular Android é página nova: `/android`. iPad, Mac mini e Apple Watch seguem em `/wendell/apple/...`. Tela e bateria de iPhone seguem em `/telaiphone`.
+O hub continua em `/reparoapple` (não abriu URL nova). MacBook, iMac e iPhone saíram de `/wendell/apple/...` para slugs curtos, com 301: `/macbook`, `/imac`, `/iphone`. Celular Android é página nova: `/android`. iPad, Mac mini e Apple Watch seguem em `/wendell/apple/...`. Tela e bateria de iPhone foram para `/iphone`; `/telaiphone` responde 301.
 
 Dado confirmado pelo dono e usado nas páginas: especialista em Apple; todos os serviços Apple e Android; reparo rápido em média 60 minutos, conforme o defeito e a peça; parcelamento em até 12x sem juros. O briefing de 04/11/2026 acrescenta, nas páginas de celular, diagnóstico grátis e coleta por motoboy (custo e prazo da coleta no WhatsApp). Sem "autorizada", "oficial", "credenciada" ou logo da Apple. Preço de serviço, tipo de peça e dias de garantia não são publicados: o texto fica neutro onde o briefing pedia para preencher. Hub Android: `/android`. Sem depoimento e sem número novo de avaliação.
 
@@ -29,7 +29,7 @@ CSP, revenda oficial, preço, certificação de técnico nem prazo de garantia.
 
 ## As páginas
 
-`/manutencao`, `/upgrade-ssd`, `/formatacao`, `/notebook-dell`, `/notebook-lenovo`, `/notebook-acer`, `/notebook-hp`, `/notebook-asus`, `/notebook-samsung`, `/qual-pc-gamer`, `/recuperacaodados`, `/reparoapple`, `/macbook`, `/imac`, `/iphone`, `/android`, `/telaiphone`, `/wendell/apple`, `/assistenciagames`,
+`/manutencao`, `/upgrade-ssd`, `/formatacao`, `/notebook-dell`, `/notebook-lenovo`, `/notebook-acer`, `/notebook-hp`, `/notebook-asus`, `/notebook-samsung`, `/qual-pc-gamer`, `/recuperacaodados`, `/reparoapple`, `/macbook`, `/imac`, `/iphone`, `/android`, `/wendell/apple`, `/assistenciagames`,
 `/montagempc`, `/pcgamer`, `/pcgamer3d`, `/notebooks`, `/carregadores`, `/toner`, `/microsoft`,
 `/microsoft/windows`, `/microsoft/windows-server`, `/microsoft/office-365`,
 `/consignacao`, `/sistemas`, `/promocao`, `/envio-e-entrega`, `/trocas-e-devolucoes`, `/como-comprar`,
