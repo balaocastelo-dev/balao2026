@@ -11,6 +11,7 @@
 // a pessoa veio ver. Função pura, testada.
 // ============================================================
 
+import { foraDaVitrineGamer } from "@/lib/catalogo/recorte-gamer";
 import { parsePriceToNumber, slugifyText, type Product } from "@/lib/utils";
 
 export interface Vitrine {
@@ -38,6 +39,11 @@ interface Regra {
   precoMinimo?: number;
   /** Só produtos de pronta entrega. */
   pronta?: boolean;
+  /**
+   * A mesma regra de /pcgamer (lib/catalogo/recorte-gamer.ts):
+   * só entra quem tem placa dedicada. Gabinete, office e vídeo integrado ficam de fora.
+   */
+  filtroDaVitrineGamer?: boolean;
   href: string;
 }
 
@@ -58,8 +64,9 @@ export const REGRAS_DAS_VITRINES: Regra[] = [
     subtitulo: "Montados e testados na nossa bancada, com garantia da loja.",
     categorias: ["Computadores/PC/PC Gamer"],
     comecaCom: ["computador", "pc", "kit", "cpu"],
-    // Office, escritório, gabinete e peça solta não entram nesta prateleira.
-    fora: /\b(monitor|notebook|office|escritorio)\b|^(gabinete|case|placa|memoria|ssd|fonte|cooler|teclado|mouse|cadeira|headset|processador)\b/,
+    // Monitor e notebook não são esta prateleira. O resto (GPU, office, gabinete) é foraDaVitrineGamer.
+    fora: /\b(monitor|notebook)\b/,
+    filtroDaVitrineGamer: true,
     precoMinimo: 900,
     href: "/categoria/computadores-pc",
   },
@@ -156,6 +163,7 @@ function entra(p: Product, r: Regra): boolean {
   if (r.categorias.length && !r.categorias.some((c) => cat === semAcento(c) || cat.startsWith(`${semAcento(c)}/`))) return false;
   if (r.comecaCom?.length && !r.comecaCom.some((w) => nome.startsWith(semAcento(w)))) return false;
   if (r.fora && r.fora.test(nome)) return false;
+  if (r.filtroDaVitrineGamer && foraDaVitrineGamer(p.name)) return false;
   const preco = parsePriceToNumber(p.price);
   if (!(preco > 0)) return false;
   if (r.precoMinimo != null && preco < r.precoMinimo) return false;

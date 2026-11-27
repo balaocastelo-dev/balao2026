@@ -1,3 +1,5 @@
+import { lerFicha } from "@/lib/catalogo/ficha";
+
 // ============================================================
 // O que não é PC gamer, mesmo quando o catálogo gravou nessa categoria.
 //
@@ -34,6 +36,24 @@ const semAcento = (s: unknown) =>
     .replace(/\s+/g, " ")
     .trim();
 
+/**
+ * Placa de vídeo dedicada no título: RTX, GTX, GT de verdade, RX, Arc e
+ * equivalentes. "Gabinete gamer", Vega, Intel HD/UHD/Iris e Radeon Graphics
+ * não contam — são o gabinete ou o vídeo integrado do processador.
+ */
+export function temGpuDedicada(nome: string): boolean {
+  const n = semAcento(nome);
+  if (!n) return false;
+  if (lerFicha({ name: nome, category: RAIZ_PC_GAMER }).placaDeVideo) return true;
+  if (/\b(rtx|gtx)\s*\d{3,4}\b/.test(n)) return true;
+  if (/\bgt\s*(610|630|640|710|720|730|740|1030)\b/.test(n)) return true;
+  if (/\brx\s*\d{3,4}\b/.test(n)) return true;
+  if (/\barc\s*[ab]\s*\d{3}\b/.test(n)) return true;
+  if (/\b(nvidia|nvidea|geforce|quadro)\b/.test(n)) return true;
+  if (/\bradeon\s+(hd|rx|r[579])\b/.test(n)) return true;
+  return false;
+}
+
 function noComputador(categoria: string) {
   return categoria === "Computadores/PC" || categoria.startsWith("Computadores/PC/");
 }
@@ -60,6 +80,8 @@ export function foraDaVitrineGamer(nome: string): boolean {
   if (ehPcDeEscritorio(nome)) return true;
   if (ehPecaSolta(nome)) return true;
   if (/\b(office|escritorio)\b/.test(n) && !/\b(gamer|rtx|gtx|geforce|radeon)\b/.test(n)) return true;
+  // Sem RTX, GTX, RX, Arc ou equivalente, não é vitrine gamer.
+  if (!temGpuDedicada(nome)) return true;
   return false;
 }
 

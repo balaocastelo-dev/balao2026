@@ -30,6 +30,18 @@ describe("vitrines da página inicial", () => {
     expect(mon.produtos.map((x) => x.id).sort()).toEqual(["m1", "m2", "m3", "m4"]);
   });
 
+  it("a seção gamer usa a mesma regra de /pcgamer: só placa dedicada", () => {
+    const gamer = [
+      p("sem", "Computador Cpu Intel Core i3 2120 16gb Ddr3 SSD 512gb Gabinete Gamer Fonte 500w", "Computadores/PC/PC Gamer", "1.200,00"),
+      p("hd", "PC Gamer Intel i7-4770, 8GB, Intel HD Graphics 4600, SSD 240GB", "Computadores/PC/PC Gamer", "1.100,00"),
+      p("3770", "PC Gamer Intel Core i7-3770, 8GB DDR3, SSD 512GB", "Computadores/PC/PC Gamer", "1.300,00"),
+      p("rtx", "PC Gamer Ryzen 5 5600, RTX 4060 8GB, 16gb", "Computadores/PC/PC Gamer", "4.500,00"),
+      p("rx", "PC Gamer Intel Core i3-2120, Radeon RX 580, 8GB DDR3, SSD 240GB", "Computadores/PC/PC Gamer", "1.800,00"),
+    ];
+    const vitrine = montarVitrines(gamer, 2).find((v) => v.id === "pc-gamer")!;
+    expect(vitrine.produtos.map((x) => x.id).sort()).toEqual(["rtx", "rx"]);
+  });
+
   it("escolhe variado e prefere foto de verdade", () => {
     const lista = Array.from({ length: 20 }, (_, i) =>
       p(`a${i}`, `Monitor Marca${i % 4} ${i}`, "Computadores/Monitores", `${(i + 1) * 100},00`, i === 0 ? { image: "/produto-sem-foto.svg" } : {})

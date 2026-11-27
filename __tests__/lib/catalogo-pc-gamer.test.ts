@@ -81,7 +81,7 @@ describe("montarFileiras", () => {
     ({ id: String(++n), name, price, category: RAIZ_PC_GAMER, image: "", slug: `p${n}`, ...extra }) as Product;
 
   const base = () => [
-    produto("PC Gamer Ryzen 5 5600gt, 16gb Ddr4, SSD 480GB", "3.000,00"),
+    produto("PC Gamer Intel Core i3, GT 1030 2GB, 8gb, SSD 240GB", "1.800,00"),
     produto("PC Gamer Hércules, Intel I3, GT 730 4GB 8GB, 500GB", "2.100,00"),
     produto("PC Gamer Hertz Intel Core i5 8500, 16GB, GTX 1660 6GB, SSD 480GB", "4.900,00"),
     produto("PC Gamer Fps Intel Core i7, 16gb Ram, Geforce RTX 3050 8GB, SSD 480GB", "4.400,00"),
@@ -98,7 +98,7 @@ describe("montarFileiras", () => {
     expect(total).toBe(10);
     expect(fileiras.map((f) => f.id)).toEqual(FILEIRAS.map((f) => f.id));
     const nomes = Object.fromEntries(fileiras.map((f) => [f.id, f.produtos.map((p) => p.name)]));
-    expect(nomes["entrada"]).toEqual(["PC Gamer Ryzen 5 5600gt, 16gb Ddr4, SSD 480GB"]);
+    expect(nomes["entrada"]).toEqual(["PC Gamer Intel Core i3, GT 1030 2GB, 8gb, SSD 240GB"]);
     expect(nomes["ate-4gb"]).toEqual(["PC Gamer Hércules, Intel I3, GT 730 4GB 8GB, 500GB"]);
     expect(nomes["ate-6gb"]).toEqual(["PC Gamer Hertz Intel Core i5 8500, 16GB, GTX 1660 6GB, SSD 480GB"]);
     expect(nomes["8gb"][0]).toBe("PC Gamer Fps Intel Core i7, 16gb Ram, Geforce RTX 3050 8GB, SSD 480GB");
@@ -114,11 +114,10 @@ describe("montarFileiras", () => {
   });
 
   it("prefere produto que ainda não apareceu; só repete quando a fileira não tem outro", () => {
-    // Ryzen 5: o 5600GT já está na entrada e o 5500 na de 8 GB. Sem outro
-    // Ryzen 5 no catálogo, a fileira mostra os dois em vez de sumir.
+    // O 5600GT (Vega) não entra: não tem placa dedicada. Sobra o 5500 com RTX.
     const pequena = montarFileiras(base()).fileiras.find((f) => f.id === "ryzen-5")!;
-    expect(pequena.total).toBe(2);
-    expect(pequena.produtos).toHaveLength(2);
+    expect(pequena.total).toBe(1);
+    expect(pequena.produtos).toHaveLength(1);
 
     // Com um Ryzen 5 que não cabe na fileira de 8 GB (limite de 1), é ele que entra.
     const lista = [
@@ -155,15 +154,18 @@ describe("montarFileiras", () => {
 
   it("tira gabinete, PC office e peça solta mesmo gravados como PC gamer", () => {
     const { fileiras, total } = montarFileiras([
+      produto("PC Gamer Ryzen 5 5600, RTX 4060 8GB, 16gb", "4.500,00"),
       produto("PC Gamer Ryzen 5 5600g, 16gb, Vega 7", "3.000,00"),
       produto("Gabinete Gamer Eclipse Mid Tower", "430,56"),
       produto("PC Office KaBuM! Intel Core i3-2120, 8GB DDR3, SSD 240GB", "896,41"),
       produto("PC Escritório KaBuM! Intel Core i5-3470", "1.063,99"),
+      produto("Computador Cpu Intel Core i3-2120, 16GB DDR3, SSD 512GB, Gabinete Gamer, Fonte 500W", "1.200,00"),
+      produto("PC Gamer Intel i7-4770, 8GB, Intel HD Graphics 4600, SSD 240GB", "1.100,00"),
       produto("Placa de Vídeo RTX 3060 12GB", "2.000,00"),
     ]);
     expect(total).toBe(1);
     expect([...new Set(fileiras.flatMap((f) => f.produtos.map((p) => p.name)))]).toEqual([
-      "PC Gamer Ryzen 5 5600g, 16gb, Vega 7",
+      "PC Gamer Ryzen 5 5600, RTX 4060 8GB, 16gb",
     ]);
     expect(categoriaCorrigida("Gabinete Gamer Eclipse Mid Tower", RAIZ_PC_GAMER)).toBe(CATEGORIA_GABINETE);
     expect(categoriaCorrigida("PC Office KaBuM! Intel Core i3-2120, 8GB DDR3, SSD 240GB", RAIZ_PC_GAMER)).toBe(CATEGORIA_ESCRITORIO);
@@ -173,7 +175,7 @@ describe("montarFileiras", () => {
 
   it("fica só com a categoria PC Gamer, disponível e com preço", () => {
     const { total } = montarFileiras([
-      produto("PC Gamer Ryzen 5 5600g, 16gb", "3.000,00"),
+      produto("PC Gamer Ryzen 5 5600, RTX 4060 8GB, 16gb", "4.500,00"),
       produto("Gabinete Gamer Rise Mode Glass 06X", "300,00", { category: "Hardware/Gabinetes" }),
       produto("Water Cooler Gamer 240mm RGB", "400,00", { category: "Hardware/Coolers/Water Cooler" }),
       produto("iMac Apple 24 M4", "15.000,00", { category: "Computadores/PC/Computador IMAC" }),
