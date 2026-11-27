@@ -138,6 +138,20 @@ describe("tranca do painel", () => {
     expect(config.matcher).toContain("/painel/:path*");
     expect((await passar("/api/products/qualquer.png", { metodo: "DELETE" })).status).toBe(401);
     expect((await passar("/painel/produtos.png")).status).toBe(307);
+    // MEU BLING, Hub e páginas prontas: o .js/.css/.webmanifest segue para o rewrite.
+    for (const caminho of [
+      "/sistema/assets/index-C00Ho9ho.js",
+      "/sistema/assets/index-CUz4bmgM.css",
+      "/sistema/manifest.webmanifest",
+      "/sistema/api/v1/saude",
+      "/mybots/assets/app.js",
+      "/app/assets/app.js",
+      "/3d/engine.91f7523ff7.js",
+    ]) {
+      expect(seguiu(await passar(caminho)), caminho).toBe(true);
+    }
+    const falso = await passar("/index.html");
+    expect(falso.headers.get("x-middleware-rewrite")).toContain("/404/pagina");
   });
 
   it("alterar o catálogo continua pedindo a senha", async () => {
