@@ -6,7 +6,7 @@
 // e cadeira. Agora só entra produto da categoria Computadores/PC/PC Gamer, e
 // cada fileira é um corte dessa categoria:
 //
-//    1. entrada: vídeo integrado ou placa de até 2 GB
+//    1. entrada: placa dedicada de até 2 GB (vídeo integrado não entra)
 //    2. intermediário: placa de 3 ou 4 GB
 //    3. top: placa de 6 GB
 //    4. placa de 8 GB (entram as de 10 e 11 GB)
@@ -184,8 +184,8 @@ export const FILEIRAS: DefinicaoDaFileira[] = [
   {
     id: "entrada",
     titulo: "PC gamer de entrada",
-    subtitulo: "Vídeo integrado ou placa de vídeo de até 2 GB.",
-    entra: (pc) => !pc.comMonitor && (pc.placa === "sem" || (pc.placa === "dedicada" && pc.vramGb! <= 2)),
+    subtitulo: "Placa de vídeo dedicada de até 2 GB.",
+    entra: (pc) => !pc.comMonitor && pc.placa === "dedicada" && pc.vramGb! <= 2,
   },
   {
     id: "ate-4gb",
@@ -214,26 +214,26 @@ export const FILEIRAS: DefinicaoDaFileira[] = [
   {
     id: "setups",
     titulo: "Setups completos com tela",
-    subtitulo: "Computador e monitor no mesmo pedido.",
-    entra: (pc) => pc.comMonitor,
+    subtitulo: "Computador com placa dedicada e monitor no mesmo pedido.",
+    entra: (pc) => pc.comMonitor && pc.placa === "dedicada",
   },
   {
     id: "ryzen-5",
     titulo: "PC gamer com AMD Ryzen 5",
-    subtitulo: "Só máquinas com processador AMD Ryzen 5.",
-    entra: (pc) => pc.ryzen === 5,
+    subtitulo: "Só máquinas com processador AMD Ryzen 5 e placa dedicada.",
+    entra: (pc) => pc.ryzen === 5 && pc.placa === "dedicada",
   },
   {
     id: "ryzen-7",
     titulo: "PC gamer com AMD Ryzen 7",
-    subtitulo: "Só máquinas com processador AMD Ryzen 7.",
-    entra: (pc) => pc.ryzen === 7,
+    subtitulo: "Só máquinas com processador AMD Ryzen 7 e placa dedicada.",
+    entra: (pc) => pc.ryzen === 7 && pc.placa === "dedicada",
   },
   {
     id: "ryzen-9",
     titulo: "PC gamer com AMD Ryzen 9",
-    subtitulo: "Só máquinas com processador AMD Ryzen 9.",
-    entra: (pc) => pc.ryzen === 9,
+    subtitulo: "Só máquinas com processador AMD Ryzen 9 e placa dedicada.",
+    entra: (pc) => pc.ryzen === 9 && pc.placa === "dedicada",
   },
   {
     id: "elite",
