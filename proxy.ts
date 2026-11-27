@@ -217,9 +217,86 @@ async function paginaDeVendedorOu404(request: NextRequest) {
   return NextResponse.rewrite(destino)
 }
 
+function hostPublico(request: NextRequest) {
+  return (request.headers.get('x-forwarded-host') || request.headers.get('host') || '')
+    .split(',')[0]
+    .trim()
+    .toLowerCase()
+    .replace(/:\d+$/, '')
+}
+
+/** Apex e http da loja caem no https://www com 301. Preview e localhost não entram. */
+function redirecionarHost(request: NextRequest) {
+  const host = hostPublico(request)
+  const proto = (request.headers.get('x-forwarded-proto') || request.nextUrl.protocol.replace(':', '')).toLowerCase()
+  const loja = host === 'balao.info' || host === 'www.balao.info'
+  if (!loja) return null
+  if (host === 'www.balao.info' && proto !== 'http') return null
+  const destino = request.nextUrl.clone()
+  destino.protocol = 'https:'
+  destino.hostname = 'www.balao.info'
+  destino.port = ''
+  return NextResponse.redirect(destino, 301)
+}
+
+/** /Pcgamer e /TONER (e qualquer caixa) vão para a URL minúscula. */
+function redirecionarCaixa(request: NextRequest) {
+  const bruto = request.nextUrl.pathname.replace(/\/+$/, '') || '/'
+  const minusculo = bruto.toLowerCase()
+  if (minusculo !== '/pcgamer' && minusculo !== '/toner') return null
+  if (bruto === minusculo) return null
+  const destino = request.nextUrl.clone()
+  destino.pathname = minusculo
+  return NextResponse.redirect(destino, 301)
+}
+
+/**
+ * Arquivo que não existe (.html, .json, .txt solto) não pode responder 200.
+ * robots, sitemap e llms.txt são de verdade e passam.
+ */
+function arquivoInexistente(pathname: string) {
+  if (!pathname.includes('.')) return false
+  const p = pathname.toLowerCase().replace(/\/+$/, '')
+  if (p === '/robots.txt' || p === '/sitemap.xml' || p === '/llms.txt') return false
+  if (p.startsWith('/sitemap/')) return false
+  if (p === '/google1b28e73344ff3a8c.html') return false
+  if (p.startsWith('/api/') || p.startsWith('/_next/') || p.startsWith('/painel')) return false
+  return true
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const metodo = request.method.toUpperCase()
+
+  // Artigo que saiu do ar (reprovado na régua: link para página que não existe).
+  // notFound() dentro do blog responde 200; aqui o status é 404 de verdade.
+  if (
+    (metodo === 'GET' || metodo === 'HEAD') &&
+    pathname === '/blog/avell-storm-480-notebook-gamer-i9-rtx-4080'
+  ) {
+    const destino = request.nextUrl.clone()
+    destino.pathname = '/404/pagina'
+    destino.search = ''
+    return NextResponse.rewrite(destino)
+  }
+
+  // /sitemap.xml é o índice. O Next só gera /sitemap/<id>.xml.
+  if ((metodo === 'GET' || metodo === 'HEAD') && pathname === '/sitemap.xml') {
+    const destino = request.nextUrl.clone()
+    destino.pathname = '/indice-do-sitemap'
+    return NextResponse.rewrite(destino)
+  }
+
+  const host = redirecionarHost(request)
+  if (host) return host
+  const caixa = redirecionarCaixa(request)
+  if (caixa) return caixa
+  if ((metodo === 'GET' || metodo === 'HEAD') && arquivoInexistente(pathname)) {
+    const destino = request.nextUrl.clone()
+    destino.pathname = '/404/pagina'
+    destino.search = ''
+    return NextResponse.rewrite(destino)
+  }
 
   // A consulta "este slug é de vendedor?" não pode voltar para cá, senão
   // a tranca chama a si mesma e a página não abre.

@@ -1,3 +1,4 @@
+import { ajustarCategoria } from "./catalogo/recorte-gamer";
 import { parsePriceToNumber, type CarouselImage, type Category, type Product } from "./utils";
 import catalogoBackup from "@/data/catalogo-backup.json";
 
@@ -72,7 +73,7 @@ async function buscarEspelho(): Promise<CopiaDoEspelho> {
 }
 
 export async function lerCatalogoDoEspelho(): Promise<Product[]> {
-  return (await buscarEspelho()).produtos;
+  return (await buscarEspelho()).produtos.map((p) => ajustarCategoria(p));
 }
 
 /**

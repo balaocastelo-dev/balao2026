@@ -7,7 +7,7 @@ export const pcgamer: PaginaDeCaptacao = {
   seo: {
     titulo: "PC Gamer em Campinas: Veja Rodando e Leve Hoje",
     descricao:
-      "PC gamer pronto no Cambuí: escolha pelo seu jogo, veja rodando na loja e leve hoje. 10% no Pix ou 10x sem juros. Fale no WhatsApp.",
+      "PC gamer pronto no Cambuí: escolha pelo seu jogo, veja rodando na loja e leve hoje. 10% no Pix ou 12x sem juros. Fale no WhatsApp.",
     palavras: [
       "PC gamer pronto em Campinas",
       "comprar PC gamer no Cambuí",
@@ -38,7 +38,7 @@ export const pcgamer: PaginaDeCaptacao = {
     secundario: { rotulo: "Como escolher a placa de vídeo", href: "#secao-2" },
     fatos: [
       { valor: "Veja ligado", rotulo: "e teste antes de pagar" },
-      { valor: "10% no Pix", rotulo: "ou até 10x sem juros no cartão" },
+      { valor: "10% no Pix", rotulo: "ou até 12x sem juros no cartão" },
       { valor: "Retire na hora", rotulo: "quando o PC está na loja" },
       { valor: "Entrega local", rotulo: "Campinas e região, combinada no WhatsApp" },
     ],
@@ -114,7 +114,7 @@ export const pcgamer: PaginaDeCaptacao = {
         },
         {
           titulo: "Pagamento sem complicação",
-          texto: "10% de desconto no Pix ou até 10x sem juros no cartão, fechando pelo WhatsApp ou no balcão.",
+          texto: "10% de desconto no Pix ou até 12x sem juros no cartão, fechando pelo WhatsApp ou no balcão.",
         },
       ],
     },
@@ -130,7 +130,7 @@ export const pcgamer: PaginaDeCaptacao = {
       tipo: "texto",
       titulo: "Pagamento e entrega",
       paragrafos: [
-        "10% de desconto no Pix ou até 10x sem juros no cartão, fechando pelo WhatsApp ou no balcão, como no resto da loja. Pedido pelo site termina no Pix.",
+        "10% de desconto no Pix ou até 12x sem juros no cartão, fechando pelo WhatsApp ou no balcão, como no resto da loja. Pedido pelo site termina no Pix.",
         "Retirada no balcão quando o PC está na loja. Entrega por motoboy em Campinas, Sumaré, Hortolândia, Valinhos e região: preço e prazo confirmados pelo WhatsApp. Não há frete fixo publicado aqui.",
       ],
     },
@@ -250,7 +250,7 @@ export const pcgamer: PaginaDeCaptacao = {
     {
       pergunta: "Quais formas de pagamento para PC gamer?",
       resposta:
-        "10% de desconto no Pix ou até 10x sem juros no cartão, com nota fiscal e garantia do fabricante nas peças.",
+        "10% de desconto no Pix ou até 12x sem juros no cartão, com nota fiscal e garantia do fabricante nas peças.",
     },
     {
       pergunta: "Qual placa de vídeo eu preciso para jogar em 1440p?",
@@ -285,7 +285,7 @@ export const pcgamer: PaginaDeCaptacao = {
     {
       pergunta: "Como funciona o pagamento e a garantia?",
       resposta:
-        "No Pix há 10% de desconto; no cartão, até 10x sem juros fechando pelo WhatsApp ou no balcão. Cada peça segue a garantia do fabricante e, na compra a distância, você tem 7 dias de arrependimento.",
+        "No Pix há 10% de desconto; no cartão, até 12x sem juros fechando pelo WhatsApp ou no balcão. Cada peça segue a garantia do fabricante e, na compra a distância, você tem 7 dias de arrependimento.",
     },
   ],
   temas: ["pcgamer", "pc", "games", "compra", "entrega", "garantia", "upgrade"],

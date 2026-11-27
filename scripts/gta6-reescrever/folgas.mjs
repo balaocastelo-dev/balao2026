@@ -127,7 +127,7 @@ const extras = {
     p("A loja fica na Av. Anchieta, 789, no Cambuí, em Campinas. O letreiro e a fachada vermelha estão na calçada. Lá dentro, o corredor leva ao balcão curvo e à parede de placas. Não é preciso marcar para olhar uma máquina exposta. Para fechar uma montagem no mesmo dia, avise pelo WhatsApp (19) 98751-0267 se a peça que você quer está na loja ou se precisa encomendar. O telefone (19) 3255-1661 tira a mesma dúvida. Sábado o balcão para às 13h. Chegar ao meio-dia com um pedido longo aperta todo mundo."),
     p("Traga o monitor só se a dúvida for a tela em si. Para o PC, a resolução anotada basta, junto com os jogos. Se a torre atual vier para upgrade, traga o gabinete e a senha do Windows, se houver. A equipe liga, olha e devolve com a peça nova ou com o diagnóstico. Você não deixa o computador e some: o endereço de retirada é o mesmo da entrega. Assistência futura também. É o motivo de montar em Campinas em vez de num anúncio de outra cidade."),
     ul([
-      "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h.",
+      "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h.",
       "WhatsApp (19) 98751-0267 para adiantar a lista de jogos e a resolução.",
       "Se for upgrade, leve o gabinete. Se for montagem nova, leve a medida da mesa.",
     ]),

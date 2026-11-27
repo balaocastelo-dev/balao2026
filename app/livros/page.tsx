@@ -1,5 +1,26 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE_CONFIG } from "@/lib/config";
+
+const URL_LIVROS = "https://www.balao.info/livros";
+
+export const metadata: Metadata = {
+  title: { absolute: "Livros de IA e tecnologia | Balão da Informática" },
+  description:
+    "Coleção de livros sobre inteligência artificial, tecnologia e sociedade, publicada pela Balão da Informática Anchieta, em Campinas.",
+  alternates: { canonical: URL_LIVROS },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: URL_LIVROS,
+    title: "Livros de IA e tecnologia | Balão da Informática",
+    description:
+      "Coleção de livros sobre inteligência artificial, tecnologia e sociedade, da Balão da Informática Anchieta.",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  robots: { index: true, follow: true },
+};
 
 export const revalidate = 3600;
 

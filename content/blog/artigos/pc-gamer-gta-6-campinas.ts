@@ -46,7 +46,7 @@ const artigo: Artigo = {
       "titulo": "Resposta rápida",
       "itens": [
         "A loja é no Cambuí: Av. Anchieta, 789. Telefone (19) 3255-1661. WhatsApp (19) 98751-0267.",
-        "Horário de balcão: segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h.",
+        "Horário de balcão: segunda a quinta, das 8h às 18h. Sexta, das 8h às 17h. Sábado, das 8h às 13h.",
         "Você diz a resolução do monitor e dois ou três jogos. A equipe fecha a configuração e mostra a máquina funcionando."
       ]
     },
@@ -172,7 +172,7 @@ const artigo: Artigo = {
       "tipo": "destaque",
       "tom": "dica",
       "titulo": "Horário",
-      "texto": "Segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h. Domingo a loja fecha. Se for sábado, chegue com folga: o balcão para às 13h."
+      "texto": "Segunda a quinta, das 8h às 18h. Sexta, das 8h às 17h. Sábado, das 8h às 13h. Domingo a loja fecha. Se for sábado, chegue com folga: o balcão para às 13h."
     },
     {
       "tipo": "titulo",
@@ -190,7 +190,7 @@ const artigo: Artigo = {
     {
       "tipo": "lista",
       "itens": [
-        "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h.",
+        "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h.",
         "WhatsApp (19) 98751-0267 para adiantar a lista de jogos e a resolução.",
         "Se for upgrade, leve o gabinete. Se for montagem nova, leve a medida da mesa."
       ]
@@ -224,7 +224,7 @@ const artigo: Artigo = {
     },
     {
       "pergunta": "Qual o horário?",
-      "resposta": "Segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h."
+      "resposta": "Segunda a quinta, das 8h às 18h. Sexta, das 8h às 17h. Sábado, das 8h às 13h."
     },
     {
       "pergunta": "Dá para orçar pelo WhatsApp?",

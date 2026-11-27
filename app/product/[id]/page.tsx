@@ -15,6 +15,8 @@ import SeloAppPix from '@/components/SeloAppPix';
 import JsonLd, { generateOrganizationSchema, generateBreadcrumbSchema, generateProductSchema } from '@/components/JsonLd';
 import { getProductHref } from '@/lib/utils';
 import { getCachedCategories, getCachedProductByIdentifier } from "@/lib/cache";
+import ContatoNoHtml from "@/components/ContatoNoHtml";
+import { PARCELAS_DA_LOJA } from "@/lib/precos/calculo";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -111,8 +113,11 @@ export default async function ProductPage({ params }: Props) {
   }
 
   const cashPriceNum = parseFloat(product.price.replace("R$", "").replace(/\./g, "").replace(",", ".").trim());
-  const listPriceNum = cashPriceNum / 0.85;
-  const installmentValue = listPriceNum / 10;
+  const cartaoTexto = String(product.price_card || "").replace("R$", "").replace(/\./g, "").replace(",", ".").trim();
+  const cartaoNum = parseFloat(cartaoTexto);
+  const totalCartao = Number.isFinite(cartaoNum) && cartaoNum > 0 ? cartaoNum : cashPriceNum / 0.85;
+  const installmentValue = totalCartao / PARCELAS_DA_LOJA;
+  const mensagemWhatsApp = `Olá! Vi no site este produto: ${product.name}. Pode confirmar estoque, valor final e opção de retirada ou entrega em Campinas?`;
   const descriptionText = stripSpecsFromDescription(product.description);
 
   // `product.category` guarda o caminho completo (ex: "Hardware/Placas-mãe/
@@ -202,14 +207,10 @@ export default async function ProductPage({ params }: Props) {
                           {/* Installment Price */}
                            <div className="mb-6 border-t border-[var(--site-border)] pt-4">
                               <div className="mb-1 text-sm text-[var(--site-muted)]">
-                                 Cartão de Crédito: <span className="font-bold text-white">{product.price_card || listPriceNum.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                 Cartão de Crédito: <span className="font-bold text-white">{product.price_card || totalCartao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                              </div>
                               <div className="text-sm text-[var(--site-soft)]">
-                                 {product.installment ? (
-                                   <span>ou em até <strong>{product.installment}</strong> sem juros</span>
-                                 ) : (
-                                   <span>em até 10x de <strong>{installmentValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> sem juros</span>
-                                 )}
+                                 <span>ou em até {PARCELAS_DA_LOJA}x de <strong>{installmentValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</strong> sem juros</span>
                              </div>
                           </div>
 
@@ -223,6 +224,9 @@ export default async function ProductPage({ params }: Props) {
                              </div>
                           </div>
 
+                         <div className="mb-4">
+                           <ContatoNoHtml mensagem={mensagemWhatsApp} titulo="Confirmar este produto" />
+                         </div>
                          <ProductActions product={product} />
                          <AvisoDeQuedaDePreco produtoId={String(product.id)} produtoNome={product.name} />
                          
@@ -230,7 +234,7 @@ export default async function ProductPage({ params }: Props) {
                     </div>
 
                     <div className="mt-6 flex flex-wrap items-center justify-end gap-2">
-                         <WhatsAppButton productName={product.name} />
+                         <WhatsAppButton productName={product.name} mensagem={mensagemWhatsApp} />
                          <ShareButton title={product.name} text={`Confira ${product.name} no Balão da Informática!`} />
                     </div>
                 </div>

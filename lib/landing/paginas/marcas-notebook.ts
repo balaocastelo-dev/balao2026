@@ -424,7 +424,7 @@ export const paginasDeMarca: PaginaDeCaptacao[] = MARCAS.map((m) => {
     relacionadas: ["manutencao", "carregadores", "upgrade-ssd", "reparoapple"],
     final: {
       titulo: `Mande o modelo do ${m.marca}`,
-      texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Preço e prazo confirmados pelo WhatsApp.",
+      texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Preço e prazo confirmados pelo WhatsApp.",
       botao: "Chamar no WhatsApp",
       mensagem: texto,
     },

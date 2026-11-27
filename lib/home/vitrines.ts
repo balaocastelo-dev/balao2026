@@ -56,9 +56,10 @@ export const REGRAS_DAS_VITRINES: Regra[] = [
     curto: "PC Gamer",
     titulo: "Computador Gamer",
     subtitulo: "Montados e testados na nossa bancada, com garantia da loja.",
-    categorias: ["Computadores/PC"],
-    comecaCom: ["computador", "pc", "kit"],
-    fora: /\b(monitor|notebook)\b/,
+    categorias: ["Computadores/PC/PC Gamer"],
+    comecaCom: ["computador", "pc", "kit", "cpu"],
+    // Office, escritório, gabinete e peça solta não entram nesta prateleira.
+    fora: /\b(monitor|notebook|office|escritorio)\b|^(gabinete|case|placa|memoria|ssd|fonte|cooler|teclado|mouse|cadeira|headset|processador)\b/,
     precoMinimo: 900,
     href: "/categoria/computadores-pc",
   },

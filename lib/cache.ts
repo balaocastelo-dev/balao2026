@@ -73,7 +73,7 @@ export const getCachedQuedasDePreco = unstable_cache(
  */
 export const getCachedProducts = unstable_cache(
   async () => comEspelho(() => getProducts(), espelhoTodos, listaVazia),
-  ["products-all"],
+  ["products-all-v2"],
   { revalidate: 120, tags: [TAG_PRODUTOS] }
 );
 
@@ -172,7 +172,7 @@ export function getCachedProductsByExactCategories(nomes: string[]) {
 
 /** Página /categoria/<caminho>, incluindo as subcategorias. */
 export function getCachedProductsByCategoryFullPath(caminho: string) {
-  const chave = ["products-category-path", String(caminho || "")];
+  const chave = ["products-category-path-v2", String(caminho || "")];
   return unstable_cache(
     async () =>
       comEspelho<Product[]>(
@@ -294,7 +294,7 @@ export const getCachedVitrinePcGamer = unstable_cache(
       (produtos) => montarFileiras(espelhoPorCaminhoDeCategoria(produtos, RAIZ_DESKTOPS)),
       (vitrine) => !vitrine || vitrine.total === 0
     ),
-  ["pcgamer-fileiras-v1"],
+  ["pcgamer-fileiras-v2"],
   { revalidate: 300, tags: [TAG_PRODUTOS] }
 );
 

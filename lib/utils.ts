@@ -517,7 +517,7 @@ export function parseProducts(text: string): Product[] {
                 price: formattedPrice,
                 price_card: formattedPrazo || undefined,
                 discount_pix: item.desconto_pix || "15%",
-                installment: item.parcelamento || `10x sem juros`,
+                installment: item.parcelamento || `12x sem juros`,
                 category: category || "Hardware",
                 brand: sanitizeText(brand) || "Balão.info",
                 availability: item.disponibilidade || item.estoque || "Disponível",

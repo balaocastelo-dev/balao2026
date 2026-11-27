@@ -141,7 +141,7 @@ export const microsoftWindowsServer: PaginaDeCaptacao = {
       titulo: "Proposta, nota e parcelamento",
       paragrafos: [
         "A proposta lista edição, núcleos, CALs de base e, se houver, CALs de acesso remoto. A venda sai com nota fiscal de venda. São licenças originais adquiridas de fornecedores oficiais Microsoft. No cartão, 12x sem juros para pessoa física e para CNPJ.",
-        "Nenhum valor está nesta página de propósito. Servidor e CAL mudam com o processador e com o número de pessoas, e copiar um preço de vitrine alheia induz a empresa a comprar núcleo a menos. O orçamento é pelo WhatsApp (19) 98751-0267 ou pelo telefone (19) 3255-1661. Loja na Av. Anchieta, 789, Cambuí, de segunda a sexta, das 9h às 18h, e sábado das 9h às 13h.",
+        "Nenhum valor está nesta página de propósito. Servidor e CAL mudam com o processador e com o número de pessoas, e copiar um preço de vitrine alheia induz a empresa a comprar núcleo a menos. O orçamento é pelo WhatsApp (19) 98751-0267 ou pelo telefone (19) 3255-1661. Loja na Av. Anchieta, 789, Cambuí, de segunda a quinta, das 8h às 18h, sexta das 8h às 17h, e sábado das 8h às 13h.",
       ],
     },
     {
@@ -225,7 +225,7 @@ export const microsoftWindowsServer: PaginaDeCaptacao = {
   relacionadas: ["microsoft", "microsoft/windows", "sistemas", "recuperacaodados"],
   final: {
     titulo: "Mande usuários, computadores e se o acesso é remoto",
-    texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Conta de núcleos e CALs, nota fiscal de venda e 12x sem juros também para CNPJ.",
+    texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Conta de núcleos e CALs, nota fiscal de venda e 12x sem juros também para CNPJ.",
     botao: "Chamar no WhatsApp",
     mensagem: MENSAGEM,
   },

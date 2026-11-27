@@ -127,7 +127,7 @@ async function run() {
     const pixPriceNum = Math.round((cost * (1 + margin)) * 100) / 100;
     // Preço parcelado em 10x com 1% a mais por parcela (10% total)
     const installmentPriceNum = Math.round((pixPriceNum * 1.10) * 100) / 100;
-    const singleInstallmentNum = Math.round((installmentPriceNum / 10) * 100) / 100;
+    const singleInstallmentNum = Math.round((installmentPriceNum / 12) * 100) / 100;
 
     const pixPriceFormatted = formatBRL(pixPriceNum);
     const installmentPriceFormatted = formatBRL(installmentPriceNum);
@@ -151,7 +151,7 @@ async function run() {
 
     const specs = {
       "Preço à Vista (PIX)": `${pixPriceFormatted} (com 10% de desconto)`,
-      "Parcelamento": `10x de ${singleInstallmentFormatted} sem juros no cartão (${installmentPriceFormatted})`,
+      "Parcelamento": `12x de ${singleInstallmentFormatted} sem juros no cartão (${installmentPriceFormatted})`,
       "Condição": "Produto Novo e Original com Nota Fiscal",
       "Garantia": "Garantia Balão da Informática - 90 dias a 1 ano",
       "Disponibilidade": "Pronta Entrega em Campinas / Envio Imediato",
@@ -159,7 +159,7 @@ async function run() {
       "Margem Aplicada": `${Math.round(margin * 100)}%`
     };
 
-    const description = `${name} disponível na Balão da Informática Anchieta em Campinas. Aproveite o melhor preço à vista no PIX por ${pixPriceFormatted} com desconto progressivo ou parcele em até 10x de ${singleInstallmentFormatted} sem juros. Compre online com entrega rápida para Campinas e região ou retire diretamente no balcão no Cambuí. Garantia total, procedência garantida e suporte técnico especializado.`;
+    const description = `${name} disponível na Balão da Informática Anchieta em Campinas. Aproveite o melhor preço à vista no PIX por ${pixPriceFormatted} com desconto progressivo ou parcele em até 12x de ${singleInstallmentFormatted} sem juros. Compre online com entrega rápida para Campinas e região ou retire diretamente no balcão no Cambuí. Garantia total, procedência garantida e suporte técnico especializado.`;
 
     productsToInsert.push({
       id: randomUUID(),

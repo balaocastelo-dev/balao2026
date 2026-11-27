@@ -4,8 +4,12 @@ import type { Product } from "@/lib/utils";
 
 export type ProdutoDoSitemap = Pick<Product, "id" | "slug" | "created_at">;
 
-/** Cabe o catálogo inteiro (~4.800 hoje); o sitemap aceita até 50 mil endereços. */
-export const LIMITE_DE_PRODUTOS = 5000;
+/**
+ * O Google aceita 50 mil endereços por arquivo. O catálogo passou de 5.000
+ * e o teto antigo cortava o resto. Cada arquivo do índice leva um pedaço.
+ */
+export const PRODUTOS_POR_ARQUIVO = 10000;
+export const LIMITE_DE_PRODUTOS = 50000;
 
 /**
  * Produtos que entram no sitemap.
@@ -34,6 +38,15 @@ export async function lerProdutosDoSitemap(
     if (saida.length >= LIMITE_DE_PRODUTOS) break;
   }
   return saida;
+}
+
+/** Pedaços para o índice do sitemap. Lista vazia vira um arquivo vazio só. */
+export function fatiarProdutos<T>(lista: T[], tamanho = PRODUTOS_POR_ARQUIVO): T[][] {
+  const n = Math.max(1, Math.trunc(tamanho) || PRODUTOS_POR_ARQUIVO);
+  if (lista.length === 0) return [[]];
+  const fatias: T[][] = [];
+  for (let i = 0; i < lista.length; i += n) fatias.push(lista.slice(i, i + n));
+  return fatias;
 }
 
 /** Data só quando o produto tem uma de verdade; sem ela o Google ignora o campo. */

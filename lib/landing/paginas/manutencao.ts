@@ -133,13 +133,15 @@ export const manutencao: PaginaDeCaptacao = {
       titulo: "Moro fora de Campinas ou não posso ir",
       paragrafos: [
         "A loja busca notebook e PC com motoboy em Campinas e na região (Sumaré, Hortolândia, Valinhos, Vinhedo, Paulínia e cidades vizinhas que a equipe confirmar). O custo e o prazo dessa coleta não estão tabelados aqui. Preço e prazo confirmados pelo WhatsApp.",
-        "Quem pode vir, retira no balcão. Horário: segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Atendimento urgente, quando a agenda permitir, está na página própria.",
+        "Quem pode vir, retira no balcão. Horário: segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Atendimento urgente, quando a agenda permitir, está na página própria.",
       ],
     },
     {
       tipo: "vitrine",
       titulo: "Peças que a loja já tem para o upgrade",
-      texto: "SSD e memória saem do catálogo abaixo. A instalação é orçada à parte. Preço e prazo confirmados pelo WhatsApp.",
+      texto:
+        "O valor de cada card é só da peça, o preço do catálogo. A mão de obra e a instalação são cobradas à parte, no orçamento pelo WhatsApp. O preço da peça não inclui o serviço.",
+      avisoNoCard: "Valor só da peça. Mão de obra e instalação são cobradas à parte.",
       regras: [
         {
           id: "ssd",

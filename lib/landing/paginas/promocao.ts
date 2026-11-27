@@ -36,7 +36,7 @@ export const promocao: PaginaDeCaptacao = {
     fatos: [
       { valor: "De / por real", rotulo: "o \"de\" é o preço que estava no site" },
       { valor: "10% no Pix", rotulo: "de desconto no pagamento à vista" },
-      { valor: "Até 10x", rotulo: "sem juros no cartão, pelo WhatsApp ou no balcão" },
+      { valor: "Até 12x", rotulo: "sem juros no cartão, pelo WhatsApp ou no balcão" },
       { valor: "Pronta entrega", rotulo: "retire na loja do Cambuí" },
     ],
   },
@@ -165,7 +165,7 @@ export const promocao: PaginaDeCaptacao = {
           titulo: "Como pagar",
           texto: "O desconto de 10% no Pix vale para a compra à vista. O pedido feito pelo site termina no Pix, com o QR code na tela.",
           pontos: [
-            "Para parcelar em até 10x sem juros no cartão, feche pelo WhatsApp ou no balcão",
+            "Para parcelar em até 12x sem juros no cartão, feche pelo WhatsApp ou no balcão",
             "Pagamento na loja do Cambuí, de segunda a sábado",
           ],
         },
@@ -213,7 +213,7 @@ export const promocao: PaginaDeCaptacao = {
     {
       pergunta: "Posso parcelar a oferta no cartão?",
       resposta:
-        "Pode, em até 10x sem juros. O pedido pelo site termina no Pix; para parcelar, feche a compra pelo WhatsApp ou no balcão da loja.",
+        "Pode, em até 12x sem juros. O pedido pelo site termina no Pix; para parcelar, feche a compra pelo WhatsApp ou no balcão da loja.",
     },
     {
       pergunta: "O que quer dizer \"Pronta entrega\"?",

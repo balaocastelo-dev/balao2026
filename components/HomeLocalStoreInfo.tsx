@@ -131,7 +131,7 @@ export default function HomeLocalStoreInfo() {
       <div className="home-panel mt-6 rounded-3xl p-6 shadow-xl sm:p-8">
         <div className="text-center max-w-xl mx-auto mb-8">
           <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-[#E60012]">
-            ⭐ Avaliações no Google
+            Depoimentos de clientes
           </span>
           <h3 className="mt-3 text-xl font-black text-white sm:text-2xl">
             Quem Compra em Campinas Recomenda

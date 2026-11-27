@@ -33,7 +33,7 @@ export default function HomeTrustPillars() {
     },
     {
       icon: CreditCard,
-      title: "Até 10x sem juros ou Desconto PIX",
+      title: "Até 12x sem juros ou Desconto PIX",
       desc: "Preço justo de distribuidor com economia real no PIX ou facilidade no cartão.",
       badge: "Melhor Condição",
       actionText: "Ver Promoções",

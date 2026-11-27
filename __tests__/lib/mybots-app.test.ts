@@ -240,7 +240,9 @@ describe("landing /mybots-app", () => {
     expect(ler("components/LayoutWrapper.tsx")).toContain("data-loja");
 
     const sitemap = ler("app/sitemap.ts");
-    expect(sitemap).toContain("URL_SITE");
+    // O sitemap da loja não lista o domínio do MyBots.
+    expect(sitemap).not.toContain("URL_SITE");
+    expect(sitemap).not.toContain("soubots.com");
     expect(sitemap).not.toContain("'/mybots-app'");
   });
 

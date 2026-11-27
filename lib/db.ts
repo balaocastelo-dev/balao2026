@@ -1,5 +1,7 @@
 import { randomUUID } from 'crypto';
 import { turso, isTursoActive } from './turso';
+import { ajustarCategoria, buscaRecebeRecorte, RAIZ_PC_GAMER } from './catalogo/recorte-gamer';
+import { arredondar, formatarNumero, PARCELAS_DA_LOJA } from './precos/calculo';
 import { BlogPost, Product, CarouselImage, Category, HomeBlock, UsedNotebook, parsePriceToNumber, buildCategoryNodesFromPaths } from './utils';
 
 // Linha crua retornada pelo driver LibSQL (valores vêm como unknown).
@@ -45,6 +47,14 @@ function mapTursoProduct(r: Record<string, unknown>): Product {
   } as Product;
 }
 
+function produtoDoBanco(r: Record<string, unknown>): Product {
+  const produto = ajustarCategoria(mapTursoProduct(r));
+  const cartao = parsePriceToNumber(produto.price_card);
+  if (!(cartao > 0)) return produto;
+  const parcela = arredondar(cartao / PARCELAS_DA_LOJA);
+  return { ...produto, installment: `${PARCELAS_DA_LOJA}x de R$ ${formatarNumero(parcela)}` };
+}
+
 const toJsonText = (value: unknown): string | null => {
   if (value === null || value === undefined) return null;
   if (Array.isArray(value)) return JSON.stringify(value);
@@ -68,7 +78,7 @@ export async function getProdutosComQueda(desde: string): Promise<Product[]> {
       sql: 'SELECT * FROM products WHERE preco_anterior IS NOT NULL AND queda_em IS NOT NULL AND queda_em >= ? ORDER BY queda_em DESC LIMIT 500',
       args: [desde],
     });
-    return res.rows.map(r => mapTursoProduct(r as Row));
+    return res.rows.map(r => produtoDoBanco(r as Row));
   } catch (error) {
     console.error('Error fetching price drops:', error);
     return [];
@@ -79,7 +89,7 @@ export async function getProducts(): Promise<Product[]> {
   if (!isTursoActive()) return [];
   try {
     const res = await turso.execute('SELECT * FROM products ORDER BY created_at DESC');
-    return sortByPrice(res.rows.map(r => mapTursoProduct(r as Row)));
+    return sortByPrice(res.rows.map(r => produtoDoBanco(r as Row)));
   } catch (error) {
     console.error("Turso error (getProducts):", error);
     return [];
@@ -147,7 +157,7 @@ export async function getProductsPaginated(opts: {
       args,
     });
 
-    return { products: res.rows.map(r => mapTursoProduct(r as Row)), total };
+    return { products: res.rows.map(r => produtoDoBanco(r as Row)), total };
   } catch (error) {
     console.error("Error fetching paginated products:", error);
     return { products: [], total: 0 };
@@ -174,7 +184,7 @@ export async function getProductsLite(): Promise<Pick<Product, "id" | "name" | "
 }
 
 export async function getProductsForSitemap(limit = 1000): Promise<Pick<Product, "id" | "slug" | "created_at">[]> {
-  const take = Math.max(1, Math.min(5000, limit));
+  const take = Math.max(1, Math.min(50000, limit));
   if (!isTursoActive()) return [];
 
   try {
@@ -206,7 +216,7 @@ export async function getProductsByCategory(categorySlug: string): Promise<Produ
       sql: 'SELECT * FROM products WHERE category LIKE ? ORDER BY created_at DESC',
       args: [`%${categorySlug}%`],
     });
-    return sortByPrice(res.rows.map(r => mapTursoProduct(r as Row)));
+    return sortByPrice(res.rows.map(r => produtoDoBanco(r as Row)));
   } catch (error) {
     console.error(`Turso error (getProductsByCategory ${categorySlug}):`, error);
     return [];
@@ -224,7 +234,7 @@ export async function getProductsByExactCategories(categoryNames: string[]): Pro
       sql: `SELECT * FROM products WHERE category IN (${placeholders}) ORDER BY created_at DESC`,
       args: normalizedNames
     });
-    return sortByPrice(res.rows.map(r => mapTursoProduct(r as Row)));
+    return sortByPrice(res.rows.map(r => produtoDoBanco(r as Row)));
   } catch (error) {
     console.error("Error fetching products by exact categories:", error);
     return [];
@@ -253,7 +263,7 @@ export async function searchProductsByKeywords(keywords: string[], limit = 24): 
       sql: `SELECT * FROM products WHERE ${clauses} LIMIT ${Math.trunc(take)}`,
       args,
     });
-    return sortByPrice(res.rows.map(r => mapTursoProduct(r as Row))).slice(0, limit);
+    return sortByPrice(res.rows.map(r => produtoDoBanco(r as Row))).slice(0, limit);
   } catch (error) {
     console.error("Error searching products by keywords:", error);
     return [];
@@ -279,7 +289,7 @@ export async function buscarProdutosPorTermos(termos: string[], limite = 1500): 
           FROM products WHERE ${clausulas} LIMIT ${Math.trunc(Math.max(1, Math.min(3000, limite)))}`,
     args,
   });
-  return res.rows.map((r) => mapTursoProduct(r as Row));
+  return res.rows.map((r) => produtoDoBanco(r as Row));
 }
 
 // Desktops e notebooks para as páginas /premium e /ia-local. Só as colunas
@@ -295,7 +305,7 @@ export async function getComputadoresDaVitrine(): Promise<Product[]> {
           WHERE category = ? OR category LIKE ? OR category = ? OR category LIKE ?`,
     args: ['Computadores/PC', 'Computadores/PC/%', 'Computadores/Notebooks', 'Computadores/Notebooks/%'],
   });
-  return res.rows.map((r) => mapTursoProduct(r as Row));
+  return res.rows.map((r) => produtoDoBanco(r as Row));
 }
 
 // Candidatos às vitrines das páginas de captação (lib/landing/vitrine.ts):
@@ -322,7 +332,7 @@ export async function getCandidatosPorOrigens(origens: { categorias: string[]; n
           WHERE ${condicoes.map((c) => `(${c})`).join(' OR ')}`,
     args,
   });
-  return res.rows.map((r) => mapTursoProduct(r as Row));
+  return res.rows.map((r) => produtoDoBanco(r as Row));
 }
 
 // Candidatos à vitrine da página /notebooks: a categoria de notebooks inteira
@@ -350,7 +360,7 @@ export async function getCandidatosANotebook(): Promise<Product[]> {
       'chromebook%',
     ],
   });
-  return res.rows.map((r) => mapTursoProduct(r as Row));
+  return res.rows.map((r) => produtoDoBanco(r as Row));
 }
 
 export async function getProductByIdentifier(identifier: string): Promise<Product | null> {
@@ -362,7 +372,7 @@ export async function getProductByIdentifier(identifier: string): Promise<Produc
       args: [identifier, identifier],
     });
     if (res.rows.length === 0) return null;
-    return mapTursoProduct(res.rows[0] as Row);
+    return produtoDoBanco(res.rows[0] as Row);
   } catch (error) {
     console.error("Turso error (getProductByIdentifier):", error);
     return null;
@@ -857,14 +867,36 @@ export async function replaceCategoriesFromPaths(paths: string[]): Promise<void>
 // "Hardware/Placas-mãe/AMD" — então "é essa categoria ou está por baixo dela
 // na árvore" vira só comparar prefixo de string, sem precisar percorrer
 // parent_id em tempo de request).
+async function lerProdutosDoCaminho(fullPath: string): Promise<Product[]> {
+  if (!isTursoActive() || !fullPath) return [];
+  const res = await turso.execute({
+    sql: `SELECT * FROM products WHERE category = ? OR category LIKE ? ORDER BY created_at DESC`,
+    args: [fullPath, `${fullPath}/%`],
+  });
+  return res.rows.map((r) => produtoDoBanco(r as Row));
+}
+
+function noCaminho(categoria: string, fullPath: string) {
+  return categoria === fullPath || categoria.startsWith(`${fullPath}/`);
+}
+
 export async function getProductsByCategoryFullPath(fullPath: string): Promise<Product[]> {
   try {
-    if (!isTursoActive() || !fullPath) return [];
-    const res = await turso.execute({
-      sql: `SELECT * FROM products WHERE category = ? OR category LIKE ? ORDER BY created_at DESC`,
-      args: [fullPath, `${fullPath}/%`],
-    });
-    return sortByPrice(res.rows.map(r => mapTursoProduct(r as Row)));
+    if (!fullPath) return [];
+    const principal = await lerProdutosDoCaminho(fullPath);
+    // O que saiu de PC Gamer (gabinete, escritório, peça) ainda pode estar
+    // gravado na categoria antiga até a próxima leitura de preço.
+    const extras = buscaRecebeRecorte(fullPath) ? await lerProdutosDoCaminho(RAIZ_PC_GAMER) : [];
+    const vistos = new Set<string>();
+    const juntos: Product[] = [];
+    for (const produto of [...principal, ...extras]) {
+      const id = String(produto?.id || "");
+      if (!id || vistos.has(id)) continue;
+      if (!noCaminho(String(produto.category || ""), fullPath)) continue;
+      vistos.add(id);
+      juntos.push(produto);
+    }
+    return sortByPrice(juntos);
   } catch (error) {
     console.error("Error fetching products by category path:", error);
     return [];

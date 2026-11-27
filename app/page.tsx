@@ -66,9 +66,9 @@ const homeBrandCarousel = [...homeBrands, ...homeBrands];
 export async function generateMetadata(props: { searchParams: SearchParams }): Promise<Metadata> {
   const sp = await props.searchParams;
   const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
-  const title = "Loja de Informática em Campinas | PC Gamer, Notebooks, Monitores e Assistência Técnica";
+  const title = "PC Gamer e Informática em Campinas | Anchieta";
   const description =
-    "Balão da Informática Anchieta: a loja mais completa de informática em Campinas. PC Gamer, Notebooks, Monitores, Smartphones e Peças. Compre com desconto no PIX ou até 10x sem juros e retire no Cambuí.";
+    "Balão da Informática Anchieta, no Cambuí: PC gamer, notebook e assistência técnica em Campinas. Pix com desconto ou até 12x sem juros.";
   const canonical = "https://www.balao.info/";
 
   return {
@@ -175,6 +175,12 @@ export default async function Home(props: {
     <div className="home-shell min-h-screen flex flex-col font-sans transition-colors duration-300 bg-slate-950 text-slate-100 selection:bg-[#E60012] selection:text-white">
       <JsonLd data={generateHomeAiAndGoogleSchema()} />
       <Header />
+
+      {!navegando && (
+        <h1 className="w-full max-w-[1920px] mx-auto px-4 pt-6 text-xl font-black tracking-tight text-white sm:px-6 sm:text-2xl md:px-8 lg:px-12 xl:px-16 2xl:px-20">
+          Loja de informática no Cambuí: PC gamer, notebook e assistência técnica em Campinas
+        </h1>
+      )}
 
       {/* Marcas Parceiras Marquee */}
       {!navegando && (
@@ -310,7 +316,7 @@ export default async function Home(props: {
               A <strong>Balão da Informática Anchieta</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
               <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, <strong>monitores gamer</strong>, <strong>smartphones</strong> e peças de hardware para upgrade (placas de vídeo RTX/Radeon,
               processadores Intel e AMD Ryzen, memórias RAM DDR4/DDR5, SSDs NVMe e fontes selo 80 Plus), periféricos gamer e <strong>assistência técnica especializada em Campinas</strong> com atendimento imediato no balcão e no WhatsApp.
-              Compre online com desconto progressivo no PIX ou em até 10x sem juros no cartão de crédito e consulte nossa equipe no WhatsApp para conferir a disponibilidade imediata para retirada no balcão no Cambuí ou entrega express.
+              Compre online com desconto progressivo no PIX ou em até 12x sem juros no cartão de crédito e consulte nossa equipe no WhatsApp para conferir a disponibilidade imediata para retirada no balcão no Cambuí ou entrega express.
             </p>
             <ul className="list-none space-y-3 pl-0 text-slate-300">
               <li className="flex items-start gap-2">

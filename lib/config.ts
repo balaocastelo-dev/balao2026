@@ -12,7 +12,7 @@ export const SITE_CONFIG = {
   city: "Campinas",
   region: "SP",
   postalCode: "13015-101",
-  openingHoursDisplay: "Seg. a Sex. das 09h às 18h | Sáb. das 09h às 13h",
+  openingHoursDisplay: "Seg. a qui. 8h–18h | Sex. 8h–17h | Sáb. 8h–13h | Dom. fechado",
   mapsUrl: "https://www.google.com/maps/search/?api=1&query=Bal%C3%A3o%20da%20Inform%C3%A1tica%20Anchieta%20Av.%20Anchieta%20789%20Campinas%20SP",
   whatsapp: {
     number: "5519987510267",
@@ -30,3 +30,22 @@ export const SITE_CONFIG = {
     cnpj: "34397947000108"
   }
 };
+
+/** Horário confirmado: seg–qui 8h–18h, sexta 8h–17h, sábado 8h–13h, domingo fechado. */
+export const HORARIO_SCHEMA = [
+  {
+    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday"],
+    opens: "08:00",
+    closes: "18:00",
+  },
+  {
+    dayOfWeek: ["Friday"],
+    opens: "08:00",
+    closes: "17:00",
+  },
+  {
+    dayOfWeek: ["Saturday"],
+    opens: "08:00",
+    closes: "13:00",
+  },
+] as const;

@@ -37,7 +37,7 @@ export const qualPcGamer: PaginaDeCaptacao = {
       { valor: "Três faixas", rotulo: "leve, Full HD e tela melhor" },
       { valor: "Catálogo real", rotulo: "a vitrine é o estoque do site" },
       { valor: "Ver ligado", rotulo: "na Av. Anchieta, antes de pagar" },
-      { valor: "10% no Pix", rotulo: "ou até 10x sem juros no cartão" },
+      { valor: "10% no Pix", rotulo: "ou até 12x sem juros no cartão" },
     ],
   },
   assistente: {
@@ -178,8 +178,8 @@ export const qualPcGamer: PaginaDeCaptacao = {
       tipo: "texto",
       titulo: "Venha ver rodando no Cambuí",
       paragrafos: [
-        "Guia de site nacional não liga o PC na sua frente. Aqui liga. A Balão da Informática Anchieta fica na Av. Anchieta, 789, Cambuí, Campinas. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Você vê a máquina, pergunta da fonte e da garantia da peça, e decide no balcão.",
-        "Pagamento com 10% de desconto no Pix ou até 10x sem juros no cartão, como no resto da loja. Nota fiscal na venda. Entrega por motoboy em Campinas, Sumaré, Hortolândia, Valinhos e região, com preço e prazo confirmados pelo WhatsApp. Para uma configuração que não está na vitrine, a montagem sob medida parte do seu jogo e da sua faixa.",
+        "Guia de site nacional não liga o PC na sua frente. Aqui liga. A Balão da Informática Anchieta fica na Av. Anchieta, 789, Cambuí, Campinas. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Você vê a máquina, pergunta da fonte e da garantia da peça, e decide no balcão.",
+        "Pagamento com 10% de desconto no Pix ou até 12x sem juros no cartão, como no resto da loja. Nota fiscal na venda. Entrega por motoboy em Campinas, Sumaré, Hortolândia, Valinhos e região, com preço e prazo confirmados pelo WhatsApp. Para uma configuração que não está na vitrine, a montagem sob medida parte do seu jogo e da sua faixa.",
       ],
     },
     {

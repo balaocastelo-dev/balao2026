@@ -71,6 +71,21 @@ export async function listarResumosDoDiario(): Promise<ArtigoResumido[]> {
   return resumos;
 }
 
+/**
+ * O arquivo do artigo existe no ramo de conteúdo?
+ * "ausente" só quando o GitHub responde 404. Falha de rede fica "incerto"
+ * para o sitemap não apagar artigo que está no ar.
+ */
+export async function arquivoDoArtigo(slug: string): Promise<"existe" | "ausente" | "incerto"> {
+  if (!diarioLigado() || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return "ausente";
+  try {
+    const bruto = await buscar(`artigos/${slug}.json`);
+    return bruto === null ? "ausente" : "existe";
+  } catch {
+    return "incerto";
+  }
+}
+
 /** O artigo inteiro. `null` se não existe, veio malformado ou não passa na régua. */
 export async function obterArtigoDoDiario(slug: string): Promise<Artigo | null> {
   if (!diarioLigado() || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return null;

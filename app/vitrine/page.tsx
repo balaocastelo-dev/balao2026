@@ -17,6 +17,27 @@ import { CAMINHO_PC_GAMER_COMPLETO } from "@/lib/vitrine/rotativa";
 import { getCachedProductByIdentifier, getCachedProductsByCategoryFullPath } from "@/lib/cache";
 import { pickPcHeroImage } from "@/lib/vitrine/core";
 import type { VitrinePageRecord } from "@/lib/vitrine/types";
+import type { Metadata } from "next";
+
+const URL_VITRINE = "https://www.balao.info/vitrine";
+
+export const metadata: Metadata = {
+  title: { absolute: "Vitrine de setups prontos em Campinas | Anchieta" },
+  description:
+    "Setups prontos da Balão da Informática Anchieta, no Cambuí, em Campinas. PC gamer com monitor e kit, para ver e fechar pelo WhatsApp.",
+  alternates: { canonical: URL_VITRINE },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: URL_VITRINE,
+    title: "Vitrine de setups prontos em Campinas | Anchieta",
+    description:
+      "Setups prontos da Balão da Informática Anchieta, no Cambuí. PC gamer com monitor, para fechar pelo WhatsApp.",
+    siteName: SITE_CONFIG.name,
+    images: [{ url: "/logo.png" }],
+  },
+  robots: { index: true, follow: true },
+};
 
 export const dynamic = "force-dynamic";
 

@@ -416,7 +416,7 @@ export default function PromocaoPagina() {
                   <div className="text-3xl font-black text-[#E60012]">
                     R$ {precoTotal.toLocaleString("pt-BR")}
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-1">ou 10x sem juros no cartão de crédito</div>
+                  <div className="text-[11px] text-slate-400 mt-1">ou 12x sem juros no cartão de crédito</div>
                 </div>
               </div>
 

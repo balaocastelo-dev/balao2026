@@ -242,19 +242,19 @@ async function seed() {
   console.log("=== POPULANDO CATÁLOGO TOP DE CONVERSÃO ===");
   for (const item of products) {
     const cost = parseFloat(item.price.replace(/[^\d,]/g, '').replace(',', '.'));
-    const singleInstallment = Math.round((cost / 10) * 100) / 100;
+    const singleInstallment = Math.round((cost / 12) * 100) / 100;
     const singleInstallmentStr = "R$ " + singleInstallment.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
     
     const enrichedSpecs = {
       ...item.specs,
       "Preço à Vista no PIX": `${item.price} (com 10% de desconto progressivo)`,
-      "Parcelamento": `10x de ${singleInstallmentStr} sem juros no cartão`,
+      "Parcelamento": `12x de ${singleInstallmentStr} sem juros no cartão`,
       "Condição": "Produto Novo com Nota Fiscal e Garantia",
       "Garantia": item.specs["Garantia"] || "Garantia Balão da Informática",
       "Disponibilidade": "Pronta Entrega em Campinas / Retirada em 30 min no Cambuí"
     };
 
-    const description = `${item.name} disponível na Balão da Informática Anchieta em Campinas. Preço especial à vista no PIX por ${item.price} ou em até 10x de ${singleInstallmentStr} sem juros no cartão de crédito. Compre online e retire no balcão no Cambuí em até 30 minutos ou solicite entrega express por motoboy em Campinas e região.`;
+    const description = `${item.name} disponível na Balão da Informática Anchieta em Campinas. Preço especial à vista no PIX por ${item.price} ou em até 12x de ${singleInstallmentStr} sem juros no cartão de crédito. Compre online e retire no balcão no Cambuí em até 30 minutos ou solicite entrega express por motoboy em Campinas e região.`;
 
     await db.execute({
       sql: `INSERT INTO products (id, name, price, image, image_urls, category, slug, description, specs, created_at)

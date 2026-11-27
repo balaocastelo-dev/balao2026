@@ -51,7 +51,7 @@ describe("precos/calculo", () => {
     expect(venda.cartao).toBe(3285.87);
     expect(venda.price).toBe("2.792,99");
     expect(venda.price_card).toBe("R$ 3.285,87");
-    expect(venda.installment).toBe("10x de R$ 328,59");
+    expect(venda.installment).toBe("12x de R$ 273,82");
     expect(venda.discount_pix).toBe("15%");
   });
 
@@ -71,7 +71,7 @@ describe("precos/calculo", () => {
   it("sem preço de cartão na fonte, o cartão acompanha o à vista", () => {
     const venda = calcularVenda({ pix: 100, cartao: 0, parcelas: 0 }, 33);
     expect(venda.cartao).toBe(133);
-    expect(venda.installment).toBe("10x de R$ 13,30");
+    expect(venda.installment).toBe("12x de R$ 11,08");
     expect(venda.discount_pix).toBe("0%");
   });
 

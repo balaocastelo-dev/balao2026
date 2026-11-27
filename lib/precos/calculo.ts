@@ -34,7 +34,8 @@ export interface PrecoDeVenda {
   discount_pix: string;
 }
 
-const PARCELAS_PADRAO = 10;
+/** A loja parcela em até 12x sem juros. O total do cartão não muda: muda a parcela. */
+export const PARCELAS_DA_LOJA = 12;
 
 export function arredondar(valor: number): number {
   return Math.round((valor + Number.EPSILON) * 100) / 100;
@@ -69,7 +70,9 @@ export function calcularVenda(origem: PrecoDeOrigem, margem: number): PrecoDeVen
   const pix = aplicarMargem(origem.pix, margem);
   // Fonte sem preço de cartão: o cartão acompanha o à vista, nunca fica abaixo.
   const cartao = Math.max(pix, aplicarMargem(origem.cartao > 0 ? origem.cartao : origem.pix, margem));
-  const parcelas = origem.parcelas > 0 ? origem.parcelas : PARCELAS_PADRAO;
+  // A fonte (KaBuM e outras) muitas vezes manda 10x. No site o combinado é 12x,
+  // sobre o mesmo total do cartão.
+  const parcelas = PARCELAS_DA_LOJA;
   const desconto = cartao > 0 ? Math.round((1 - pix / cartao) * 100) : 0;
 
   return {

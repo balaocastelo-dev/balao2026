@@ -159,7 +159,7 @@ const FAQ = [
   {
     question: "Posso testar o notebook antes de comprar?",
     answer:
-      "Pode e recomendamos. Reserve pelo site ou pelo WhatsApp e venha à loja no Cambuí: você liga, testa e só leva se gostar. Atendemos de segunda a sexta das 9h às 18h e aos sábados das 9h às 13h.",
+      "Pode e recomendamos. Reserve pelo site ou pelo WhatsApp e venha à loja no Cambuí: você liga, testa e só leva se gostar. Atendemos de segunda a quinta das 8h às 18h, sexta das 8h às 17h e aos sábados das 8h às 13h.",
   },
   {
     question: "Dá para aumentar a memória ou trocar o SSD na hora da compra?",

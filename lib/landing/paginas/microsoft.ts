@@ -268,7 +268,7 @@ export const microsoft: PaginaDeCaptacao = {
   relacionadas: ["microsoft/windows", "microsoft/windows-server", "microsoft/office-365", "sistemas"],
   final: {
     titulo: "Mande os números da empresa e receba o levantamento",
-    texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Licenças originais, nota fiscal de venda e 12x sem juros também para CNPJ. Orçamento pelo WhatsApp.",
+    texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Licenças originais, nota fiscal de venda e 12x sem juros também para CNPJ. Orçamento pelo WhatsApp.",
     botao: "Chamar no WhatsApp",
     mensagem: MENSAGEM,
   },

@@ -11,7 +11,7 @@ import GlobalConversionTracker from "@/components/GlobalConversionTracker";
 import { VENDEDORES } from "@/lib/vendedores";
 
 import type { Category } from "@/lib/utils";
-import { SITE_CONFIG } from "@/lib/config";
+import { HORARIO_SCHEMA, SITE_CONFIG } from "@/lib/config";
 import { getCachedCategories } from "@/lib/cache";
 
 const bangers = Bangers({
@@ -113,20 +113,12 @@ const jsonLd = {
       telephone: `+${SITE_CONFIG.phone.number}`,
       email: SITE_CONFIG.email,
       priceRange: "$$",
-      openingHoursSpecification: [
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          opens: "09:00",
-          closes: "18:00",
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: "Saturday",
-          opens: "09:00",
-          closes: "13:00",
-        },
-      ],
+      openingHoursSpecification: HORARIO_SCHEMA.map((faixa) => ({
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: [...faixa.dayOfWeek],
+        opens: faixa.opens,
+        closes: faixa.closes,
+      })),
       areaServed: [
         {
           "@type": "City",

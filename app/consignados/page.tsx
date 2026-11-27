@@ -6,6 +6,7 @@ import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema } from "@/
 import VitrineDeConsignados from "@/components/consignados/VitrineDeConsignados";
 import { SITE_CONFIG } from "@/lib/config";
 import { listarConsignados, urlDoConsignado } from "@/lib/consignados";
+import ContatoNoHtml from "@/components/ContatoNoHtml";
 
 // ============================================================
 // /consignados — vitrine dos usados deixados na loja em consignação
@@ -90,6 +91,12 @@ export default async function PaginaDeConsignados() {
               </li>
             ))}
           </ul>
+          <div className="mt-6">
+            <ContatoNoHtml
+              mensagem="Olá! Estou na página de consignados e quero saber o que tem disponível na loja."
+              titulo="Chamar sobre um consignado"
+            />
+          </div>
         </header>
 
         <section aria-labelledby="vitrine-consignados">

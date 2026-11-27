@@ -109,7 +109,7 @@ export const imac: PaginaDeCaptacao = {
       texto: "O iMac vem sem teclado e mouse, a menos que eles também tenham defeito.",
       itens: [
         { titulo: "Mande o ano", texto: "Sobre Este Mac mostra o ano e o chip. Se não liga, o número de série na caixa ou na base resolve." },
-        { titulo: "Traga o iMac", texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Motoboy em Campinas e região é combinado à parte, porque o iMac é grande." },
+        { titulo: "Traga o iMac", texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Motoboy em Campinas e região é combinado à parte, porque o iMac é grande." },
         { titulo: "Aprove", texto: "Causa, opções e valor no WhatsApp. Parcelamento em até 12x sem juros. Nada começa sem a sua aprovação." },
         { titulo: "Teste no balcão", texto: "Você vê o iMac ligado antes de levar. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça." },
       ],
@@ -191,7 +191,7 @@ export const imac: PaginaDeCaptacao = {
   relacionadas: ["reparoapple", "macbook", "iphone", "android"],
   final: {
     titulo: "Mande o ano do iMac",
-    texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Preço confirmado pelo WhatsApp.",
+    texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Preço confirmado pelo WhatsApp.",
     botao: "Chamar no WhatsApp",
     mensagem: MENSAGEM,
   },

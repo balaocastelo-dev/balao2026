@@ -12,7 +12,7 @@
 // vender abaixo do custo); o produto fica com o preço da margem.
 // ============================================================
 
-import { arredondar, calcularVenda, formatarNumero, type PrecoDeOrigem, type PrecoDeVenda } from "./calculo";
+import { arredondar, calcularVenda, formatarNumero, PARCELAS_DA_LOJA, type PrecoDeOrigem, type PrecoDeVenda } from "./calculo";
 
 export interface FaixaDeVenda {
   nome: string;
@@ -59,7 +59,7 @@ export function aplicarFaixa(venda: PrecoDeVenda, faixa: FaixaDeVenda | null, cu
 
   const proporcao = venda.pix > 0 ? venda.cartao / venda.pix : 1;
   const cartao = Math.max(pix, arredondar(pix * proporcao));
-  const parcelas = Number(venda.installment.match(/^(\d+)x/)?.[1]) || 10;
+  const parcelas = Number(venda.installment.match(/^(\d+)x/)?.[1]) || PARCELAS_DA_LOJA;
   const desconto = cartao > 0 ? Math.round((1 - pix / cartao) * 100) : 0;
   return {
     pix,

@@ -423,7 +423,7 @@ export const maisMaquinas = [
       p("PC gamer para GTA 6 em Campinas se resolve numa loja, não num fórum. A Balão da Informática Anchieta fica na Av. Anchieta, 789, Cambuí, e monta o computador em cima da sua tela e dos jogos que você já abre. A versão de PC do GTA 6 não foi anunciada pela Rockstar. A máquina que sai daqui é para o que você joga agora, com peça que dá para ver ligada antes de pagar."),
       rapida([
         "A loja é no Cambuí: Av. Anchieta, 789. Telefone (19) 3255-1661. WhatsApp (19) 98751-0267.",
-        "Horário de balcão: segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h.",
+        "Horário de balcão: segunda a quinta, das 8h às 18h. Sexta, das 8h às 17h. Sábado, das 8h às 13h.",
         "Você diz a resolução do monitor e dois ou três jogos. A equipe fecha a configuração e mostra a máquina funcionando.",
       ]),
       h2("PC gamer para GTA 6 em Campinas, na prática"),
@@ -478,7 +478,7 @@ export const maisMaquinas = [
       nota(
         "dica",
         "Horário",
-        "Segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h. Domingo a loja fecha. Se for sábado, chegue com folga: o balcão para às 13h.",
+        "Segunda a quinta, das 8h às 18h. Sexta, das 8h às 17h. Sábado, das 8h às 13h. Domingo a loja fecha. Se for sábado, chegue com folga: o balcão para às 13h.",
       ),
       chamada({
         tema: "pc-gamer",
@@ -503,7 +503,7 @@ export const maisMaquinas = [
       },
       {
         pergunta: "Qual o horário?",
-        resposta: "Segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h.",
+        resposta: "Segunda a quinta, das 8h às 18h. Sexta, das 8h às 17h. Sábado, das 8h às 13h.",
       },
       {
         pergunta: "Dá para orçar pelo WhatsApp?",
@@ -566,7 +566,7 @@ export const maisMaquinas = [
       ),
       h2("Teste, pasta e o que você leva para casa"),
       p("Montar não é só parafusar. Pasta térmica no processador, cooler firme, cabo que não encosta na ventoinha, e um teste que liga de verdade. Você não precisa entender cada fio. Precisa ver a tela acender e o sistema reconhecer a placa e o disco. Se algo falha, falha na loja, com a peça ainda na bancada."),
-      p("O endereço de volta é o mesmo. Manutenção, limpeza e upgrade futuro ficam na [assistência](/manutencao) do Cambuí. Quem quer conhecer a loja antes de fechar lê [PC gamer para GTA 6 em Campinas](/blog/pc-gamer-gta-6-campinas), com horário e o que trazer. Segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h."),
+      p("O endereço de volta é o mesmo. Manutenção, limpeza e upgrade futuro ficam na [assistência](/manutencao) do Cambuí. Quem quer conhecer a loja antes de fechar lê [PC gamer para GTA 6 em Campinas](/blog/pc-gamer-gta-6-campinas), com horário e o que trazer. Segunda a quinta, das 8h às 18h. Sexta, das 8h às 17h. Sábado, das 8h às 13h."),
       img(
         "Escada e parede vermelha com o quadro da loja. A montagem mora neste endereço, não num estoque distante.",
         "Escada e parede da Balão da Informática Anchieta, sede da montagem de PC gamer em Campinas.",
@@ -618,7 +618,7 @@ export const maisMaquinas = [
       {
         pergunta: "Quanto tempo leva?",
         resposta:
-          "Depende da fila do dia e de a peça estar na loja. O horário de balcão é de segunda a sexta, das 9h às 18h, e sábado das 9h às 13h. Confirme no (19) 3255-1661 ou no WhatsApp.",
+          "Depende da fila do dia e de a peça estar na loja. O horário de balcão é de segunda a quinta, das 8h às 18h, sexta das 8h às 17h, e sábado das 8h às 13h. Confirme no (19) 3255-1661 ou no WhatsApp.",
       },
       {
         pergunta: "A montagem já deixa o PC pronto para GTA 6?",

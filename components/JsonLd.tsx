@@ -1,5 +1,5 @@
 import { getProductHref, parsePriceToNumber, Product } from "@/lib/utils";
-import { SITE_CONFIG } from "@/lib/config";
+import { HORARIO_SCHEMA, SITE_CONFIG } from "@/lib/config";
 
 type JsonLdProps = {
   data: Record<string, unknown> | Record<string, unknown>[];
@@ -46,20 +46,12 @@ export function generateOrganizationSchema() {
       latitude: -22.9099,
       longitude: -47.0626,
     },
-    openingHoursSpecification: [
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-        opens: "09:00",
-        closes: "18:00",
-      },
-      {
-        "@type": "OpeningHoursSpecification",
-        dayOfWeek: "Saturday",
-        opens: "09:00",
-        closes: "13:00",
-      },
-    ],
+    openingHoursSpecification: HORARIO_SCHEMA.map((faixa) => ({
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [...faixa.dayOfWeek],
+      opens: faixa.opens,
+      closes: faixa.closes,
+    })),
     areaServed: [
       { "@type": "City", name: "Campinas" },
       { "@type": "City", name: "Sumaré" },
@@ -102,7 +94,7 @@ export function generateHomeAiAndGoogleSchema() {
           name: "Onde comprar PC Gamer e peças de informática em Campinas?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Na Balão da Informática Anchieta no Cambuí em Campinas. Oferecemos computadores montados, placas de vídeo RTX/Radeon, processadores Intel/Ryzen, SSDs e periféricos com pronta entrega, desconto de 10% no PIX ou até 10x sem juros e retirada no balcão em até 30 minutos."
+            text: "Na Balão da Informática Anchieta no Cambuí em Campinas. Oferecemos computadores montados, placas de vídeo RTX/Radeon, processadores Intel/Ryzen, SSDs e periféricos com pronta entrega, desconto de 10% no PIX ou até 12x sem juros e retirada no balcão em até 30 minutos."
           }
         },
         {
@@ -110,7 +102,7 @@ export function generateHomeAiAndGoogleSchema() {
           name: "Como funciona o pagamento com desconto no PIX e parcelamento no cartão?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Todos os produtos contam com desconto progressivo para pagamento à vista no PIX (cerca de 10% OFF) ou podem ser parcelados em até 10x sem juros no cartão de crédito diretamente pelo site ou no balcão da loja física."
+            text: "Todos os produtos contam com desconto progressivo para pagamento à vista no PIX (cerca de 10% OFF) ou podem ser parcelados em até 12x sem juros no cartão de crédito diretamente pelo site ou no balcão da loja física."
           }
         },
         {

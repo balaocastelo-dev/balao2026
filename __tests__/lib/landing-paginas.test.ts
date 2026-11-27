@@ -114,7 +114,7 @@ describe("páginas de captação", () => {
         expect(p.seo.imagem, p.slug).toBeUndefined();
         const og = metadadosDaPagina(p).openGraph?.images;
         const cartao = Array.isArray(og) ? og[0] : og;
-        const url = typeof cartao === "string" ? cartao : cartao?.url;
+        const url = typeof cartao === "string" ? cartao : cartao && "url" in cartao ? cartao.url : undefined;
         const alt = typeof cartao === "object" && cartao && "alt" in cartao ? cartao.alt : undefined;
         expect(url, p.slug).toBe(p.hero.imagem.src);
         expect(alt, p.slug).toBe(p.hero.imagem.alt);

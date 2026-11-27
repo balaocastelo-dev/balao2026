@@ -5,6 +5,7 @@
 // quanto custa. O banco só grava o que sair daqui.
 // ============================================================
 
+import { categoriaCorrigida } from "@/lib/catalogo/recorte-gamer";
 import { type PrecoDeVenda } from "./calculo";
 import { vendaDoProduto } from "./faixas";
 import type { ItemDeOrigem } from "./kabum";
@@ -67,14 +68,18 @@ const limparCaminho = (caminho: string) =>
 export function categoriaNoSite(item: ItemDeOrigem, fonte: RegrasDaFonte): string {
   const daFonte = limparCaminho(item.categoria) || limparCaminho(fonte.trilha || "") || fonte.nome;
   const destino = limparCaminho(fonte.categoria_destino || "");
-  if (!destino) return daFonte;
-
-  const trilha = limparCaminho(fonte.trilha || "");
-  if (trilha && (daFonte === trilha || daFonte.startsWith(`${trilha}/`))) {
-    const resto = daFonte.slice(trilha.length).replace(/^\//, "");
-    return resto ? `${destino}/${resto}` : destino;
+  let categoria = daFonte;
+  if (destino) {
+    const trilha = limparCaminho(fonte.trilha || "");
+    if (trilha && (daFonte === trilha || daFonte.startsWith(`${trilha}/`))) {
+      const resto = daFonte.slice(trilha.length).replace(/^\//, "");
+      categoria = resto ? `${destino}/${resto}` : destino;
+    } else {
+      categoria = destino;
+    }
   }
-  return destino;
+  // Gabinete, PC office e peça solta saem de PC Gamer na hora de gravar.
+  return categoriaCorrigida(item.nome, categoria);
 }
 
 // ---------- nome ----------

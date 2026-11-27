@@ -217,7 +217,7 @@ export const microsoftOffice365: PaginaDeCaptacao = {
   relacionadas: ["microsoft", "microsoft/windows", "notebooks", "sistemas"],
   final: {
     titulo: "Diga se é para casa ou para a empresa, e quantas pessoas",
-    texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Licença original, nota fiscal de venda, instalação e 12x sem juros também para CNPJ.",
+    texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Licença original, nota fiscal de venda, instalação e 12x sem juros também para CNPJ.",
     botao: "Chamar no WhatsApp",
     mensagem: MENSAGEM,
   },

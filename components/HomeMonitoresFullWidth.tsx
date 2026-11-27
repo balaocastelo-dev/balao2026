@@ -113,7 +113,7 @@ export default function HomeMonitoresFullWidth({ products }: HomeMonitoresFullWi
                     </span>
                   </div>
                   <div className="text-xs font-bold text-slate-400 mt-1">
-                    ou até 10x sem juros no cartão
+                    ou até 12x sem juros no cartão
                   </div>
                 </div>
 

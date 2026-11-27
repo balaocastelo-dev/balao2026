@@ -105,7 +105,7 @@ export default function HomeProductShelf({
                     <div className="text-xl font-black leading-none tracking-tight text-white sm:text-2xl mt-0.5">
                       {product.price.replace("R$", "R$ ").trim()}
                     </div>
-                    <div className="mt-1 text-[11px] text-[var(--home-muted)]">ou até 10x no cartão</div>
+                    <div className="mt-1 text-[11px] text-[var(--home-muted)]">ou até 12x no cartão</div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 pt-1">
