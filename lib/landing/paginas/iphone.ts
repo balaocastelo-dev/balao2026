@@ -152,7 +152,7 @@ export const iphone: PaginaDeCaptacao = {
       itens: [
         {
           titulo: "Tela",
-          texto: "Trinca, toque falhando, mancha ou imagem cortada. A tela do iPhone sai em conjunto. A opção de peça e o aviso do iOS entram no orçamento. O detalhe de tela e de bateria está na página própria.",
+          texto: "Trinca, toque falhando, mancha ou imagem cortada. A tela do iPhone sai em conjunto. A opção de peça e o aviso do iOS entram no orçamento. Os sintomas de tela e de bateria estão mais abaixo nesta página.",
         },
         {
           titulo: "Bateria",
@@ -178,6 +178,49 @@ export const iphone: PaginaDeCaptacao = {
           titulo: "Molhou",
           texto: "Caiu na água, no vaso ou tomou chuva. Desligue, não carregue e não coloque em arroz. Quanto antes chega ao Cambuí, menor a corrosão.",
         },
+      ],
+    },
+    {
+      tipo: "comparativo",
+      titulo: "Tela ou bateria? Pelos sintomas",
+      texto: "Um guia rápido para chegar ao balcão sabendo o que pedir. O teste na bancada confirma.",
+      colunas: ["O que você vê", "Costuma ser", "O que fazer até chegar à loja"],
+      linhas: [
+        ["Vidro trincado, imagem normal", "Tela (vidro e toque são uma peça só)", "Uma película por cima para não se cortar"],
+        ["Toque fantasma ou área que não responde", "Tela", "Bloquear o iPhone quando não estiver usando"],
+        ["Mancha, listra ou tela preta", "Tela (painel danificado)", "Fazer backup se ainda der para ver algo"],
+        ["Descarrega rápido, desliga com carga", "Bateria", "Olhar a saúde em Ajustes > Bateria"],
+        ["Tela levantando ou fresta na lateral", "Bateria estufada", "Parar de carregar e trazer logo"],
+        ["Não carrega", "Conector sujo, cabo ou bateria", "Testar outro cabo e carregador"],
+      ],
+    },
+    {
+      tipo: "texto",
+      titulo: "Por que não continuar usando com a tela quebrada",
+      paragrafos: [
+        "A tela do iPhone é um conjunto: vidro, camada de toque e painel de imagem colados numa peça só. Por isso, mesmo quando só o vidro parece trincado, a troca é da tela inteira. Esperar costuma sair caro: a trinca deixa passar poeira e umidade, a pressão do dedo sobre o vidro solto vai marcando o painel, e o que era só um risco vira mancha, listra ou toque fantasma.",
+        "Há ainda o risco do dia a dia. Lascas de vidro cortam o dedo e o rosto, e com o vidro aberto o iPhone perde parte da proteção contra respingos. Película por cima da trinca ajuda a não se cortar até chegar à loja, mas não conserta nada.",
+        "Na hora do orçamento, o técnico explica as opções de tela disponíveis para o seu modelo e a diferença entre elas, além do que muda no aparelho depois da troca. Assim você escolhe sabendo o que está levando.",
+      ],
+      lista: [
+        "Faça backup no iCloud ou no computador enquanto a tela ainda deixa",
+        "Evite apertar a região trincada",
+        "Se a tela levantou, o problema pode ser a bateria",
+      ],
+    },
+    {
+      tipo: "texto",
+      titulo: "Quando a saúde da bateria pede troca",
+      paragrafos: [
+        "Bateria de celular é peça de desgaste: a cada ciclo de carga ela guarda um pouco menos. O iPhone mostra quanto ela ainda segura em Ajustes > Bateria > Saúde e Carregamento (o nome muda um pouco conforme a versão do iOS). O número é a capacidade atual comparada à de quando a bateria era nova.",
+        "Na prática, abaixo de 80% a maioria das pessoas já sente: o iPhone não chega ao fim do dia e pode desligar sozinho com carga na tela. Para evitar esses desligamentos, o próprio iOS pode reduzir o desempenho, e o aparelho parece lento. Se aparecer a mensagem de Serviço nessa tela, o sistema está dizendo que a bateria já não está boa.",
+        "Bateria estufada é diferente: não é questão de duração, é segurança. Ela empurra a tela por dentro e pode danificar outras peças. Pare de carregar, não aperte e traga o iPhone à loja. Na troca, o técnico também explica as opções de bateria para o seu modelo e o que aparece nos Ajustes depois.",
+      ],
+      lista: [
+        "Acima de 80% e durando o dia: ainda não precisa trocar",
+        "Abaixo de 80% ou desligando sozinho: hora de orçar",
+        "Mensagem de Serviço: troca recomendada",
+        "Estufada: pare de carregar e traga logo",
       ],
     },
     {
@@ -236,7 +279,6 @@ export const iphone: PaginaDeCaptacao = {
       itens: [
         { titulo: "Serviços Apple", texto: "O hub da linha: MacBook, iMac, iPad, Mac mini e Watch.", href: "/reparoapple", imagem: "/images/landing/v3/reparoapple/reparoapple.webp", alt: "Bancada de assistência técnica com notebook, celular no suporte, lupa iluminada e ferramentas organizadas" },
         { titulo: "Especialista por aparelho", texto: "Como achar o modelo exato antes de vir.", href: "/wendell/apple", imagem: "/images/landing/v3/reparoapple/wendell-apple.webp", alt: "Técnico fazendo microsolda em placa de celular sob microscópio" },
-        { titulo: "Tela e bateria", texto: "Trinca, toque e saúde da bateria, em detalhe.", href: "/telaiphone", imagem: "/images/landing/v3/iphone/telaiphone.webp", alt: "Técnico de luvas avaliando um iPhone com a tela trincada na bancada de reparo" },
         { titulo: "MacBook", texto: "Air e Pro, no mesmo endereço.", href: "/macbook", imagem: "/images/landing/v3/macbook/macbook-hero.webp", alt: "Técnico de luvas trabalhando na placa de um MacBook aberto na bancada" },
         { titulo: "Celular Android", texto: "Samsung, Motorola e Xiaomi, na mesma bancada.", href: "/android", imagem: "/images/landing/v3/reparoapple/hub-hero.webp", alt: "Bancada clara com notebook, computador tudo-em-um, celular e kit de ferramentas de precisão" },
         { titulo: "iPhones à venda", texto: "Quando trocar compensar mais que consertar.", href: "/categoria/celular-smartphone-smartphones-iphone" },
@@ -295,6 +337,31 @@ export const iphone: PaginaDeCaptacao = {
         "Sim. Parcelamento em até 12x sem juros. A coleta por motoboy em Campinas e região existe; custo e prazo da coleta são confirmados pelo WhatsApp (19) 98751-0267. A loja fica na Av. Anchieta, 789, Cambuí. Telefone (19) 3255-1661.",
     },
     {
+      pergunta: "Posso continuar usando o iPhone com a tela trincada?",
+      resposta:
+        "Dá para usar por pouco tempo, mas não é recomendado. A trinca deixa entrar poeira e umidade, costuma avançar e pode chegar ao painel de imagem, além do risco de se cortar. Uma película por cima ajuda até chegar à loja.",
+    },
+    {
+      pergunta: "Com quantos por cento de saúde devo trocar a bateria do iPhone?",
+      resposta:
+        "Abaixo de 80% é o ponto em que a maioria das pessoas já sente a diferença e o iOS pode reduzir o desempenho. Se aparecer a mensagem de Serviço em Ajustes > Bateria, ou se a bateria estufou, a troca é recomendada.",
+    },
+    {
+      pergunta: "Minha tela está levantando. É a tela ou a bateria?",
+      resposta:
+        "Quase sempre é a bateria estufada empurrando a tela por dentro. Pare de carregar o iPhone, não aperte a tela e traga logo à loja para o técnico avaliar.",
+    },
+    {
+      pergunta: "A tela nova funciona igual à antiga?",
+      resposta:
+        "Depende da opção de tela disponível para o seu modelo. No orçamento, o técnico explica as opções e o que muda de uma para outra, para você decidir antes de qualquer serviço.",
+    },
+    {
+      pergunta: "Meu iPhone não carrega. Preciso trocar a bateria?",
+      resposta:
+        "Nem sempre. Muitas vezes o problema é sujeira no conector ou o cabo. O técnico limpa e testa primeiro e só fala em troca de peça se for preciso.",
+    },
+    {
       pergunta: "Quais bairros de Campinas a loja atende?",
       resposta:
         "A loja fica no Cambuí. Atende quem vem do Centro, Nova Campinas, Guanabara, Taquaral, Bosque, Castelo, Barão Geraldo, Jardim Chapadão e Jardim Planalto. Horário: segunda a quinta, 8h às 18h; sexta, 8h às 17h; sábado, 8h às 13h.",
@@ -303,7 +370,7 @@ export const iphone: PaginaDeCaptacao = {
   tituloDasPerguntas: "Perguntas frequentes",
   temas: ["iphone", "apple", "assistencia", "android", "celular"],
   termosDoBlog: ["iphone", "bateria", "tela", "apple", "celular", "cambuí"],
-  relacionadas: ["reparoapple", "telaiphone", "android", "macbook"],
+  relacionadas: ["reparoapple", "android", "macbook", "imac"],
   final: {
     titulo: "Mande o modelo e diga se traz ou pede motoboy",
     texto:

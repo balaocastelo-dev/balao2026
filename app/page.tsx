@@ -66,13 +66,13 @@ const homeBrandCarousel = [...homeBrands, ...homeBrands];
 export async function generateMetadata(props: { searchParams: SearchParams }): Promise<Metadata> {
   const sp = await props.searchParams;
   const hasFacet = Boolean((sp?.category || "").trim() || (sp?.search || "").trim());
-  const title = "PC Gamer e Informática em Campinas | Anchieta";
+  const title = "Loja de Informática em Campinas (Cambuí) | Balão Anchieta";
   const description =
-    "Balão da Informática Anchieta, no Cambuí: PC gamer, notebook e assistência técnica em Campinas. Pix com desconto ou até 12x sem juros.";
+    "Loja de informática em Campinas, no Cambuí: computadores, notebooks e assistência técnica. Chame no WhatsApp (19) 98751-0267. Parcela em até 12x na loja.";
   const canonical = "https://www.balao.info/";
 
   return {
-    title,
+    title: { absolute: title },
     description,
     metadataBase: new URL("https://www.balao.info"),
     alternates: { canonical },
@@ -314,7 +314,7 @@ export default async function Home(props: {
           <SeoContent title="LOJA DE INFORMATICA EM CAMPINAS COM WHATSAPP, RETIRADA E ASSISTENCIA TECNICA">
             <p className="mb-4 text-slate-300">
               A <strong>Balão da Informática Anchieta</strong> é a principal <strong>loja de informática em Campinas</strong> para quem busca
-              <strong>PC Gamer em Campinas</strong>, <strong>notebooks</strong>, <strong>monitores gamer</strong>, <strong>smartphones</strong> e peças de hardware para upgrade (placas de vídeo RTX/Radeon,
+              <Link href="/pcgamer" className="underline decoration-[#E60012] underline-offset-2 hover:text-white"><strong>PC Gamer em Campinas</strong></Link>, <strong>notebooks</strong>, <strong>monitores gamer</strong>, <strong>smartphones</strong> e peças de hardware para upgrade (placas de vídeo RTX/Radeon,
               processadores Intel e AMD Ryzen, memórias RAM DDR4/DDR5, SSDs NVMe e fontes selo 80 Plus), periféricos gamer e <strong>assistência técnica especializada em Campinas</strong> com atendimento imediato no balcão e no WhatsApp.
               Compre online com desconto progressivo no PIX ou em até 12x sem juros no cartão de crédito e consulte nossa equipe no WhatsApp para conferir a disponibilidade imediata para retirada no balcão no Cambuí ou entrega express.
             </p>

@@ -26,7 +26,6 @@ import { reparoapple } from "./reparoapple";
 import { sistemas } from "./sistemas";
 import { sobreAEmpresa } from "./sobre-a-empresa";
 import { sobreNos } from "./sobre-nos";
-import { telaiphone } from "./telaiphone";
 import { tonner } from "./tonner";
 import { trocasEDevolucoes } from "./trocas-e-devolucoes";
 import { upgradeSsd } from "./upgrade-ssd";
@@ -56,7 +55,6 @@ export const PAGINAS: Record<string, PaginaDeCaptacao> = Object.fromEntries(
     qualPcGamer,
     recuperacaodados,
     reparoapple,
-    telaiphone,
     wendellApple,
     assistenciagames,
     montagempc,

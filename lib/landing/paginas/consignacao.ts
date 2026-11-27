@@ -5,9 +5,9 @@ export const consignacao: PaginaDeCaptacao = {
   nome: "Consignação de notebook, PC, console e iPhone usados",
   chamada: "Deixe o usado na vitrine da loja do Cambuí: a equipe avalia, expõe e atende o comprador por você.",
   seo: {
-    titulo: "Vender Notebook ou PC Usado em Campinas | Avaliação Grátis",
+    titulo: "Venda seu Notebook Usado em Campinas | Avaliação Grátis | Balão Anchieta",
     descricao:
-      "Venda seu notebook, PC gamer, MacBook, iPhone ou console usado em consignação na loja do Cambuí, em Campinas. Avaliação pelo WhatsApp, vitrine e comprador atendidos.",
+      "Vender notebook usado em Campinas: avaliação grátis na loja do Cambuí. Depois, a Balão Anchieta combina pagamento ou consignação. WhatsApp (19) 98751-0267.",
     palavras: [
       "vender notebook usado em Campinas",
       "consignação de computador Campinas",
@@ -31,8 +31,8 @@ export const consignacao: PaginaDeCaptacao = {
       src: "/images/landing/v2/consignacao.jpg",
       alt: "Notebook, console e smartphone usados sobre a mesa sendo fotografados por um celular",
     },
-    mensagem: "Olá! Vim pela página de consignação da Balão e quero avaliar um aparelho usado para vender.",
-    botao: "Mandar fotos para avaliação",
+    mensagem: "Quero vender meu notebook",
+    botao: "Quero vender meu notebook",
     secundario: { rotulo: "Ver como funciona", href: "#secao-2" },
     fatos: [
       { valor: "Loja física", rotulo: "o comprador vê o aparelho no Cambuí" },
@@ -44,7 +44,7 @@ export const consignacao: PaginaDeCaptacao = {
   assistente: {
     titulo: "Avaliação em três toques",
     texto: "Responda e a mensagem vai pronta para quem avalia. Depois é só mandar as fotos.",
-    abertura: "Olá! Vim pela página de consignação e quero vender um aparelho usado.",
+    abertura: "Quero vender meu notebook.",
     fecho: "Posso mandar as fotos (frente, costas, tela ligada e etiqueta do modelo)?",
     botao: "Enviar para avaliação",
     perguntas: [
@@ -70,6 +70,22 @@ export const consignacao: PaginaDeCaptacao = {
     // Faixa "Consignados em destaque" (MEU BLING): o que já está à venda por
     // consignação. Some sozinha quando não há nenhum. Ver app/consignacao/page.tsx.
     { tipo: "especial", id: "faixa-consignados" },
+    {
+      tipo: "passos",
+      titulo: "Como vender notebook usado em Campinas",
+      texto:
+        "Avaliação grátis na loja do Cambuí. Depois da avaliação, a equipe combina o pagamento ou a consignação. Valor, parte da loja e tempo de vitrine saem nessa conversa, não nesta página.",
+      itens: [
+        {
+          titulo: "Avaliação grátis no Cambuí",
+          texto: "Traga o notebook à loja da Av. Anchieta, 789. A equipe olha o aparelho na hora, sem cobrar a avaliação.",
+        },
+        {
+          titulo: "Pagamento ou consignação",
+          texto: "Depois da avaliação, a loja combina o pagamento ou a consignação. Você fica sabendo das condições antes de deixar o aparelho.",
+        },
+      ],
+    },
     {
       tipo: "dores",
       titulo: "Por que tanta gente desiste de vender sozinha",
@@ -213,6 +229,11 @@ export const consignacao: PaginaDeCaptacao = {
   ],
   perguntas: [
     {
+      pergunta: "Como vender notebook usado em Campinas?",
+      resposta:
+        "A avaliação é grátis na loja do Cambuí, na Av. Anchieta, 789. Depois, a Balão da Informática Anchieta combina o pagamento ou a consignação. Chame no WhatsApp (19) 98751-0267 com a mensagem Quero vender meu notebook. Valor e condições saem na avaliação.",
+    },
+    {
       pergunta: "Como funciona a consignação de aparelho usado?",
       resposta:
         "Você deixa o aparelho na loja, a Balão expõe, atende os interessados e faz a venda. Quando ele é vendido, você recebe o valor combinado na avaliação. Até lá o aparelho continua sendo seu.",
@@ -254,7 +275,7 @@ export const consignacao: PaginaDeCaptacao = {
   final: {
     titulo: "Mande as fotos e descubra quanto vale",
     texto: "Modelo, estado e o que acompanha já bastam para a primeira resposta. A vitrine fica na loja do Cambuí, na Av. Anchieta.",
-    botao: "Avaliar meu usado",
-    mensagem: "Olá! Quero avaliar um aparelho usado para deixar em consignação na Balão. Vou mandar as fotos.",
+    botao: "Quero vender meu notebook",
+    mensagem: "Quero vender meu notebook",
   },
 };

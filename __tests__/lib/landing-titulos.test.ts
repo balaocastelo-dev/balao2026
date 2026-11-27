@@ -18,6 +18,12 @@ import { metadadosDaPagina } from "@/lib/landing/metadados";
  */
 const LIMITE = 60;
 
+/**
+ * O dono pediu este título inteiro, com a marca no fim, mesmo passando de 60.
+ * As outras páginas de captação continuam na régua.
+ */
+const TITULO_LONGO_PEDIDO = new Set(["consignacao"]);
+
 /** Sufixos de marca que o resultado do Google já mostra por conta própria. */
 const SUFIXO_DE_MARCA = /[|–-]\s*(balão|balao)[^|–-]*$/i;
 
@@ -25,13 +31,13 @@ describe("título das páginas de captação", () => {
   it("cabe no que o Google mostra", () => {
     const grandes = Object.values(PAGINAS)
       .map((p) => ({ slug: p.slug, tamanho: p.seo.titulo.length, titulo: p.seo.titulo }))
-      .filter((p) => p.tamanho > LIMITE);
+      .filter((p) => p.tamanho > LIMITE && !TITULO_LONGO_PEDIDO.has(p.slug));
     expect(grandes).toEqual([]);
   });
 
   it("não termina com a marca, que o Google já mostra acima do título", () => {
     const comMarca = Object.values(PAGINAS)
-      .filter((p) => SUFIXO_DE_MARCA.test(p.seo.titulo))
+      .filter((p) => SUFIXO_DE_MARCA.test(p.seo.titulo) && !TITULO_LONGO_PEDIDO.has(p.slug))
       .map((p) => `${p.slug}: ${p.seo.titulo}`);
     expect(comMarca).toEqual([]);
   });

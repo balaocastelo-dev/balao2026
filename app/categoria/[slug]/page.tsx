@@ -10,8 +10,11 @@ import { type Category } from "@/lib/utils";
 import { Metadata } from "next";
 import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema, generateItemListSchema } from "@/components/JsonLd";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import ContatoNoHtml from "@/components/ContatoNoHtml";
 import { getCachedCategories, getCachedProducts, getCachedProductsByCategoryFullPath } from "@/lib/cache";
+import { SITE_CONFIG } from "@/lib/config";
+import { MENSAGEM_PS5_GTA6, ajusteDaCategoriaPs5 } from "@/lib/seo/ps5-campinas";
  
 export const revalidate = 300;
 const PRODUCTS_PER_PAGE = 24;
@@ -81,9 +84,15 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   } else {
     const category = categories.find(c => c.slug === slug);
     if (category) {
-      const nome = nomeDaCategoriaParaTitulo(category.name, category.full_path);
-      title = `${nome} em Campinas | Balão da Informática`;
-      description = `Compre ${nome} com o melhor preço de Campinas. Retire na loja do Cambuí ou receba rápido na região.`;
+      const ps5 = ajusteDaCategoriaPs5(slug);
+      if (ps5) {
+        title = ps5.titulo;
+        description = ps5.descricao;
+      } else {
+        const nome = nomeDaCategoriaParaTitulo(category.name, category.full_path);
+        title = `${nome} em Campinas | Balão da Informática`;
+        description = `Compre ${nome} com o melhor preço de Campinas. Retire na loja do Cambuí ou receba rápido na região.`;
+      }
       if (!hasFacet && category.full_path) {
         // Mesmo cache que a página usa: não abre conexão nova no banco.
         const produtos = await getCachedProductsByCategoryFullPath(category.full_path);
@@ -185,6 +194,9 @@ export default async function CategoriaPage({
     (currentPage - 1) * PRODUCTS_PER_PAGE,
     currentPage * PRODUCTS_PER_PAGE
   );
+  const ps5 = ajusteDaCategoriaPs5(slug);
+  const tituloVisivel = ps5?.h1 || categoryName || "Categoria";
+  const whatsPs5 = `https://wa.me/${SITE_CONFIG.whatsapp.number}?text=${encodeURIComponent(MENSAGEM_PS5_GTA6)}`;
   const canonical = buildCategoryCanonical(
     slug,
     currentPage,
@@ -215,7 +227,7 @@ export default async function CategoriaPage({
       {/* Mobile Title & Filters Toggle (Placeholder for future filter drawer) */}
       <div className="container mx-auto flex items-center justify-between px-3 py-4 sm:px-4 lg:hidden">
          <h1 className="text-xl font-bold text-[var(--site-text)]">
-            {categoryName || "Categoria"}
+            {tituloVisivel}
          </h1>
          <div className="flex items-center gap-2">
            <span className="rounded-full border border-[var(--site-border)] bg-[var(--site-panel-soft)] px-2.5 py-1 text-xs font-medium text-[var(--site-muted)]">
@@ -241,7 +253,7 @@ export default async function CategoriaPage({
           </div>
           <div className="mb-4 hidden items-center justify-between lg:flex">
             <h1 className="text-2xl font-bold text-[var(--site-text)]">
-              {categoryName || "Categoria"}
+              {tituloVisivel}
             </h1>
             <span className="text-sm text-[var(--site-muted)]">
               {totalProducts} produtos{totalPages > 1 ? ` • Página ${currentPage} de ${totalPages}` : ""}
@@ -263,7 +275,35 @@ export default async function CategoriaPage({
           )}
 
           {/* SEO Section for Categories */}
-          {categoryName && categoryName !== "Todos os Produtos" && (
+          {ps5 ? (
+             <section className="site-surface-soft mt-8 rounded-[1.5rem] border-t border-[var(--site-border)] p-5 shadow-sm sm:p-6">
+                <h2 className="mb-4 text-xl font-bold text-[var(--site-text)]">
+                    {ps5.h2}
+                </h2>
+                <div className="prose prose-sm max-w-none text-[var(--site-soft)]">
+                    {ps5.paragrafos.map((paragrafo) => (
+                      <p key={paragrafo} className="mt-2 first:mt-0">{paragrafo}</p>
+                    ))}
+                    {ps5.papel === "consoles" ? (
+                      <p className="mt-2">
+                        A oferta também está no{" "}
+                        <Link href="/" className="font-semibold text-[#E60012] underline underline-offset-2">destaque da página inicial</Link>.
+                        {" "}
+                        <a href={whatsPs5} className="font-semibold text-[#E60012] underline underline-offset-2">Chamar no WhatsApp sobre o PS5 + GTA 6</a>.
+                      </p>
+                    ) : null}
+                    {ps5.ancoraCanonica ? (
+                      <p className="mt-2">
+                        Para o console, veja{" "}
+                        <Link href={ps5.ancoraCanonica.href} className="font-semibold text-[#E60012] underline underline-offset-2">
+                          {ps5.ancoraCanonica.texto}
+                        </Link>
+                        , com pronta entrega no Cambuí.
+                      </p>
+                    ) : null}
+                </div>
+             </section>
+          ) : categoryName && categoryName !== "Todos os Produtos" ? (
              <section className="site-surface-soft mt-8 rounded-[1.5rem] border-t border-[var(--site-border)] p-5 shadow-sm sm:p-6">
                 <h2 className="mb-4 text-xl font-bold text-[var(--site-text)]">
                     Comprar {categoryName} em Campinas e Região
@@ -280,7 +320,7 @@ export default async function CategoriaPage({
                     </p>
                 </div>
              </section>
-          )}
+          ) : null}
         </main>
       </div>
     </div>

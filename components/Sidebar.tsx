@@ -288,7 +288,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
           <CustomLink href="/imac" icon={Laptop} label="iMac" />
           <CustomLink href="/iphone" icon={Smartphone} label="iPhone" />
           <CustomLink href="/android" icon={Smartphone} label="Android" />
-          <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
+          <CustomLink href="/iphone" icon={Zap} label="Troca de Tela & Bateria" />
           <CustomLink href="/recuperacaodados" icon={HardDrive} label="Recuperação de Dados" />
           <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
           <CustomLink href="/sistemas" icon={CircuitBoard} label="Sites & Sistemas" />
@@ -389,7 +389,7 @@ export default function Sidebar({ categories, mobileOnly = false, availableTags:
             <CustomLink href="/imac" icon={Laptop} label="iMac" />
             <CustomLink href="/iphone" icon={Smartphone} label="iPhone" />
             <CustomLink href="/android" icon={Smartphone} label="Android" />
-            <CustomLink href="/telaiphone" icon={Zap} label="Troca de Tela & Bateria" />
+            <CustomLink href="/iphone" icon={Zap} label="Troca de Tela & Bateria" />
             <CustomLink href="/recuperacaodados" icon={HardDrive} label="Recuperação de Dados" />
             <CustomLink href="/montagempc" icon={Cpu} label="Montagem PC Gamer" />
             <CustomLink href="/sistemas" icon={CircuitBoard} label="Sites & Sistemas" />
