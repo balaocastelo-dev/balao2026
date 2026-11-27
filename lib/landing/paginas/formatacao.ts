@@ -162,7 +162,7 @@ export const formatacao: PaginaDeCaptacao = {
   relacionadas: ["manutencao", "upgrade-ssd", "microsoft", "recuperacaodados"],
   final: {
     titulo: "Diga o modelo e se precisa de backup",
-    texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Preço e prazo confirmados pelo WhatsApp.",
+    texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Preço e prazo confirmados pelo WhatsApp.",
     botao: "Chamar no WhatsApp",
     mensagem: MENSAGEM,
   },

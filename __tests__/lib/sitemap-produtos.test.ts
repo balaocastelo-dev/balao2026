@@ -3,7 +3,8 @@ import { describe, it, expect, vi } from "vitest";
 vi.mock("@/lib/db", () => ({ getProductsForSitemap: async () => [] }));
 vi.mock("@/lib/catalogo-espelho", () => ({ lerCatalogoDoEspelho: async () => [] }));
 
-import { lerProdutosDoSitemap, dataDoProduto } from "@/lib/sitemap/produtos";
+import { lerProdutosDoSitemap, dataDoProduto, fatiarProdutos } from "@/lib/sitemap/produtos";
+import { slugsAusentes } from "@/lib/sitemap/artigos";
 import type { Product } from "@/lib/utils";
 
 const prod = (id: string, slug: string, created_at?: string) =>
@@ -47,6 +48,22 @@ describe("sitemap — produtos", () => {
       async () => Promise.reject(new Error("y"))
     );
     expect(lista).toEqual([]);
+  });
+
+  it("não corta o catálogo em 5.000", async () => {
+    const muitos = Array.from({ length: 5001 }, (_, i) => prod(String(i + 1), `p-${i}`));
+    const lista = await lerProdutosDoSitemap(async () => [], async () => muitos);
+    expect(lista).toHaveLength(5001);
+    expect(fatiarProdutos(lista, 10000)).toHaveLength(1);
+    expect(fatiarProdutos(lista, 5000)).toHaveLength(2);
+  });
+
+  it("tira do sitemap o post que a fonte confirma que não existe", async () => {
+    const mortos = await slugsAusentes(
+      ["vivo", "avell-storm-480-notebook-gamer-i9-rtx-4080", "instavel"],
+      async (slug) => (slug === "avell-storm-480-notebook-gamer-i9-rtx-4080" ? "ausente" : slug === "instavel" ? "incerto" : "existe")
+    );
+    expect([...mortos]).toEqual(["avell-storm-480-notebook-gamer-i9-rtx-4080"]);
   });
 
   it("data só quando é válida", () => {

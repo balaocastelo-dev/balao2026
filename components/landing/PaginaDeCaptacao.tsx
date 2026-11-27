@@ -349,6 +349,7 @@ function RenderSecao({
                       titulo={f.titulo}
                       subtitulo={f.subtitulo ?? ""}
                       produtos={f.produtos}
+                      aviso={secao.avisoNoCard}
                     />
                     {f.verTodos ? (
                       <Link

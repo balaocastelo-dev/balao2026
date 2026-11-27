@@ -22,6 +22,18 @@
       "has": [{ "type": "host", "value": "soubots.com" }],
       "destination": "https://www.soubots.com/:path*",
       "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "balao.info" }],
+      "destination": "https://www.balao.info/",
+      "permanent": true
+    },
+    {
+      "source": "/:path+",
+      "has": [{ "type": "host", "value": "balao.info" }],
+      "destination": "https://www.balao.info/:path+",
+      "permanent": true
     }
   ]
 }

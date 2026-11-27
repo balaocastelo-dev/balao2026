@@ -1,22 +1,22 @@
 import { MetadataRoute } from 'next'
 import { getCachedCategories } from '@/lib/cache'
-import { lerProdutosDoSitemap, dataDoProduto } from '@/lib/sitemap/produtos'
+import { lerProdutosDoSitemap, dataDoProduto, fatiarProdutos, PRODUTOS_POR_ARQUIVO } from '@/lib/sitemap/produtos'
+import { slugsAusentes } from '@/lib/sitemap/artigos'
 import { lerCaminhosComProduto, categoriaTemProduto } from '@/lib/sitemap/categorias'
 import { CATEGORIAS } from '@/lib/blog/categorias'
-import { listarResumos } from '@/lib/blog/repositorio'
+import { listarArtigosDaCasa, listarResumos, obterArtigo } from '@/lib/blog/repositorio'
 import { LEAD_INTENTS } from '@/lib/lead-intents'
 import { REGIONAL_CITIES, REGIONAL_SERVICES, buildRegionalServicePath } from '@/lib/local-seo'
 import { CAMPINAS_NEIGHBORHOODS } from '@/lib/neighborhood-seo'
 import { listVitrinePagesPublic } from '@/lib/vitrine/db'
-import { SETUPS_ASSINADOS } from '@/lib/vitrine/assinadas'
+import { paginaAssinadaPorSlug, SETUPS_ASSINADOS } from '@/lib/vitrine/assinadas'
+import { getCachedProductByIdentifier } from '@/lib/cache'
 import { PAGINAS } from '@/lib/landing/paginas'
 import { listarConsignados, urlDoConsignado } from '@/lib/consignados'
-import { URL_SITE } from '@/lib/soubots'
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://www.balao.info'
-  
-  // Rotas Estáticas
+const baseUrl = 'https://www.balao.info'
+
+async function paginas(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     '',
     '/blog',
@@ -68,6 +68,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/acer-aspire-go-15',
     '/telaiphone',
     '/toner',
+    '/livros',
+    '/vitrine',
     '/wendell/apple',
     '/wendell/apple/blog',
     '/wendell/apple/ipad',
@@ -81,16 +83,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     changeFrequency: route === '' ? 'daily' as const : 'weekly' as const,
-    // As páginas de captação (lib/landing/paginas) vêm logo depois da home.
     priority: route === '' ? 1 : PAGINAS[route.slice(1)] ? 0.9 : 0.7,
   }))
 
-  // Categorias (com a cópia do catálogo de reserva quando o banco recusa).
-  // Só entram as que têm produto: categoria vazia já sai com `noindex` na
-  // própria página, então mandá-la aqui só gasta o rastreamento do Google
-  // (3.344 endereços "excluída pela tag noindex" em 11/11/2026). Se a lista de
-  // caminhos vier vazia — banco em pausa e cópia do catálogo fora do ar —,
-  // mantém todas, como era antes: sitemap a mais é melhor que sitemap a menos.
   const categories = await getCachedCategories().catch(() => [])
   const caminhosComProduto = await lerCaminhosComProduto().catch(() => [] as string[])
   const categoryRoutes = categories
@@ -104,35 +99,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }))
 
-  // Produtos: o catálogo inteiro. Se o banco recusar (cota de conexões),
-  // vêm da cópia do catálogo — ver lib/sitemap/produtos.ts.
-  const products = await lerProdutosDoSitemap()
-  const productRoutes = products.map((product) => ({
-    url: `${baseUrl}/product/${product.slug}`,
-    lastModified: dataDoProduto(product.created_at),
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }))
-
-  // Blog: cada artigo e cada categoria que já tem artigo. Se a leitura
-  // falhar, o sitemap sai sem o blog — melhor do que não sair.
   const artigos = await listarResumos({ tolerante: true }).catch(() => [])
+  const daCasa = new Set((await listarArtigosDaCasa().catch(() => [])).map((a) => a.slug))
+  const diarios = artigos.filter((a) => !daCasa.has(a.slug)).map((a) => a.slug)
+  const mortos = await slugsAusentes(diarios, async (slug) => {
+    try {
+      return (await obterArtigo(slug)) ? 'existe' : 'ausente'
+    } catch {
+      return 'incerto'
+    }
+  }).catch(() => new Set<string>())
   const blogRoutes = [
-    ...artigos.map((artigo) => ({
-      url: `${baseUrl}/blog/${artigo.slug}`,
-      lastModified: new Date(artigo.publicadoEm),
-      changeFrequency: 'monthly' as const,
-      priority: 0.75,
-    })),
-    ...CATEGORIAS.filter((c) => artigos.some((a) => a.categoria === c.slug)).map((c) => ({
+    ...artigos
+      .filter((artigo) => !mortos.has(artigo.slug))
+      .map((artigo) => ({
+        url: `${baseUrl}/blog/${artigo.slug}`,
+        lastModified: new Date(artigo.publicadoEm),
+        changeFrequency: 'monthly' as const,
+        priority: 0.75,
+      })),
+    ...CATEGORIAS.filter((c) => artigos.some((a) => a.categoria === c.slug && !mortos.has(a.slug))).map((c) => ({
       url: `${baseUrl}/blog/categoria/${c.slug}`,
       changeFrequency: 'weekly' as const,
       priority: 0.6,
     })),
   ]
 
+  const setupsVivos = (
+    await Promise.all(
+      SETUPS_ASSINADOS.map(async (s) => {
+        const pagina = await paginaAssinadaPorSlug(s.slug, getCachedProductByIdentifier).catch(() => null)
+        return pagina ? s : null
+      })
+    )
+  ).filter((s): s is (typeof SETUPS_ASSINADOS)[number] => Boolean(s))
+
   const vitrinePages = [
-    ...SETUPS_ASSINADOS.map((s) => ({ slug: s.slug, data_publicacao: s.publicado_em, data_criacao: s.publicado_em })),
+    ...setupsVivos.map((s) => ({ slug: s.slug, data_publicacao: s.publicado_em, data_criacao: s.publicado_em })),
     ...(await listVitrinePagesPublic().catch(() => [])),
   ]
   const vitrineRoutes = vitrinePages.map((p) => ({
@@ -162,8 +165,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }))
 
-  // Consignados (MEU BLING): giram rápido, então só entram os que estão à
-  // venda agora. Se o MEU BLING não responder, fica só a página da vitrine.
   const consignados = await listarConsignados().catch(() => [])
   const consignadoRoutes = consignados.map((item) => ({
     url: urlDoConsignado(item),
@@ -172,13 +173,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  // A landing do MyBots tem endereço oficial no www. O /mybots-app do balao.info
-  // aponta para lá no canonical, então não entra de novo neste sitemap.
-  const landingMyBots = [{
-    url: URL_SITE,
-    changeFrequency: 'weekly' as const,
-    priority: 0.8,
-  }]
+  return [
+    ...staticRoutes,
+    ...consignadoRoutes,
+    ...categoryRoutes,
+    ...blogRoutes,
+    ...vitrineRoutes,
+    ...regionalRoutes,
+    ...urgentRoutes,
+    ...neighborhoodRoutes,
+  ]
+}
 
-  return [...staticRoutes, ...landingMyBots, ...consignadoRoutes, ...categoryRoutes, ...productRoutes, ...blogRoutes, ...vitrineRoutes, ...regionalRoutes, ...urgentRoutes, ...neighborhoodRoutes]
+async function produtosDoPedaco(indice: number): Promise<MetadataRoute.Sitemap> {
+  const products = await lerProdutosDoSitemap()
+  const fatia = fatiarProdutos(products, PRODUTOS_POR_ARQUIVO)[indice] || []
+  return fatia.map((product) => ({
+    url: `${baseUrl}/product/${product.slug}`,
+    lastModified: dataDoProduto(product.created_at),
+    changeFrequency: 'weekly' as const,
+    priority: 0.6,
+  }))
+}
+
+export async function generateSitemaps() {
+  const products = await lerProdutosDoSitemap().catch(() => [])
+  const fatias = products.length === 0 ? [] : fatiarProdutos(products, PRODUTOS_POR_ARQUIVO)
+  return [
+    { id: 'paginas' },
+    ...fatias.map((_, i) => ({ id: `produtos-${i}` })),
+  ]
+}
+
+export default async function sitemap(
+  props: { id: Promise<string> | string }
+): Promise<MetadataRoute.Sitemap> {
+  const id = typeof props.id === 'string' ? props.id : await props.id
+  if (id === 'paginas') return paginas()
+  const indice = Number(String(id).replace('produtos-', ''))
+  if (!Number.isFinite(indice) || indice < 0) return []
+  return produtosDoPedaco(indice)
 }

@@ -142,7 +142,7 @@ export const upgradeSsd: PaginaDeCaptacao = {
       texto: "Quatro passos, do modelo até a retirada. Preço e prazo confirmados pelo WhatsApp.",
       itens: [
         { titulo: "Mande o modelo", texto: "Pelo WhatsApp, com o que você quer: SSD, memória ou os dois. A equipe diz se a peça cabe e o que tem em estoque." },
-        { titulo: "Traga o notebook", texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Em Campinas e região, a coleta por motoboy é combinada à parte." },
+        { titulo: "Traga o notebook", texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Em Campinas e região, a coleta por motoboy é combinada à parte." },
         { titulo: "Troca e clonagem", texto: "A bancada instala a peça. Quando o disco ainda lê, clona o sistema para você não recomeçar do zero." },
         { titulo: "Retire testado", texto: "Você confere o notebook ligado no balcão antes de levar. Nada é feito sem a sua aprovação do orçamento." },
       ],
@@ -207,7 +207,7 @@ export const upgradeSsd: PaginaDeCaptacao = {
   relacionadas: ["manutencao", "notebooks", "formatacao", "envio-e-entrega"],
   final: {
     titulo: "Mande o modelo e receba o preço fechado",
-    texto: "A loja fica na Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Preço e prazo confirmados pelo WhatsApp.",
+    texto: "A loja fica na Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Preço e prazo confirmados pelo WhatsApp.",
     botao: "Chamar no WhatsApp",
     mensagem: MENSAGEM,
   },

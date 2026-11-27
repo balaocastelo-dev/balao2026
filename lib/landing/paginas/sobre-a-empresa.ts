@@ -93,8 +93,9 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
         ["Telefone", "(19) 3255-1661"],
         ["WhatsApp", "(19) 98751-0267"],
         ["Instagram", "@balaoanchieta"],
-        ["Segunda a sexta", "9h às 18h"],
-        ["Sábado", "9h às 13h"],
+        ["Segunda a quinta", "8h às 18h"],
+        ["Sexta", "8h às 17h"],
+        ["Sábado", "8h às 13h"],
         ["Domingo", "Fechado; o WhatsApp recebe mensagens"],
       ],
     },
@@ -175,7 +176,7 @@ export const sobreAEmpresa: PaginaDeCaptacao = {
     {
       pergunta: "Qual é o horário de funcionamento?",
       resposta:
-        "De segunda a sexta, das 9h às 18h, e aos sábados, das 9h às 13h. O WhatsApp (19) 98751-0267 recebe mensagens fora desse horário e a equipe responde no próximo período de atendimento.",
+        "De segunda a quinta, das 8h às 18h, sexta das 8h às 17h, e aos sábados, das 8h às 13h. Domingo fechado. O WhatsApp (19) 98751-0267 recebe mensagens fora desse horário e a equipe responde no próximo período de atendimento.",
     },
     {
       pergunta: "Qual é o WhatsApp oficial da loja?",

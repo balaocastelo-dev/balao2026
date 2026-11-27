@@ -174,7 +174,7 @@ export const android: PaginaDeCaptacao = {
       texto: "Do WhatsApp ao balcão. Telefone (19) 3255-1661.",
       itens: [
         { titulo: "Chame", texto: "Marca, modelo e o problema. Diga se leva ou quer motoboy." },
-        { titulo: "Traga ou o motoboy busca", texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Custo e prazo da coleta no WhatsApp." },
+        { titulo: "Traga ou o motoboy busca", texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Custo e prazo da coleta no WhatsApp." },
         { titulo: "Diagnóstico grátis", texto: "Causa, peça e se vale consertar. Você aprova ou leva o aparelho embora." },
         { titulo: "Reparo e retirada", texto: "Parcelamento em até 12x sem juros. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça. Tela, carga e câmera conferidos no balcão." },
       ],
@@ -188,7 +188,7 @@ export const android: PaginaDeCaptacao = {
         ["Endereço", "Av. Anchieta, 789, Cambuí, Campinas, SP"],
         ["WhatsApp", "(19) 98751-0267"],
         ["Telefone", "(19) 3255-1661"],
-        ["Horário", "Segunda a sexta, 9h às 18h. Sábado, 9h às 13h."],
+        ["Horário", "Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h."],
         ["Diagnóstico", "Grátis, com aviso se vale consertar"],
         ["Reparo", "Em média 60 minutos, conforme o defeito e a peça"],
         ["Pagamento", "Parcelamento em até 12x sem juros"],
@@ -249,7 +249,7 @@ export const android: PaginaDeCaptacao = {
     {
       pergunta: "Quais bairros de Campinas vocês atendem?",
       resposta:
-        "A loja fica no Cambuí. Atende quem vem do Centro, Nova Campinas, Guanabara, Taquaral, Bosque, Castelo, Barão Geraldo, Jardim Chapadão e Jardim Planalto. Horário: segunda a sexta, 9h às 18h; sábado, 9h às 13h.",
+        "A loja fica no Cambuí. Atende quem vem do Centro, Nova Campinas, Guanabara, Taquaral, Bosque, Castelo, Barão Geraldo, Jardim Chapadão e Jardim Planalto. Horário: segunda a quinta, 8h às 18h; sexta, 8h às 17h; sábado, 8h às 13h.",
     },
   ],
   tituloDasPerguntas: "Perguntas frequentes",
@@ -259,7 +259,7 @@ export const android: PaginaDeCaptacao = {
   final: {
     titulo: "Mande a marca, o modelo e se quer motoboy",
     texto:
-      "Av. Anchieta, 789, Cambuí, Campinas. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Diagnóstico grátis. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça. Parcelamento em até 12x sem juros.",
+      "Av. Anchieta, 789, Cambuí, Campinas. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Diagnóstico grátis. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça. Parcelamento em até 12x sem juros.",
     botao: "Chamar no WhatsApp",
     mensagem: MENSAGEM,
   },

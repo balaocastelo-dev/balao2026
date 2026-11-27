@@ -5,7 +5,7 @@
 //
 // Tudo o que a página afirma sobre a loja está aqui, num lugar só, para
 // conferir e mudar sem mexer no desenho. Regra: só entra o que o Thiago já
-// disse ou o que o site já anunciava (10% no Pix, 10x sem juros, tela de
+// disse ou o que o site já anunciava (10% no Pix, 12x sem juros, tela de
 // retirada no balcão). Preço de serviço não entra:
 // o orçamento é sempre pelo WhatsApp.
 // ============================================================
@@ -155,7 +155,7 @@ export const DIFERENCIAIS = [
   { titulo: "Bancada própria", texto: "Montagem, configuração, garantia e conserto no mesmo lugar. Se der problema, você sabe onde nos achar." },
   { titulo: "Atendimento direto", texto: "No WhatsApp você fala com a equipe da loja, que conhece o produto e o serviço." },
   { titulo: "Entrega rápida na região", texto: "Entrega e retirada local no mesmo dia em Campinas e cidades vizinhas, conforme disponibilidade." },
-  { titulo: "Pix com 10% e 10x sem juros", texto: "Desconto à vista no Pix ou parcelamento em até 10x sem juros no cartão." },
+  { titulo: "Pix com 10% e 12x sem juros", texto: "Desconto à vista no Pix ou parcelamento em até 12x sem juros no cartão." },
   { titulo: "Mais de 25 anos de marca", texto: "Confiança regional, mais de 700 avaliações no Google e 20 mil seguidores no Instagram." },
 ];
 
@@ -198,7 +198,7 @@ export const PERGUNTAS = [
   },
   {
     question: "Os produtos têm garantia e nota fiscal?",
-    answer: "Sim. Todos os produtos novos saem com nota fiscal eletrônica e garantia. Pagando à vista no Pix você ganha 10% de desconto, ou parcela em até 10x sem juros no cartão.",
+    answer: "Sim. Todos os produtos novos saem com nota fiscal eletrônica e garantia. Pagando à vista no Pix você ganha 10% de desconto, ou parcela em até 12x sem juros no cartão.",
   },
   {
     question: "Posso retirar o produto na loja no mesmo dia?",

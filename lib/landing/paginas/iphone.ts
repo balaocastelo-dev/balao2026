@@ -186,7 +186,7 @@ export const iphone: PaginaDeCaptacao = {
       texto: "Cinco passos. Preço e prazo confirmados pelo WhatsApp (19) 98751-0267. Telefone (19) 3255-1661.",
       itens: [
         { titulo: "Chame no WhatsApp", texto: "Modelo e o problema. Diga se leva na loja ou quer coleta por motoboy. Não envie a senha do ID Apple." },
-        { titulo: "Traga ou o motoboy busca", texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Custo e prazo da coleta são confirmados na conversa." },
+        { titulo: "Traga ou o motoboy busca", texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Custo e prazo da coleta são confirmados na conversa." },
         { titulo: "Diagnóstico grátis", texto: "A bancada diz a causa e as opções de peça. Você vê o que muda, inclusive o aviso de peça no iOS, antes de decidir." },
         { titulo: "Você aprova", texto: "Nada começa sem o ok. Parcelamento em até 12x sem juros. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça." },
         { titulo: "Retire testado", texto: "Toque, carga e câmera conferidos no balcão, com você por perto para desbloquear se precisar." },
@@ -217,7 +217,7 @@ export const iphone: PaginaDeCaptacao = {
         ["Endereço", "Av. Anchieta, 789, Cambuí, Campinas, SP"],
         ["WhatsApp", "(19) 98751-0267"],
         ["Telefone", "(19) 3255-1661"],
-        ["Horário", "Segunda a sexta, 9h às 18h. Sábado, 9h às 13h."],
+        ["Horário", "Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h."],
         ["Diagnóstico", "Grátis, antes de qualquer serviço"],
         ["Reparo", "Em média 60 minutos, conforme o defeito e a peça"],
         ["Pagamento", "Parcelamento em até 12x sem juros"],
@@ -297,7 +297,7 @@ export const iphone: PaginaDeCaptacao = {
     {
       pergunta: "Quais bairros de Campinas a loja atende?",
       resposta:
-        "A loja fica no Cambuí. Atende quem vem do Centro, Nova Campinas, Guanabara, Taquaral, Bosque, Castelo, Barão Geraldo, Jardim Chapadão e Jardim Planalto. Horário: segunda a sexta, 9h às 18h; sábado, 9h às 13h.",
+        "A loja fica no Cambuí. Atende quem vem do Centro, Nova Campinas, Guanabara, Taquaral, Bosque, Castelo, Barão Geraldo, Jardim Chapadão e Jardim Planalto. Horário: segunda a quinta, 8h às 18h; sexta, 8h às 17h; sábado, 8h às 13h.",
     },
   ],
   tituloDasPerguntas: "Perguntas frequentes",
@@ -307,7 +307,7 @@ export const iphone: PaginaDeCaptacao = {
   final: {
     titulo: "Mande o modelo e diga se traz ou pede motoboy",
     texto:
-      "Av. Anchieta, 789, Cambuí, Campinas. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Diagnóstico grátis. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça. Parcelamento em até 12x sem juros.",
+      "Av. Anchieta, 789, Cambuí, Campinas. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Diagnóstico grátis. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça. Parcelamento em até 12x sem juros.",
     botao: "Chamar no WhatsApp",
     mensagem: MENSAGEM,
   },

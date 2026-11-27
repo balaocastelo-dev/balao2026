@@ -34,7 +34,7 @@ export const RESPOSTAS_BASE: CrmRespostaRapida[] = [
   {
     id: 5,
     titulo: "Horário de funcionamento",
-    texto: "🕒 Segunda a sexta: 08h30 às 18h\nSábado: 09h às 13h\nEstamos online e também realizamos entregas rápidas na região de Campinas!",
+    texto: "🕒 Segunda a quinta: 8h às 18h\nSexta: 8h às 17h\nSábado: 8h às 13h\nDomingo: fechado\nEstamos online e também realizamos entregas rápidas na região de Campinas!",
     categoria: "Loja",
   },
   {

@@ -10,6 +10,7 @@ import { type Category } from "@/lib/utils";
 import { Metadata } from "next";
 import JsonLd, { generateBreadcrumbSchema, generateOrganizationSchema, generateItemListSchema } from "@/components/JsonLd";
 import { notFound } from "next/navigation";
+import ContatoNoHtml from "@/components/ContatoNoHtml";
 import { getCachedCategories, getCachedProducts, getCachedProductsByCategoryFullPath } from "@/lib/cache";
  
 export const revalidate = 300;
@@ -232,6 +233,12 @@ export default async function CategoriaPage({
         </div>
 
         <main className="flex-1 w-full min-w-0">
+          <div className="mb-4">
+            <ContatoNoHtml
+              mensagem={`Olá! Estou na categoria ${categoryName || "de produtos"} do site e quero atendimento da Balão da Informática em Campinas.`}
+              titulo={`WhatsApp sobre ${categoryName || "esta categoria"}`}
+            />
+          </div>
           <div className="mb-4 hidden items-center justify-between lg:flex">
             <h1 className="text-2xl font-bold text-[var(--site-text)]">
               {categoryName || "Categoria"}

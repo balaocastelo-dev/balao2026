@@ -28,6 +28,7 @@
 // ============================================================
 
 import { lerFicha, tituloDaMaquina } from "@/lib/catalogo/ficha";
+import { foraDaVitrineGamer } from "@/lib/catalogo/recorte-gamer";
 import { parsePriceToNumber, type Product } from "@/lib/utils";
 
 export const RAIZ_PC_GAMER = "Computadores/PC/PC Gamer";
@@ -280,6 +281,8 @@ export function montarFileiras<T extends ProdutoDeVitrine>(produtos: T[], porFil
 
   for (const produto of Array.isArray(produtos) ? produtos : []) {
     if (!produto || !naCategoria(produto.category) || indisponivel(produto)) continue;
+    // Gabinete, PC office e peça solta não são máquina gamer, mesmo gravados aqui.
+    if (foraDaVitrineGamer(produto.name)) continue;
     const id = String(produto.id || "");
     if (!id || vistos.has(id) || !String(produto.name || "").trim()) continue;
     const pc = lerPc(produto);

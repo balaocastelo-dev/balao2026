@@ -67,7 +67,7 @@ export const revalidate = 300;
 
 const TITULO = "Assistência Técnica e Ofertas de Informática em Campinas (Cambuí)";
 const DESCRICAO =
-  "Conserto de notebook, PC, iPhone e MacBook, montagem de PC gamer, recuperação de dados e ofertas com 10% no Pix ou 10x sem juros. Loja física no Cambuí, Campinas. Orçamento pelo WhatsApp.";
+  "Conserto de notebook, PC, iPhone e MacBook, montagem de PC gamer, recuperação de dados e ofertas com 10% no Pix ou 12x sem juros. Loja física no Cambuí, Campinas. Orçamento pelo WhatsApp.";
 
 export const metadata: Metadata = {
   title: TITULO,
@@ -222,7 +222,7 @@ export default async function ServicosEOfertasPage() {
               <p className="max-w-xl text-lg leading-relaxed text-slate-300">
                 Notebook, PC, iPhone, MacBook e videogame consertados na nossa bancada, PC gamer montado sob medida e
                 produtos com <strong className="text-white">10% de desconto no Pix</strong> ou{" "}
-                <strong className="text-white">10x sem juros</strong>. Diga do que precisa e receba o orçamento pelo WhatsApp.
+                <strong className="text-white">12x sem juros</strong>. Diga do que precisa e receba o orçamento pelo WhatsApp.
               </p>
 
               <div>
@@ -275,7 +275,7 @@ export default async function ServicosEOfertasPage() {
           <ul className={`${CONTAINER} grid grid-cols-2 gap-4 py-6 lg:grid-cols-4`}>
             {[
               { icone: QrCode, forte: "10% OFF no Pix", fraco: "Desconto à vista" },
-              { icone: CreditCard, forte: "10x sem juros", fraco: "No cartão de crédito" },
+              { icone: CreditCard, forte: "12x sem juros", fraco: "No cartão de crédito" },
               { icone: Store, forte: "Retire na loja", fraco: "Pronta entrega no Cambuí" },
               { icone: ShieldCheck, forte: "Nota fiscal e garantia", fraco: "Em todo produto novo" },
             ].map(({ icone: Icone, forte, fraco }) => (
@@ -309,7 +309,7 @@ export default async function ServicosEOfertasPage() {
                   Produtos para levar hoje, com a assistência do lado
                 </h2>
                 <p className="mt-2 max-w-2xl text-slate-400">
-                  Preços atualizados todo dia. No Pix sai com 10% de desconto; no cartão, em até 10x sem juros.
+                  Preços atualizados todo dia. No Pix sai com 10% de desconto; no cartão, em até 12x sem juros.
                 </p>
               </div>
               <a
@@ -520,7 +520,7 @@ export default async function ServicosEOfertasPage() {
                   ["Horário", SITE_CONFIG.openingHoursDisplay],
                   ["WhatsApp", SITE_CONFIG.whatsapp.display],
                   ["Telefone", SITE_CONFIG.phone.display],
-                  ["Pagamento", "Pix com 10% de desconto, cartão em até 10x sem juros"],
+                  ["Pagamento", "Pix com 10% de desconto, cartão em até 12x sem juros"],
                   ["CNPJ", SITE_CONFIG.cnpj],
                 ].map(([rotulo, valor]) => (
                   <div key={rotulo}>

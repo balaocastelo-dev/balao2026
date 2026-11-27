@@ -144,7 +144,7 @@ const artigo: Artigo = {
     },
     {
       "tipo": "paragrafo",
-      "texto": "O endereço de volta é o mesmo. Manutenção, limpeza e upgrade futuro ficam na [assistência](/manutencao) do Cambuí. Quem quer conhecer a loja antes de fechar lê [PC gamer para GTA 6 em Campinas](/blog/pc-gamer-gta-6-campinas), com horário e o que trazer. Segunda a sexta, das 9h às 18h. Sábado, das 9h às 13h."
+      "texto": "O endereço de volta é o mesmo. Manutenção, limpeza e upgrade futuro ficam na [assistência](/manutencao) do Cambuí. Quem quer conhecer a loja antes de fechar lê [PC gamer para GTA 6 em Campinas](/blog/pc-gamer-gta-6-campinas), com horário e o que trazer. Segunda a quinta, das 8h às 18h. Sexta, das 8h às 17h. Sábado, das 8h às 13h."
     },
     {
       "tipo": "imagem",
@@ -240,7 +240,7 @@ const artigo: Artigo = {
     },
     {
       "pergunta": "Quanto tempo leva?",
-      "resposta": "Depende da fila do dia e de a peça estar na loja. O horário de balcão é de segunda a sexta, das 9h às 18h, e sábado das 9h às 13h. Confirme no (19) 3255-1661 ou no WhatsApp."
+      "resposta": "Depende da fila do dia e de a peça estar na loja. O horário de balcão é de segunda a quinta, das 8h às 18h, sexta das 8h às 17h, e sábado das 8h às 13h. Confirme no (19) 3255-1661 ou no WhatsApp."
     },
     {
       "pergunta": "A montagem já deixa o PC pronto para GTA 6?",

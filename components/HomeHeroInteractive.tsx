@@ -235,7 +235,7 @@ export default function HomeHeroInteractive({ carouselImages }: HomeHeroInteract
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
-                  <span>Desconto no PIX ou até 10x sem juros</span>
+                  <span>Desconto no PIX ou até 12x sem juros</span>
                 </div>
               </div>
             </div>

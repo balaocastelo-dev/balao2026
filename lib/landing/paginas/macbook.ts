@@ -128,7 +128,7 @@ export const macbook: PaginaDeCaptacao = {
       texto: "Quatro passos. Preço e prazo confirmados pelo WhatsApp.",
       itens: [
         { titulo: "Mande o modelo", texto: "Air ou Pro, o ano e o que aconteceu. Foto da tela Sobre Este Mac ajuda." },
-        { titulo: "Traga à loja", texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Em Campinas e região, a coleta por motoboy é combinada à parte." },
+        { titulo: "Traga à loja", texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Em Campinas e região, a coleta por motoboy é combinada à parte." },
         { titulo: "Aprove o orçamento", texto: "A bancada diz a causa, as opções de peça, o valor e o prazo. Nada começa sem o seu ok. Parcelamento em até 12x sem juros." },
         { titulo: "Retire testado", texto: "Você confere o Mac ligado no balcão. O reparo é rápido: em média 60 minutos, conforme o defeito e a peça." },
       ],
@@ -217,7 +217,7 @@ export const macbook: PaginaDeCaptacao = {
   relacionadas: ["reparoapple", "imac", "iphone", "upgrade-ssd"],
   final: {
     titulo: "Mande o modelo do MacBook e receba o preço",
-    texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Preço confirmado pelo WhatsApp.",
+    texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Preço confirmado pelo WhatsApp.",
     botao: "Chamar no WhatsApp",
     mensagem: MENSAGEM,
   },

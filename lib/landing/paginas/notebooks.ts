@@ -38,7 +38,7 @@ export const notebooks: PaginaDeCaptacao = {
     fatos: [
       { valor: "Ligado no balcão", rotulo: "você vê e testa antes de levar" },
       { valor: "Assistência", rotulo: "no mesmo endereço, para upgrade e garantia" },
-      { valor: "10% no Pix", rotulo: "ou até 10x sem juros no cartão" },
+      { valor: "10% no Pix", rotulo: "ou até 12x sem juros no cartão" },
       { valor: "Nota fiscal", rotulo: "e garantia do fabricante" },
     ],
   },
@@ -135,7 +135,7 @@ export const notebooks: PaginaDeCaptacao = {
         { titulo: "Conte o uso", texto: "Pelo assistente acima ou direto no WhatsApp: o que vai fazer, o que pesa mais e a faixa que tem em mente." },
         { titulo: "Receba as opções", texto: "Duas ou três indicações com a diferença explicada, e a informação do que tem para retirar hoje e do que precisa ser pedido." },
         { titulo: "Veja ligado", texto: "No balcão do Cambuí você liga, testa teclado, tela e som e tira as dúvidas com quem vende e com quem conserta." },
-        { titulo: "Leve pronto", texto: "Pague com 10% de desconto no Pix ou parcele em até 10x sem juros no cartão. Se precisar de configuração, combine com a equipe." },
+        { titulo: "Leve pronto", texto: "Pague com 10% de desconto no Pix ou parcele em até 12x sem juros no cartão. Se precisar de configuração, combine com a equipe." },
       ],
     },
     {
@@ -211,7 +211,7 @@ export const notebooks: PaginaDeCaptacao = {
     {
       pergunta: "Dá para parcelar o notebook?",
       resposta:
-        "Sim, em até 10x sem juros no cartão, fechando pelo WhatsApp ou no balcão. No Pix o desconto é de 10%; pedido feito pelo site termina no Pix, com o QR code na tela.",
+        "Sim, em até 12x sem juros no cartão, fechando pelo WhatsApp ou no balcão. No Pix o desconto é de 10%; pedido feito pelo site termina no Pix, com o QR code na tela.",
     },
   ],
   temas: ["notebook", "compra", "upgrade", "ssd", "memoria", "assistencia", "apple", "licenca"],

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { FILEIRAS, lerPc, montarFileiras, POR_FILEIRA, RAIZ_PC_GAMER } from "@/lib/catalogo/pc-gamer";
+import { categoriaCorrigida, CATEGORIA_ESCRITORIO, CATEGORIA_GABINETE } from "@/lib/catalogo/recorte-gamer";
 import catalogo from "@/data/catalogo-backup.json";
 import type { Product } from "@/lib/utils";
 
@@ -150,6 +151,24 @@ describe("montarFileiras", () => {
     expect(cheia.produtos.map((p) => p.price)).toEqual(["3.000,00", "3.200,00"]);
     const comSobra = montarFileiras(lista, 3).fileiras.find((f) => f.id === "8gb")!;
     expect(comSobra.produtos.map((p) => p.price)).toEqual(["3.000,00", "3.100,00", "3.200,00"]);
+  });
+
+  it("tira gabinete, PC office e peça solta mesmo gravados como PC gamer", () => {
+    const { fileiras, total } = montarFileiras([
+      produto("PC Gamer Ryzen 5 5600g, 16gb, Vega 7", "3.000,00"),
+      produto("Gabinete Gamer Eclipse Mid Tower", "430,56"),
+      produto("PC Office KaBuM! Intel Core i3-2120, 8GB DDR3, SSD 240GB", "896,41"),
+      produto("PC Escritório KaBuM! Intel Core i5-3470", "1.063,99"),
+      produto("Placa de Vídeo RTX 3060 12GB", "2.000,00"),
+    ]);
+    expect(total).toBe(1);
+    expect([...new Set(fileiras.flatMap((f) => f.produtos.map((p) => p.name)))]).toEqual([
+      "PC Gamer Ryzen 5 5600g, 16gb, Vega 7",
+    ]);
+    expect(categoriaCorrigida("Gabinete Gamer Eclipse Mid Tower", RAIZ_PC_GAMER)).toBe(CATEGORIA_GABINETE);
+    expect(categoriaCorrigida("PC Office KaBuM! Intel Core i3-2120, 8GB DDR3, SSD 240GB", RAIZ_PC_GAMER)).toBe(CATEGORIA_ESCRITORIO);
+    expect(categoriaCorrigida("PC Escritório KaBuM! Intel Core i5-3470", RAIZ_PC_GAMER)).toBe(CATEGORIA_ESCRITORIO);
+    expect(categoriaCorrigida("PC Gamer Ryzen 5 5600g, 16gb, Vega 7", RAIZ_PC_GAMER)).toBe(RAIZ_PC_GAMER);
   });
 
   it("fica só com a categoria PC Gamer, disponível e com preço", () => {

@@ -82,8 +82,8 @@ export const envioEEntrega: PaginaDeCaptacao = {
             "Quando o produto está na loja do Cambuí, você retira na hora. Dá para ver ligado, conferir a caixa e sair com a nota fiscal.",
           pontos: [
             "Confirme pelo WhatsApp que o produto está separado antes de vir",
-            "Av. Anchieta, 789, Cambuí: seg. a sex. 9h às 18h, sáb. 9h às 13h",
-            "Paga no balcão no Pix ou no cartão em até 10x sem juros",
+            "Av. Anchieta, 789, Cambuí: seg. a qui. 8h às 18h, sex. 8h às 17h, sáb. 8h às 13h",
+            "Paga no balcão no Pix ou no cartão em até 12x sem juros",
           ],
         },
         {
@@ -120,7 +120,7 @@ export const envioEEntrega: PaginaDeCaptacao = {
       itens: [
         { titulo: "Mande o produto e o CEP", texto: "O link do site, uma foto ou só o nome do produto. Com o CEP a equipe já calcula a entrega." },
         { titulo: "A equipe confere", texto: "Se o produto está na loja ou no fornecedor da região, e qual é o horário possível para retirar ou entregar." },
-        { titulo: "Você paga", texto: "Pix com 10% de desconto ou cartão em até 10x sem juros, combinado na conversa ou no balcão." },
+        { titulo: "Você paga", texto: "Pix com 10% de desconto ou cartão em até 12x sem juros, combinado na conversa ou no balcão." },
         { titulo: "Retira ou recebe", texto: "Você passa no balcão do Cambuí ou o motoboy leva até o endereço combinado." },
       ],
     },
@@ -239,7 +239,7 @@ export const envioEEntrega: PaginaDeCaptacao = {
     {
       pergunta: "Posso comprar e retirar na loja?",
       resposta:
-        "Pode. Confirme pelo WhatsApp que o produto está na loja, peça para separar e retire no balcão da Av. Anchieta, 789, no Cambuí. Você paga no Pix ou no cartão em até 10x sem juros e sai com a nota fiscal.",
+        "Pode. Confirme pelo WhatsApp que o produto está na loja, peça para separar e retire no balcão da Av. Anchieta, 789, no Cambuí. Você paga no Pix ou no cartão em até 12x sem juros e sai com a nota fiscal.",
     },
     {
       pergunta: "Como calculo o frete para outra cidade?",

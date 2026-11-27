@@ -147,7 +147,7 @@ export default function HomeSeminovosShowcase({ pcGamerProducts, notebookProduct
                       {product.price}
                     </div>
                     <div className="text-[11px] text-[var(--home-muted)]">
-                      ou até 10x no cartão
+                      ou até 12x no cartão
                     </div>
                   </div>
 

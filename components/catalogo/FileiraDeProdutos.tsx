@@ -14,6 +14,7 @@ export default function FileiraDeProdutos({
   titulo,
   subtitulo,
   produtos,
+  aviso,
 }: {
   id: string;
   /** Posição da fileira na página (1, 2, 3...). */
@@ -21,6 +22,8 @@ export default function FileiraDeProdutos({
   titulo: string;
   subtitulo: string;
   produtos: Product[];
+  /** Texto curto embaixo de cada card. Não muda o preço. */
+  aviso?: string;
 }) {
   const trilho = useRef<HTMLDivElement>(null);
 
@@ -70,6 +73,7 @@ export default function FileiraDeProdutos({
             className="w-[calc(50%-0.5rem)] shrink-0 snap-start sm:w-[calc(33.333%-1rem)] lg:w-[calc(25%-1.125rem)]"
           >
             <ProductCard product={produto} />
+            {aviso ? <p className="mt-2 text-[11px] leading-snug text-slate-400">{aviso}</p> : null}
           </div>
         ))}
       </div>

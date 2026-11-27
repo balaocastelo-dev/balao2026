@@ -228,7 +228,7 @@ export function jsonLdDoArtigo(artigo: Artigo): Record<string, unknown>[] {
         postalCode: SITE_CONFIG.postalCode,
         addressCountry: "BR",
       },
-      openingHours: "Mo-Fr 09:00-18:00, Sa 09:00-13:00",
+      openingHours: "Mo-Th 08:00-18:00, Fr 08:00-17:00, Sa 08:00-13:00",
       contactPoint: [
         {
           "@type": "ContactPoint",

@@ -30,7 +30,7 @@ describe("faixa de preço: fonte de notebook entre R$ 119 e R$ 199", () => {
     expect(v.pix).toBe(199);
     expect(v.price).toBe("199,00");
     expect(v.cartao).toBeCloseTo(234.13, 1);
-    expect(v.installment).toMatch(/^10x de R\$ 23,41$/);
+    expect(v.installment).toMatch(/^12x de R\$ 19,51$/);
     const outro = vendaDoProduto({ pix: 10, cartao: 10, parcelas: 0 }, 150, { nome: "Cabo HDMI", categoria: "" });
     expect(outro.pix).toBe(25);
   });

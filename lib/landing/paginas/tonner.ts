@@ -40,7 +40,7 @@ export const tonner: PaginaDeCaptacao = {
       { valor: "Cartucho e tinta", rotulo: "só originais" },
       { valor: "Toner", rotulo: "original ou compatível, você escolhe" },
       { valor: "Motoboy", rotulo: "entrega local combinada no WhatsApp" },
-      { valor: "10% no Pix", rotulo: "ou até 10x sem juros no cartão" },
+      { valor: "10% no Pix", rotulo: "ou até 12x sem juros no cartão" },
     ],
   },
   assistente: {

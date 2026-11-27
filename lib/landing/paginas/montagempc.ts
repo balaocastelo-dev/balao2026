@@ -39,7 +39,7 @@ export const montagempc: PaginaDeCaptacao = {
     fatos: [
       { valor: "Você vê ligado", rotulo: "e testa antes de pagar" },
       { valor: "Peças do estoque", rotulo: "a configuração sai do que está na loja" },
-      { valor: "10% no Pix", rotulo: "ou até 10x sem juros no cartão" },
+      { valor: "10% no Pix", rotulo: "ou até 12x sem juros no cartão" },
       { valor: "Bancada no Cambuí", rotulo: "a mesma que dá o suporte depois" },
     ],
   },
@@ -92,7 +92,7 @@ export const montagempc: PaginaDeCaptacao = {
         },
         {
           titulo: "Veja ligado e pague",
-          texto: "Você confere o PC funcionando na loja e só então paga: Pix com desconto, cartão em até 10x ou combinamos a entrega.",
+          texto: "Você confere o PC funcionando na loja e só então paga: Pix com desconto, cartão em até 12x ou combinamos a entrega.",
         },
       ],
     },

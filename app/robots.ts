@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
           '/arena/admin',
           '/controle',
           '/api/',
+          '/cart',
           '/cart/',
           '/fechamento/',
           '/thank-you/',

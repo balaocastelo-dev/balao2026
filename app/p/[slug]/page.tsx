@@ -239,7 +239,12 @@ function AppCard({
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await props.params;
   const page = await buscarPaginaDaVitrine(slug);
-  if (!page) return {};
+  if (!page) {
+    return {
+      title: { absolute: "Página não encontrada" },
+      robots: { index: false, follow: false },
+    };
+  }
 
   const title = `${page.nome_pc} | Balão da Informática`;
   const description = `${page.nome_pc}. Confira detalhes e compre direto no site da Balão da Informática.`;

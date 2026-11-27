@@ -3,7 +3,8 @@
 import Header from "@/components/Header";
 import { SITE_CONFIG } from "@/lib/config";
 import { useToast } from "@/context/ToastContext";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle, Send } from "lucide-react";
+import { URL_DO_TELEFONE, urlDoWhatsApp } from "@/lib/contato";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import {
@@ -82,6 +83,18 @@ export default function FaleConoscoPage() {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-[#E60012] border-b pb-4">Fale Conosco</h1>
+
+        <div className="mb-8">
+          <a
+            href={urlDoWhatsApp("Olá! Estou na página Fale conosco e quero atendimento da Balão da Informática em Campinas.")}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 font-black text-white hover:bg-[#128C7E]"
+          >
+            <MessageCircle className="h-5 w-5" aria-hidden />
+            WhatsApp {SITE_CONFIG.whatsapp.display}
+          </a>
+        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           
@@ -100,7 +113,7 @@ export default function FaleConoscoPage() {
                 <div>
                   <h3 className="font-bold text-gray-800 text-lg">Televendas</h3>
                   <a
-                    href={`tel:${SITE_CONFIG.phone.number}`}
+                    href={URL_DO_TELEFONE}
                     data-conversion-source="fale-conosco"
                     data-conversion-label="Televendas"
                     data-conversion-service="Contato geral"
@@ -108,7 +121,7 @@ export default function FaleConoscoPage() {
                   >
                     {SITE_CONFIG.phone.display}
                   </a>
-                  <p className="text-sm text-gray-500">Seg. a Sex. das 9h às 18h</p>
+                  <p className="text-sm text-gray-500">{SITE_CONFIG.openingHoursDisplay}</p>
                 </div>
               </div>
 

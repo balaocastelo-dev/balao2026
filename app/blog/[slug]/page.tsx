@@ -31,7 +31,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const artigo = await obterArtigo(slug);
-  if (!artigo) return { title: "Artigo não encontrado", robots: { index: false, follow: true } };
+  if (!artigo) notFound();
   return metadataDoArtigo(artigo);
 }
 

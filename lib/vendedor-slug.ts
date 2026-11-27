@@ -35,6 +35,7 @@ export const PASTAS_DE_VENDEDOR = [
 export const SLUGS_RESERVADOS: readonly string[] = [
   "[slug]",
   "3d",
+  "404",
   "_next",
   "_vercel",
   "acer-aspire-go-15",
@@ -77,6 +78,7 @@ export const SLUGS_RESERVADOS: readonly string[] = [
   "gerador",
   "ia-local",
   "icon",
+  "indice-do-sitemap",
   "icons",
   "images",
   "imac",

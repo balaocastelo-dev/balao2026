@@ -12,6 +12,7 @@ import JsonLd, {
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/config";
 import { getCachedProducts } from "@/lib/cache";
+import ContatoNoHtml from "@/components/ContatoNoHtml";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,12 @@ export default async function MonteSeuPCPage() {
                 para seu orçamento. Montagem profissional com testes térmicos e retirada no Cambuí.
               </p>
             </div>
+          </div>
+          <div className="mt-8">
+            <ContatoNoHtml
+              mensagem="Olá! Estou no configurador Monte seu PC e quero ajuda para fechar a configuração."
+              titulo="Falar com a loja sobre a montagem"
+            />
           </div>
         </section>
 

@@ -35,7 +35,7 @@ const REGIAO_FAQS = [
   {
     question: "Os preços e condições de pagamento são os mesmos para toda a região?",
     answer:
-      "Sim! 10% de desconto à vista no PIX e parcelamento em até 10x sem juros no cartão de crédito em toda a linha de produtos e serviços.",
+      "Sim! 10% de desconto à vista no PIX e parcelamento em até 12x sem juros no cartão de crédito em toda a linha de produtos e serviços.",
   },
 ];
 

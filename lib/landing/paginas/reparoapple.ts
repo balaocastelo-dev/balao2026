@@ -167,7 +167,7 @@ export const reparoapple: PaginaDeCaptacao = {
     {
       tipo: "passos",
       titulo: "Como o serviço acontece",
-      texto: "Segunda a sexta, 9h às 18h. Sábado, 9h às 13h.",
+      texto: "Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h.",
       itens: [
         { titulo: "Mande o modelo", texto: "Ajustes, Sobre Este Mac ou a caixa. Foto do problema ajuda. Não envie senha de ID Apple." },
         { titulo: "Traga à loja", texto: "Av. Anchieta, 789, Cambuí. Em Campinas e região, a coleta por motoboy é combinada à parte." },
@@ -255,7 +255,7 @@ export const reparoapple: PaginaDeCaptacao = {
   relacionadas: ["macbook", "imac", "iphone", "android"],
   final: {
     titulo: "Mande o aparelho e o defeito",
-    texto: "Av. Anchieta, 789, Cambuí. Segunda a sexta, 9h às 18h. Sábado, 9h às 13h. Preço confirmado pelo WhatsApp.",
+    texto: "Av. Anchieta, 789, Cambuí. Segunda a quinta, 8h às 18h. Sexta, 8h às 17h. Sábado, 8h às 13h. Preço confirmado pelo WhatsApp.",
     botao: "Chamar no WhatsApp",
     mensagem: MENSAGEM,
   },

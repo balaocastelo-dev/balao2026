@@ -262,11 +262,11 @@ export default function AcerAspireGo15Landing() {
           <ul className="mt-6 flex flex-wrap gap-x-7 gap-y-2 text-sm font-bold text-slate-200">
             <li className="flex items-center gap-2">
               <Check size={16} className="text-[#E60012]" aria-hidden="true" />
-              Segunda a sexta, das 9h às 18h
+              Segunda a quinta, das 8h às 18h. Sexta, das 8h às 17h
             </li>
             <li className="flex items-center gap-2">
               <Check size={16} className="text-[#E60012]" aria-hidden="true" />
-              Sábado, das 9h às 13h
+              Sábado, das 8h às 13h
             </li>
             <li className="flex items-center gap-2">
               <Check size={16} className="text-[#E60012]" aria-hidden="true" />
