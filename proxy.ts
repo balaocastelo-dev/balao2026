@@ -251,11 +251,25 @@ function redirecionarCaixa(request: NextRequest) {
 }
 
 /**
+ * Caminhos que a Vercel só repassa (rewrite) e que têm arquivo com ponto
+ * no nome: JS, CSS, manifest. Se o 404 novo pegar antes, a tela fica branca.
+ * /sistema é o MEU BLING na VPS. /mybots e /app são o Hub. /3d, /chacara3d
+ * e /convite são páginas prontas com o próprio JS.
+ */
+const PREFIXOS_REPASSADOS = ['/sistema', '/mybots', '/app', '/3d', '/chacara3d', '/convite', '/downloads']
+
+function ehRepassado(pathname: string) {
+  const p = pathname.toLowerCase()
+  return PREFIXOS_REPASSADOS.some((prefixo) => p === prefixo || p.startsWith(`${prefixo}/`))
+}
+
+/**
  * Arquivo que não existe (.html, .json, .txt solto) não pode responder 200.
  * robots, sitemap e llms.txt são de verdade e passam.
  */
 function arquivoInexistente(pathname: string) {
   if (!pathname.includes('.')) return false
+  if (ehRepassado(pathname)) return false
   const p = pathname.toLowerCase().replace(/\/+$/, '')
   if (p === '/robots.txt' || p === '/sitemap.xml' || p === '/llms.txt') return false
   if (p.startsWith('/sitemap/')) return false
