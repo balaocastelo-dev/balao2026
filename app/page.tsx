@@ -6,6 +6,7 @@ import QuickLeadSection from "@/components/QuickLeadSection";
 import HomeLocalStoreInfo from "@/components/HomeLocalStoreInfo";
 import HomeHeroFullWidth from "@/components/HomeHeroFullWidth";
 import HomePs5Gta6Destaque from "@/components/HomePs5Gta6Destaque";
+import HomePredatorHeliosDestaque from "@/components/HomePredatorHeliosDestaque";
 import HomeTrustPillars from "@/components/HomeTrustPillars";
 import HomeBlogSection from "@/components/HomeBlogSection";
 
@@ -225,6 +226,11 @@ export default async function Home(props: {
         {/* 1.07 Consignados em destaque: usados da consignação, vindos do MEU BLING (some quando não há nenhum ou o MEU BLING não responde) */}
         {!navegando && (
           <FaixaDeConsignados />
+        )}
+
+        {/* 1.09 Destaque: Acer Predator Helios 300 seminovo (R$ 4.499 à vista ou 12x de R$ 449) */}
+        {!navegando && (
+          <HomePredatorHeliosDestaque />
         )}
 
         {/* 1.1 Destaque: PlayStation 5 + jogo GTA 6 (R$ 5.999 à vista ou 12x de R$ 599) */}
